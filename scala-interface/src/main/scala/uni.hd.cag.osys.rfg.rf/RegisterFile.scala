@@ -1,989 +1,1109 @@
 package uni.hd.cag.osys.rfg.rf
 
-import java.net.URL
 import java.io._
-import com.idyria.osi.ooxoo.core.buffers.structural._
-import com.idyria.osi.ooxoo.core.buffers.datatypes._
-import com.idyria.osi.ooxoo.core.buffers.structural.io.sax._
-
-import com.idyria.osi.tea.bit._
+import java.net.URL
 
 import scala.language.implicitConversions
+
+import com.idyria.osi.ooxoo.core.buffers.datatypes._
+import com.idyria.osi.ooxoo.core.buffers.structural._
+import com.idyria.osi.ooxoo.core.buffers.structural.io.sax._
+import com.idyria.osi.tea.bit._
 
 // Common Traits
 //-------------------
 
 /**
-    @group rf
-*/
+ * @group rf
+ */
 trait Named {
 
-    /**
-        name attribute
-        @group rf
-    */
-    @xattribute
-    var name : XSDStringBuffer = null
+  /**
+   * name attribute
+   * @group rf
+   */
+  @xattribute
+  var name: XSDStringBuffer = null
 
 }
 
 trait NamedAddressed extends Named {
 
-    /**
-        @group rf
-    */
-    @xattribute(name = "_absoluteAddress")
-    var absoluteAddress : LongBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute(name = "_absoluteAddress")
+  var absoluteAddress: LongBuffer = null
 
-    /**
-        @group rf
-    */
-    @xattribute ( name = "_baseAddress")
-    var baseAddress : LongBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute(name = "_baseAddress")
+  var baseAddress: LongBuffer = null
 
 }
 
 /**
-    This Buffer is used for sw="" hw="" hwreg read/write rights
-
-*/
+ * This Buffer is used for sw="" hw="" hwreg read/write rights
+ *
+ */
 class ReadWriteRightsType extends XSDStringBuffer {
 
-    
-    def canWrite : Boolean = this.data.contains('w')
-    def canRead : Boolean = this.data.contains('r')
-
+  def canWrite: Boolean = this.data.contains('w')
+  def canRead: Boolean = this.data.contains('r')
 
 }
 object ReadWriteRightsType {
 
-    def apply(str:String) = {
-        var rwt = new ReadWriteRightsType
-        rwt.data = str
-        rwt
-    }
+  def apply(str: String) = {
+    var rwt = new ReadWriteRightsType
+    rwt.data = str
+    rwt
+  }
 }
 
-
 /**
-    This Buffer represents a verilog value, which is defined as:
-
-    SIZE'TYPEVALUE
-
-    TYPE = h,b,d etc..
-*/
+ * This Buffer represents a verilog value, which is defined as:
+ *
+ * SIZE'TYPEVALUE
+ *
+ * TYPE = h,b,d etc..
+ */
 class VerilogLongValue extends LongBuffer {
 
-    var originalStringValue = "0"
+  var originalStringValue = "0"
 
-    /**
-        Parse Verilog value
-    */
-    override def dataFromString(str: String) : java.lang.Long  = {
+  /**
+   * Parse Verilog value
+   */
+  override def dataFromString(str: String): java.lang.Long = {
 
-        this.originalStringValue = str
-        var resValue : Long = 0
-        //println("Parsing: "+str)
+    this.originalStringValue = str
+    var resValue: Long = 0
+    //println("Parsing: "+str)
 
-        var expr = """(?i)([0-9]+)'(b|h|d)([A-Fa-f0-9]+)""".r
-        expr.findFirstMatchIn(str) match {
+    var expr = """(?i)([0-9]+)'(b|h|d)([A-Fa-f0-9]+)""".r
+    expr.findFirstMatchIn(str) match {
 
-            //-> HEx Match, parse value
-           case Some(m) if (m.group(2)=="h") =>
+      //-> HEx Match, parse value
+      case Some(m) if (m.group(2) == "h") =>
 
-                resValue = java.lang.Long.decode(s"0x${m.group(3)}")
+        resValue = java.lang.Long.decode(s"0x${m.group(3)}")
 
-            //-> B match
-            case Some(m) if (m.group(2)=="b") =>
-            
-                // Every character is a bit
-                var offset = 0 
-                m.group(3).reverse.foreach {
-                    c => 
-                        resValue = TeaBitUtil.setBits(resValue,offset,offset,java.lang.Long.parseLong(s"$c"))
-                        offset+=1
-                }  
+      //-> B match
+      case Some(m) if (m.group(2) == "b") =>
 
-            //-> Decimal match, let normal long parse value
-            case Some(m) if(m.group(2)=="d") =>
-
-                resValue = super.dataFromString(m.group(3))
-
-            //-> No match, let normal long parse value
-            case None if (str.matches("[0-9]+")) => 
-                
-                // Only Do if 
-                resValue = super.dataFromString(str)
-            
-            //-> No match but keep value 0 if a Define is referenced
-            case None if(str.matches(".*`.*")) => 
-                resValue = 0
-            case _ => 
-                throw new IllegalArgumentException(s"""Verilog Value matched format for input: $str , but match case was not handled""")
-                
+        // Every character is a bit
+        var offset = 0
+        m.group(3).reverse.foreach {
+          c =>
+            resValue = TeaBitUtil.setBits(resValue, offset, offset, java.lang.Long.parseLong(s"$c"))
+            offset += 1
         }
 
-        this.data = resValue
-        this.data
+      //-> Decimal match, let normal long parse value
+      case Some(m) if (m.group(2) == "d") =>
+
+        resValue = super.dataFromString(m.group(3))
+
+      //-> No match, let normal long parse value
+      case None if (str.matches("[0-9]+")) =>
+
+        // Only Do if 
+        resValue = super.dataFromString(str)
+
+      //-> No match but keep value 0 if a Define is referenced
+      case None if (str.matches(".*`.*")) =>
+        resValue = 0
+      case _ =>
+        throw new IllegalArgumentException(s"""Verilog Value matched format for input: $str , but match case was not handled""")
+
     }
 
-    /**
-        Return the last parsed representation
-    */
-    override def toString : String = this.originalStringValue
+    this.data = resValue
+    this.data
+  }
 
+  /**
+   * Return the last parsed representation
+   */
+  override def toString: String = this.originalStringValue
 
 }
 
 object VerilogLongValue {
 
-    def apply(init:Long) = {
-        var obj = new VerilogLongValue()
-        obj.data = init
-        obj
-    }
+  def apply(init: Long) = {
+    var obj = new VerilogLongValue()
+    obj.data = init
+    obj
+  }
 
-    implicit def convertStringToVerilogLongValue(str: String) : VerilogLongValue = {
+  implicit def convertStringToVerilogLongValue(str: String): VerilogLongValue = {
 
-        var value = new VerilogLongValue
-        value.data = value.dataFromString(str)
-        value
+    var value = new VerilogLongValue
+    value.data = value.dataFromString(str)
+    value
 
-    }
+  }
 }
-
 
 // Register File Structure
 //-------------------------
 
 /**
-    Top Level element
+ * Top Level element
+ *
+ */
+@xelement(name = "regfile")
+class RegisterFile extends Group {
 
-*/
-@xelement(name="regfile")
-class RegisterFile extends Group  {
-
-
-    @xelement
-    var vendorsettings : VendorSettings = null
+  @xelement
+  var vendorsettings: VendorSettings = null
 
 }
 
 /**
-    Companion Objects used as factories
-*/
+ * Companion Objects used as factories
+ */
 object RegisterFile {
 
-    /**
-        Create a RegisterFile from an URL
-    */
-    def apply( annotXML: URL ) : RegisterFile = {
+  /**
+   * Create a RegisterFile from an URL
+   */
+  def apply(annotXML: URL): RegisterFile = {
 
-        //  Prepar RF
-        var rf = new RegisterFile()
+    //  Prepar RF
+    var rf = new RegisterFile()
 
-        // Append Input IO
-        rf - new StAXIOBuffer(new InputStreamReader(annotXML.openStream))
+    // Append Input IO
+    rf - new StAXIOBuffer(new InputStreamReader(annotXML.openStream))
 
-        // Streamin
-        rf.lastBuffer.streamIn
-        //rf streamIn
-        //rf.getNextBuffer.remove
+    // Streamin
+    rf.lastBuffer.streamIn
+   
+    //rf streamIn
+    //rf.getNextBuffer.remove
 
-        // Return
-        rf
+    // Return
+    rf
 
+  }
 
-
-    }
-
-    /**
-        Create a RegisterFile from a File path
-    */
-    def apply( file: String ) : RegisterFile = this.apply(new File(file).toURI.toURL)
+  /**
+   * Create a RegisterFile from a File path
+   */
+  def apply(file: String): RegisterFile = this.apply(new File(file).toURI.toURL)
 }
 
-@xelement(name="vendorsettings")
+@xelement(name = "vendorsettings")
 class VendorSettings extends ElementBuffer {
 
-    @any
-    var any = AnyXList()
+  @any
+  var any = AnyXList()
 
+}
+
+import scala.language.dynamics
+
+trait DynamicSearchable extends Dynamic {
+  
+	def selectDynamic(name: String) : DynamicSearchable
 }
 
 /**
-    The <regrooot element
+ * The <regrooot element
+ *
+ */
+@xelement(name = "regroot")
+class Group  extends DynamicSearchable with ElementBuffer with Named {
 
-*/
-@xelement(name="regroot")
-class Group extends ElementBuffer with Named {
+  // Attributes
+  //-----------------
 
-    // Attributes
+  // Structure
+  //------------------
+
+  //----- regroot
+  /**
+   * @group rf
+   */
+  @xelement(name = "regroot")
+  var groups = XList { new Group }
+
+  //---- Register
+  /**
+   * @group rf
+   */
+  @xelement(name = "reg64")
+  var registers = XList { new Register }
+
+  //---- Rams
+  /**
+   * @group rf
+   */
+  @xelement(name = "ramblock")
+  var rams = XList { new RamBlock }
+
+  //---- Repeat
+  /**
+   * @group rf
+   */
+  @xelement(name = "repeat")
+  var repeats = XList {
+
+    //-- Create Repeat as Group
+    var repeat = new RepeatGroup(this)
+
+    //-- Add to groups
+    Group.this.groups += repeat
+
+    //-- Return
+    repeat
+  }
+
+  // General
+  //-------------------
+
+  /**
+   * @group rf
+   */
+  def apply(closure: Group => Unit) = {
+
+    closure(this)
+  }
+
+  // Search
+  //-------------------------
+
+  /**
+   * 
+   * Dynamic Search
+   */
+  def selectDynamic(name: String) : DynamicSearchable = {
+    
+    this
+  }
+  
+  
+  /**
+   * Generic search that can return Register, Ram Entries or Fields
+   *
+   * Format of search string:
+   *
+   *  - Register: /path/to/register
+   *  - Ram Entry: /path/to/ram[entryIndex]
+   *  - Field of ram or register: /path/to/register.field or /path/to/ram[entryIndex].field
+   *
+   *
+   */
+  def search(search: String): Any = {
+
+    // Patterns
+    val ramEntry = """(.+)\[([0-9]+)]$""".r
+    val ramEntryField = """(.+)\[([0-9]+)]\.([\w]+)$""".r
+    val regField = """(.+)\.([\w]+)$""".r
+    val reg = """(.+)$""".r
+
+    /**
+     * match more complex ram search, if not matching, easier matching falls back to Registers
+     */
+    search.trim match {
+
+      //-- Ram entry
+      case ramEntry(path, entry)             =>
+
+        var ram = this.ram(path)
+        return ram.entry(Integer.parseInt(entry))
+        
+        
+        
+      //-- Ram Entry field
+      case ramEntryField(path, entry, fieldName) =>
+
+        var ram = this.ram(path)
+        var field = ram.field(fieldName)
+        return field.forEntry(Integer.parseInt(entry))
+        
+      //-- Register Field
+      case regField(path, fieldName)             =>
+
+         var reg = this.register(path)
+         var field = reg.field(fieldName)
+         return field
+         
+      //-- Register
+      case reg(path)                         =>
+
+        var reg = this.register(path)
+        return reg
+      case _                                 => throw new RuntimeException(s"Generic Search expression $search does not match expected format")
+    }
+
+  }
+
+  /**
+   * Search for a regroot
+   *
+   * Search String format:
+   *
+   * xxx/xxx/xxx
+   *
+   * wherre xxx should be the name of a regroot
+   *
+   * @group rf
+   * @return the found regroot, this if the search string is empty
+   * @throws RuntimeException if the specificed search path doesn't point to any regroot
+   */
+  def group(searchAndApply: String)(implicit closure: Group => Unit): Group = {
+
+    // Split regroot names
     //-----------------
-
-    // Structure
-    //------------------
-
-    //----- regroot
-    /**
-        @group rf
-    */
-    @xelement(name="regroot")
-    var groups = XList { new Group }
-
-    //---- Register
-    /**
-        @group rf
-    */
-    @xelement(name="reg64")
-    var registers = XList { new Register }
-
-    //---- Rams
-    /**
-        @group rf
-    */
-    @xelement(name="ramblock")
-    var rams = XList { new RamBlock }
-
-    //---- Repeat
-    /**
-        @group rf
-    */
-    @xelement(name="repeat") 
-    var repeats = XList {
-
-        //-- Create Repeat as Group
-        var repeat = new RepeatGroup(this)
-
-        //-- Add to groups
-        Group.this.groups += repeat
-
-        //-- Return
-        repeat
-    }
-
-    // General
-    //-------------------
-
-    /**
-        @group rf
-    */
-    def apply( closure: Group => Unit) = {
-
-        closure(this)
-    }
-
+    var regRoots = searchAndApply.split("/")
 
     // Search
-    //-------------------------
+    //----------------
+    var currentSearchedRegRoot = this
 
+    regRoots.foreach {
+      currentSearchedRegRootName =>
 
-    /**
-        Search for a reǵroot
-
-        Search String format:
-
-        xxx/xxx/xxx
-
-        wherre xxx should be the name of a regroot
-    
-        @group rf
-        @return the found regroot, this if the search string is empty
-        @throws RuntimeException if the specificed search path doesn't point to any regroot
-    */
-    def group ( searchAndApply : String)(implicit closure: Group => Unit) : Group = {
-
-
-        // Split regroot names
-        //-----------------
-        var regRoots = searchAndApply.split("/")
-
-        // Search
-        //----------------
-        var currentSearchedRegRoot = this
-
-        regRoots.foreach {
-            currentSearchedRegRootName =>
-
-                //-- Look for a regroot with current searched Name in currrent Regroot source
-                currentSearchedRegRoot.groups.find(_.name.toString == currentSearchedRegRootName) match {
-                    case Some(nextRegRoot) => currentSearchedRegRoot = nextRegRoot
-                    case None =>
-                        throw new RuntimeException(s"""
+        //-- Look for a regroot with current searched Name in currrent Regroot source
+        currentSearchedRegRoot.groups.find(_.name.toString == currentSearchedRegRootName) match {
+          case Some(nextRegRoot) => currentSearchedRegRoot = nextRegRoot
+          case None =>
+            throw new RuntimeException(s"""
                             Searching for regroot ${currentSearchedRegRootName} under ${currentSearchedRegRoot.name} in expression $searchAndApply failed, is the searched path available in the current in use registerfile ?
                         """)
-                }
-
         }
 
-        // Apply Closure if one is provided
-        closure(currentSearchedRegRoot)
-        //closure(currentSearchedRegRoot)
-
-        // Return
-        currentSearchedRegRoot
     }
 
-    /**
-        Search for a Register
+    // Apply Closure if one is provided
+    closure(currentSearchedRegRoot)
+    //closure(currentSearchedRegRoot)
 
-        Search String format:
+    // Return
+    currentSearchedRegRoot
+  }
 
-        xxxxx/xxx/xxxx/yyyyy
-        path/to/regroot/register
+  /**
+   * Search for a Register
+   *
+   * Search String format:
+   *
+   * xxxxx/xxx/xxxx/yyyyy
+   * path/to/regroot/register
+   *
+   * With:
+   *
+   * - xxxx are possible regroots to search
+   * - the last path element yyyy beeing the name of the searched register
+   *
+   * @group rf
+   */
+  def register(searchAndApply: String)(implicit closure: Register => Unit): Register = {
 
-        With:
+    // Split String
+    //----------------
+    var paths = searchAndApply.split("/")
+    var searchedRegister = paths.last
 
-            - xxxx are possible regroots to search
-            - the last path element yyyy beeing the name of the searched register
-    
-        @group rf
-    */
-    def register ( searchAndApply : String)(implicit closure: Register => Unit) : Register = {
+    // Regroot: This or the one defined by all the paths elements until the last one
+    //---------
+    var regRoot = this.group(paths.dropRight(1).mkString("/"))
 
-        // Split String
-        //----------------
-        var paths = searchAndApply.split("/")
-        var searchedRegister = paths.last
+    // Look For possible register
+    //----------------
+    regRoot.registers.find(_.name.equals(searchedRegister)) match {
+      case Some(searchedRegister) =>
 
-        // Regroot: This or the one defined by all the paths elements until the last one
-        //---------
-        var regRoot = this.group(paths.dropRight(1).mkString("/"))
+        // Execute closure
+        //----------------------
+        closure(searchedRegister)
 
-        // Look For possible register
-        //----------------
-        regRoot.registers.find(_.name.equals(searchedRegister)) match {
-            case Some(searchedRegister) =>
-
-                // Execute closure
-                //----------------------
-                closure(searchedRegister)
-
-                return searchedRegister
-            case None =>
-                throw new RuntimeException(s"""
+        return searchedRegister
+      case None =>
+        throw new RuntimeException(s"""
                     Searching for Register ${searchedRegister} under ${regRoot.name} in expression $searchAndApply failed, is the searched path available in the current in use registerfile ?
                 """)
-        }
-
     }
 
-    /**
-        Search for a RamBlock
+  }
 
-        Search String format:
+  /**
+   * Search for a RamBlock
+   *
+   * Search String format:
+   *
+   * xxxxx/xxx/xxxx/yyyyy
+   * path/to/regroot/ramblock
+   *
+   * With:
+   *
+   * - xxxx are possible regroots to search
+   * - the last path element yyyy beeing the name of the searched ramblock
+   *
+   * @group rf
+   *
+   */
+  def ram(searchAndApply: String)(implicit closure: RamBlock => Unit): RamBlock = {
 
-        xxxxx/xxx/xxxx/yyyyy
-        path/to/regroot/ramblock
+    // Split String
+    //----------------
+    var paths = searchAndApply.split("/")
+    var searchedRamName = paths.last
 
-        With:
+    // Regroot: This or the one defined by all the paths elements until the last one
+    //---------
+    var regRoot = this.group(paths.dropRight(1).mkString("/"))
 
-            - xxxx are possible regroots to search
-            - the last path element yyyy beeing the name of the searched ramblock
+    // Look For possible register
+    //----------------
+    regRoot.rams.find(_.name.equals(searchedRamName)) match {
+      case Some(searchedRam) =>
 
-        @group rf
+        // Execute closure
+        //----------------------
+        closure(searchedRam)
 
-    */
-    def ram ( searchAndApply : String)(implicit closure: RamBlock => Unit) : RamBlock = {
-
-        // Split String
-        //----------------
-        var paths = searchAndApply.split("/")
-        var searchedRamName = paths.last
-
-        // Regroot: This or the one defined by all the paths elements until the last one
-        //---------
-        var regRoot = this.group(paths.dropRight(1).mkString("/"))
-
-        // Look For possible register
-        //----------------
-        regRoot.rams.find(_.name.equals(searchedRamName)) match {
-            case Some(searchedRam) =>
-
-                // Execute closure
-                //----------------------
-                closure(searchedRam)
-
-                return searchedRam
-            case None =>
-                throw new RuntimeException(s"""
+        return searchedRam
+      case None =>
+        throw new RuntimeException(s"""
                     Searching for Ram ${searchedRamName} under ${regRoot.name} in expression $searchAndApply failed, is the searched path available in the current in use registerfile ?
                 """)
-        }
-
     }
 
-    /**
-        Search for a Field
+  }
 
-        Search String format:
+  /**
+   * Search for a Field
+   *
+   * Search String format:
+   *
+   * xxxxx/xxx/xxxx/yyyyy.fieldName
+   *
+   *
+   * With:
+   *
+   * - xxxx are possible regroots to search
+   * - the last path element yyyy beeing the name of the searched register
+   * - @fieldName is the name of the field to search on target register
+   *
+   * @group rf
+   */
+  def field(searchAndApply: String)(implicit closure: Field => Unit): Field = {
 
-        xxxxx/xxx/xxxx/yyyyy@fieldName
+    // Get Register Path and Field Path
+    //-------------------------
+    var paths = searchAndApply.split("""\.""")
 
-
-        With:
-
-            - xxxx are possible regroots to search
-            - the last path element yyyy beeing the name of the searched register
-            - @fieldName is the name of the field to search on target register
-
-        @group rf
-    */
-    def field ( searchAndApply : String)(implicit closure: Field => Unit) : Field = {
-
-        // Get Register Path and Field Path
-        //-------------------------
-        var paths = searchAndApply.split("@")
-
-        if (paths.size!=2) {
-            throw new IllegalArgumentException(s"Field search format must be: /path/to/register@fieldName, provided: ${searchAndApply}")
-        }
-
-        var registerPath = paths.head
-        var fieldName    = paths.last
-
-        // Search
-        //---------------
-        this.register(registerPath).field(fieldName)(closure)
-
+    if (paths.size != 2) {
+      throw new IllegalArgumentException(s"Field search format must be: /path/to/register.fieldName, provided: ${searchAndApply}")
     }
 
+    var registerPath = paths.head
+    var fieldName = paths.last
 
+    // Search
+    //---------------
+    this.register(registerPath).field(fieldName)(closure)
+
+  }
 
 }
 object Group {
 
-    implicit val defaultRegrootClosure : (Group => Unit) = { t => }
-
-
-}
-
-@xelement(name="repeat")
-class RepeatGroup(var parent : Group) extends Group with  NamedAddressed {
-
-    /**
-        @group rf
-    */
-    @xattribute(name="loop")
-    var loop : IntegerBuffer = 1
-
-    //-- When Streamin is finished for this element :
-    //--    -> Duplicate the group based on loop attribute, and update addresses
-    override def streamIn(du: DataUnit) =  {
-
-        //-- Let parent work normally
-        //---------------------
-        super.streamIn(du)
-
-        //-- Finish
-        //------------------
-        if (du.isHierarchyClose && this.stackSize == 0) {
-
-
-            //-- Size of one repeat is number of registers * 64
-            var repeatSize : Long = this.registers.size * 8
-            
-            //-- loop over number of repeat times
-            for ( i <- 1 to (this.loop-1)) {
-
-                // Duplicate
-                var newRepeat = this.clone 
-
-                // Update
-                newRepeat.name = s"""${newRepeat.name}[$i]"""
-                newRepeat.absoluteAddress = this.absoluteAddress + (i*repeatSize)
-                newRepeat.registers.foreach(reg => reg.absoluteAddress=newRepeat.absoluteAddress+(newRepeat.registers.indexOf(reg)*8))
-
-                // Add To Parent group
-                parent.groups+=newRepeat
-            }
-
-            //-- Update current group as number 0
-            this.name = s"""${this.name}[0]"""
-            this.registers.foreach {
-                reg =>
-                    var index=this.registers.indexOf(reg)
-                    var newAddress =  index *8
-                    reg.absoluteAddress=this.absoluteAddress+newAddress
-            } 
-
-        }
-
-        
-    }
-
-    /**
-        Duplicate this repeat with all registers and so on
-    */
-    override def clone : RepeatGroup = {
-
-        // Create
-        var newRepeat = new RepeatGroup(parent)
-
-        // Name
-        newRepeat.name = s"${this.name}"
-
-        // Absolute Address
-        newRepeat.absoluteAddress = this.absoluteAddress.data
-
-        // Registers
-        this.registers.foreach(newRepeat.registers+=_.clone)
-
-        newRepeat
-    }
+  implicit val defaultRegrootClosure: (Group => Unit) = { t => }
 
 }
 
+@xelement(name = "repeat")
+class RepeatGroup(var parent: Group) extends Group with NamedAddressed {
 
+  /**
+   * @group rf
+   */
+  @xattribute(name = "loop")
+  var loop: IntegerBuffer = 1
+
+  //-- When Streamin is finished for this element :
+  //--    -> Duplicate the group based on loop attribute, and update addresses
+  override def streamIn(du: DataUnit) = {
+
+    //-- Let parent work normally
+    //---------------------
+    super.streamIn(du)
+
+    //-- Finish
+    //------------------
+    if (du.isHierarchyClose && this.stackSize == 0) {
+
+      //-- Size of one repeat is number of registers * 64
+      var repeatSize: Long = this.registers.size * 8
+
+      //-- loop over number of repeat times
+      for (i <- 1 to (this.loop - 1)) {
+
+        // Duplicate
+        var newRepeat = this.clone
+
+        // Update
+        newRepeat.name = s"""${newRepeat.name}[$i]"""
+        newRepeat.absoluteAddress = this.absoluteAddress + (i * repeatSize)
+        newRepeat.registers.foreach(reg => reg.absoluteAddress = newRepeat.absoluteAddress + (newRepeat.registers.indexOf(reg) * 8))
+
+        // Add To Parent group
+        parent.groups += newRepeat
+      }
+
+      //-- Update current group as number 0
+      this.name = s"""${this.name}[0]"""
+      this.registers.foreach {
+        reg =>
+          var index = this.registers.indexOf(reg)
+          var newAddress = index * 8
+          reg.absoluteAddress = this.absoluteAddress + newAddress
+      }
+
+    }
+
+  }
+
+  /**
+   * Duplicate this repeat with all registers and so on
+   */
+  override def clone: RepeatGroup = {
+
+    // Create
+    var newRepeat = new RepeatGroup(parent)
+
+    // Name
+    newRepeat.name = s"${this.name}"
+
+    // Absolute Address
+    newRepeat.absoluteAddress = this.absoluteAddress.data
+
+    // Registers
+    this.registers.foreach(newRepeat.registers += _.clone)
+
+    newRepeat
+  }
+
+}
 
 /**
-    <Register
-
-    Search string format:
-
-    xxxx
-
-    With:
-     - xxxx beeing the name of a field
-
-
-*/
-@xelement(name="reg64")
+ * <Register
+ *
+ * Search string format:
+ *
+ * xxxx
+ *
+ * With:
+ * - xxxx beeing the name of a field
+ *
+ *
+ */
+@xelement(name = "reg64")
 class Register extends ElementBuffer with NamedAddressed {
 
-    // Attributes
-    //-----------
+  // Attributes
+  //-----------
 
-    /**
-        @group rf
-    */
-    @xattribute(name="desc")
-    var description : XSDStringBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute(name = "desc")
+  var description: XSDStringBuffer = null
 
-    // Structure
+  // Structure
+  //----------------
+
+  //---- Reserved bits
+  @xelement(name = "reserved")
+  var reserved: Reserved = null
+
+  //---- rreinit
+  @xelement(name = "rreinit")
+  var rreinit: BooleanBuffer = false
+
+  //---- fields
+
+  /**
+   * The Builder closure for Fields also calculates the field offset in the register
+   *
+   * @group rf
+   */
+  @xelement(name = "hwreg")
+  var fields: XList[Field] = XList {
+    var newField = new Field
+    newField.parentRegister = this
+    fields.lastOption match {
+      case Some(previousField) =>
+        newField.offset = previousField.offset + previousField.width
+      case None =>
+    }
+    newField
+  }
+
+  // Value
+  //------------------
+
+  /**
+   * This is the combination of all the subfields reset values
+   *
+   * @group rf
+   */
+  def getResetValue: Long = {
+
+    // Base value
+    //------------
+    var resetValue: Long = 0
+    var offset = 0
+
+    // Go through fields and set bits in long
+    //--------------
+    this.fields.foreach {
+      f =>
+        //println(s"Updating reg value with field: @${offset} -> ${offset+(f.width-1)} = ${f.reset.data}")
+
+        // Set Bits in result long
+        //----------
+        resetValue = TeaBitUtil.setBits(resetValue, offset, offset + (f.width - 1), f.reset)
+
+        // Update offset
+        //------------------
+        offset = offset + f.width
+    }
+
+    resetValue
+
+  }
+
+  /**
+   * @group rf
+   */
+  var valueBuffer = RegisterTransactionBuffer(this)
+
+  def value = this.valueBuffer
+
+  /**
+   *
+   * Enables register.value = Long  syntax
+   *
+   * @group rf
+   */
+  def value_=(data: Long) = this.valueBuffer.set(data)
+
+  // Search
+  //--------------------
+
+  /**
+   * Search string format:
+   *
+   * xxxxx
+   *
+   * Just the name of the field to search for
+   *
+   * @group rf
+   */
+  def field(searchAndApply: String)(implicit closure: Field => Unit): Field = {
+
+    // Look For possible field
     //----------------
+    this.fields.find(_.name.equals(searchAndApply)) match {
+      case Some(searchedField) =>
 
-    //---- Reserved bits
-    @xelement(name="reserved")
-    var reserved  : Reserved = null
+        // Execute closure
+        //----------------------
+        closure(searchedField)
 
-    //---- rreinit
-    @xelement(name="rreinit")
-    var rreinit : BooleanBuffer = false
-  
-
-    //---- fields
-
-    /**
-        The Builder closure for Fields also calculates the field offset in the register
-
-        @group rf
-    */
-    @xelement(name="hwreg")
-    var fields : XList[Field] = XList { 
-        var newField = new Field 
-        newField.parentRegister = this
-        fields.lastOption match {
-            case Some(previousField) => 
-                newField.offset = previousField.offset + previousField.width
-            case None => 
-        }
-        newField
-    }
-
-
-    // Value
-    //------------------
-    
-
-    /**
-        This is the combination of all the subfields reset values
-    
-        @group rf
-    */
-    def getResetValue : Long = {
-
-        // Base value
-        //------------
-        var resetValue : Long = 0
-        var offset = 0
- 
-        // Go through fields and set bits in long
-        //--------------
-        this.fields.foreach {
-            f => 
-               //println(s"Updating reg value with field: @${offset} -> ${offset+(f.width-1)} = ${f.reset.data}")
-
-                // Set Bits in result long
-                //----------
-                resetValue = TeaBitUtil.setBits(resetValue,offset,offset+(f.width-1),f.reset)
-
-                // Update offset
-                //------------------
-                offset = offset+f.width
-        }
-
-
-        resetValue
-
-    }
-
-    /**
-        @group rf
-    */
-    var valueBuffer = RegisterTransactionBuffer(this)
-
-    def value  = this.valueBuffer
-
-    /**
-        
-        Enables register.value = Long  syntax
-
-        @group rf
-    */
-    def value_=(data: Long) = this.valueBuffer.set(data)
-
-    // Search
-    //--------------------
-
-    /**
-        Search string format:
-
-        xxxxx
-
-        Just the name of the field to search for
-
-        @group rf
-    */
-    def field ( searchAndApply : String)(implicit closure: Field => Unit) : Field = {
-
-        // Look For possible field
-        //----------------
-        this.fields.find(_.name.equals(searchAndApply)) match {
-            case Some(searchedField) =>
-
-                // Execute closure
-                //----------------------
-                closure(searchedField)
-
-                return searchedField
-            case None =>
-                throw new RuntimeException(s"""
+        return searchedField
+      case None =>
+        throw new RuntimeException(s"""
                     Searching for Field ${searchAndApply} under ${this.name} in expression $searchAndApply failed, is the field defined in the current register ?
                 """)
-        }
-
     }
 
-    // Utils
-    //------------
-    override def clone : Register = {
+  }
 
-        // Create
-        var reg = new Register
+  // Utils
+  //------------
+  override def clone: Register = {
 
-        // Name
-        reg.name = this.name.data 
+    // Create
+    var reg = new Register
 
-        // Desc
-        reg.description = this.description.data
+    // Name
+    reg.name = this.name.data
 
-        // Address
-        if (this.absoluteAddress!=null)
-            reg.absoluteAddress = this.absoluteAddress.data
+    // Desc
+    reg.description = this.description.data
 
-        // Fields
-        this.fields.foreach(reg.fields+=_.clone)
+    // Address
+    if (this.absoluteAddress != null)
+      reg.absoluteAddress = this.absoluteAddress.data
 
-        reg
-    }
+    // Fields
+    this.fields.foreach(reg.fields += _.clone)
+
+    reg
+  }
 }
 
 object Register {
 
-    implicit val defaultClosure : (Register => Unit) = { t => }
+  implicit val defaultClosure: (Register => Unit) = { t => }
 
 }
 
-@xelement(name="ramblock")
+@xelement(name = "ramblock")
 class RamBlock extends ElementBuffer with NamedAddressed {
 
-    // Attributes
-    //-----------
+  // Attributes
+  //-----------
 
-    /**
-        @group rf
-    */
-    @xattribute(name="addrsize")
-    var addressSize : LongBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute(name = "addrsize")
+  var addressSize: LongBuffer = null
 
-    /**
-        @group rf
-    */
-    @xattribute(name="ramwidth")
-    var width : LongBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute(name = "ramwidth")
+  var width: LongBuffer = null
 
-    /**
-        @group rf
-    */
-    @xattribute(name="desc")
-    var description : XSDStringBuffer = null
-    
-    //---- fields
+  /**
+   * @group rf
+   */
+  @xattribute(name = "desc")
+  var description: XSDStringBuffer = null
 
-    /**
-        The Builder closure for Fields also calculates the field offset in the register
+  //---- fields
 
-        @group rf
-    */
-    @xelement(name="field")
-    var fields : XList[RamField] = XList { 
-        var newField = new RamField 
-        newField.parent = this
-        fields.lastOption match {
-            case Some(previousField) => 
-                newField.offset = previousField.offset + previousField.width
-            case None => 
-        }
-        newField
+  /**
+   * The Builder closure for Fields also calculates the field offset in the register
+   *
+   * @group rf
+   */
+  @xelement(name = "field")
+  var fields: XList[RamField] = XList {
+    var newField = new RamField
+    newField.parent = this
+    fields.lastOption match {
+      case Some(previousField) =>
+        newField.offset = previousField.offset + previousField.width
+      case None =>
+    }
+    newField
+  }
+
+  // Search
+  //--------------------
+
+  /**
+   * Return a RamEntry for the corresponding index
+   * @throws a Runtime exception if the index is out of range
+   */
+  def entry(index: Int): RamEntry = {
+
+    index match {
+
+      // Out of range
+      case i if (i < 0 || i > Math.pow(2.0, (this.addressSize).data.toDouble)) => throw new RuntimeException(s"""Could no get entry $i in ram ($name), must be 0 < index < ${this.addressSize.data.toDouble}""")
+      case i => new RamEntry(this, i)
     }
 
-    // Search
-    //--------------------
+  }
 
-    /**
-        Search string format:
+  /**
+   * Search string format:
+   *
+   * xxxxx
+   *
+   * Just the name of the field to search for
+   *
+   * @group rf
+   */
+  def field(searchAndApply: String)(implicit closure: RamField => Unit): RamField = {
 
-        xxxxx
+    // Look For possible field
+    //----------------
+    this.fields.find(_.name.equals(searchAndApply)) match {
+      case Some(searchedField) =>
 
-        Just the name of the field to search for
+        // Execute closure
+        //----------------------
+        closure(searchedField)
 
-        @group rf
-    */
-    def field ( searchAndApply : String)(implicit closure: RamField => Unit) : RamField = {
-
-        // Look For possible field
-        //----------------
-        this.fields.find(_.name.equals(searchAndApply)) match {
-            case Some(searchedField) =>
-
-                // Execute closure
-                //----------------------
-                closure(searchedField)
-
-                return searchedField
-            case None =>
-                throw new RuntimeException(s"""
+        return searchedField
+      case None =>
+        throw new RuntimeException(s"""
                     Searching for RamField ${searchAndApply} under ${this.name} in expression $searchAndApply failed, is the field defined in the current ramblock ?
                 """)
-        }
-
     }
 
-    // FIXME
-    //@xattribute
-    //var external : BooleanBuffer = null
+  }
+
+  // FIXME
+  //@xattribute
+  //var external : BooleanBuffer = null
 }
 
-@xelement(name="field")
-class RamField extends ElementBuffer with Named {
+object RamBlock {
 
-    /**
-        @group rf
-    */
-    @xattribute(name="width")
-    var width : IntegerBuffer = null
-
-    // Value
-    //--------------------
-
-    /**
-        Offset of this field inside register.
-        Basically previous field offset + previous field size
-        @group rf
-    */
-    var offset = 0
-
-    /**
-        parent register type
-        @group rf
-    */
-    var parent : RamBlock = null
+  implicit val defaultClosure: (RamBlock => Unit) = { t => }
 
 }
 
 /**
-    <hwreg
+ * Represents a value entry in a RAM
+ */
+class RamEntry(var ramBlock: RamBlock, var index: Integer) {
 
-*/
-@xelement(name="hwreg")
+}
+
+@xelement(name = "field")
+class RamField extends ElementBuffer with Named {
+
+  /**
+   * @group rf
+   */
+  @xattribute(name = "width")
+  var width: IntegerBuffer = null
+
+  // Value
+  //--------------------
+
+  /**
+   * Offset of this field inside register.
+   * Basically previous field offset + previous field size
+   * @group rf
+   */
+  var offset = 0
+
+  /**
+   * parent register type
+   * @group rf
+   */
+  var parent: RamBlock = null
+
+  /**
+   * The entry to which we need to write this field
+   */
+  var entry : RamEntry = null
+  
+  /**
+   * Set this field to write its value to the given Entry
+   * The method returns a new Field with all fields set correctly
+   * 
+   * !! WARNING User must use the returned RamField instance, otherwise it won't be thread safe !!
+   * 
+   */
+  def forEntry(index : Int ) : RamField = {
+    
+    // Clone and set entry
+    var newField = this.clone
+    newField.entry = parent.entry(index)
+    
+    newField
+ 
+  }
+  
+  override def clone: RamField = {
+
+    // Create
+    var field = new RamField
+
+    // Width
+    field.name = this.name.data
+
+    // Offset
+    field.offset = this.offset
+
+    // Parent
+    field.parent = this.parent
+    
+
+    field
+  }
+  
+}
+
+object RamField {
+
+  implicit val defaultClosure: (RamField => Unit) = { t => }
+
+}
+
+/**
+ * <hwreg
+ *
+ */
+@xelement(name = "hwreg")
 class Field extends ElementBuffer with Named {
 
-    // Attributes
-    //-----------------
+  // Attributes
+  //-----------------
 
-    /**
-        @group rf
-    */
-    @xattribute
-    var width : IntegerBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute
+  var width: IntegerBuffer = null
 
-    /**
-        @group rf
-    */
-    @xattribute(name="desc")
-    var description : XSDStringBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute(name = "desc")
+  var description: XSDStringBuffer = null
 
-    /**
-        @group rf
-    */
-    @xattribute(name="reset")
-    var reset : VerilogLongValue = VerilogLongValue(0)
+  /**
+   * @group rf
+   */
+  @xattribute(name = "reset")
+  var reset: VerilogLongValue = VerilogLongValue(0)
 
-    /**
-        @group rf
-    */
-    @xattribute(name="sw")
-    var sw = ReadWriteRightsType("ro")
+  /**
+   * @group rf
+   */
+  @xattribute(name = "sw")
+  var sw = ReadWriteRightsType("ro")
 
-    /**
-        @group rf
-    */
-    @xattribute(name="hw")
-    var hw  = ReadWriteRightsType("rw")
+  /**
+   * @group rf
+   */
+  @xattribute(name = "hw")
+  var hw = ReadWriteRightsType("rw")
 
+  // Value
+  //--------------------
 
-    // Value
-    //--------------------
+  /**
+   * Offset of this field inside register.
+   * Basically previous field offset + previous field size
+   * @group rf
+   */
+  var offset = 0
 
-    /**
-        Offset of this field inside register.
-        Basically previous field offset + previous field size
-        @group rf
-    */
-    var offset = 0
+  /**
+   * parent register type
+   * @group rf
+   */
+  var parentRegister: Register = null
 
-    /**
-        parent register type
-        @group rf
-    */
-    var parentRegister : Register = null
+  //var value : Long = 0
 
+  def value: Long = {
 
-    //var value : Long = 0
+    // Read
+    var actualValue = parentRegister.value
 
-    def value : Long  = {
+    // Extract
+    TeaBitUtil.extractBits(actualValue, offset, offset + width - 1)
+  }
 
-        // Read
-        var actualValue = parentRegister.value
+  /**
+   * Set the value of this field:
+   *
+   * - Read register value
+   * - Modify field bits
+   * - write register value back
+   *
+   * @group rf
+   */
+  def value_=(newData: java.lang.Long) = {
 
-        // Extract
-        TeaBitUtil.extractBits(actualValue,offset,offset+width-1)
-    }
+    // Read
+    var actualValue: Long = parentRegister.value
 
-    /** 
-        Set the value of this field:
+    //java.lang.Long.toHexString(node.value)
 
-        - Read register value
-        - Modify field bits
-        - write register value back
+    var resultingValue = TeaBitUtil.setBits(actualValue, offset, offset + (width - 1), newData)
+    var scalResult = this.testSetBits(actualValue, offset, offset + (width - 1), newData)
 
-        @group rf
-    */
-    def value_=( newData: java.lang.Long )  =  {
+    //println(s"Changing value of field $name (${offset+(width-1)}:$offset) to ${java.lang.Long.toHexString(newData)}, reg was ${java.lang.Long.toHexString(actualValue)}, is now: ${java.lang.Long.toHexString(resultingValue)}")
+    //println(s"Scal result: ${java.lang.Long.toHexString(scalResult)}")
+    // println(s"Setting to: ${this.parentRegister.name}")
 
-        // Read
-        var actualValue : Long = parentRegister.value
+    // Modify / Write
+    this.parentRegister.value = scalResult
 
-        //java.lang.Long.toHexString(node.value)
-       
-        var resultingValue = TeaBitUtil.setBits(actualValue,offset,offset+(width-1),newData)
-        var scalResult = this.testSetBits(actualValue,offset,offset+(width-1),newData)
+    ///println(s"Now val is ${java.lang.Long.toHexString(this.parentRegister.value)}")
 
-        //println(s"Changing value of field $name (${offset+(width-1)}:$offset) to ${java.lang.Long.toHexString(newData)}, reg was ${java.lang.Long.toHexString(actualValue)}, is now: ${java.lang.Long.toHexString(resultingValue)}")
-        //println(s"Scal result: ${java.lang.Long.toHexString(scalResult)}")
-       // println(s"Setting to: ${this.parentRegister.name}")
+  }
 
-        // Modify / Write
-        this.parentRegister.value = scalResult
+  def testSetBits(baseValue: Long, lsb: Int, msb: Int, newValue: Long): Long = {
 
+    var width = msb - lsb + 1;
 
-       ///println(s"Now val is ${java.lang.Long.toHexString(this.parentRegister.value)}")
-       
+    // Variables
+    //----------------
+    var fullMask: Long = java.lang.Long.decode("0x7FFFFFFFFFFFFFFF");
+    var fullMaskLeft: Long = 0;
+    var newValShifted: Long = 0;
+    var resultVal: Long = 0;
+    var baseValueRight: Long = 0;
 
-    }
+    //-- Shift newVal left to its offset position
+    newValShifted = newValue << lsb;
 
-    def testSetBits( baseValue : Long, lsb : Int , msb : Int , newValue: Long) : Long = {
+    //-- Suppress right bits of baseValue by & masking with F on the left
+    fullMaskLeft = fullMask << (lsb + width);
+    resultVal = baseValue & fullMaskLeft;
 
+    //-- Set Result value in result by ORing with the placed shifted bits new value
+    resultVal = resultVal | newValShifted;
 
-        var width = msb-lsb+1;
-        
-        // Variables
-        //----------------
-        var fullMask : Long = java.lang.Long.decode("0x7FFFFFFFFFFFFFFF");
-        var fullMaskLeft : Long = 0;
-        var newValShifted : Long = 0;
-        var resultVal : Long = 0;
-        var baseValueRight : Long = 0;
+    // Reconstruct  Right part
+    //----------------------------------
 
-        //-- Shift newVal left to its offset position
-        newValShifted = newValue << lsb;
+    //-- Isolate base value right part
+    baseValueRight = baseValue & (fullMask >> (63 - lsb));
 
-        //-- Suppress right bits of baseValue by & masking with F on the left
-        fullMaskLeft = fullMask << (lsb+width);
-        resultVal =  baseValue & fullMaskLeft;
+    //-- Restore right part
+    resultVal = resultVal | baseValueRight;
 
-        //-- Set Result value in result by ORing with the placed shifted bits new value
-        resultVal =  resultVal | newValShifted;
+    return resultVal
 
-        // Reconstruct  Right part
-        //----------------------------------
+  }
 
-        //-- Isolate base value right part
-        baseValueRight = baseValue & (fullMask >> (63-lsb));
+  override def clone: Field = {
 
-        //-- Restore right part
-        resultVal =  resultVal | baseValueRight;
+    var field = new Field
 
-        return resultVal
+    // Name
+    field.name = this.name.data
 
-    }
+    // Desc
+    if (this.description != null)
+      field.description = this.description.data
 
-    
-    override def clone : Field = {
+    // reset
+    field.reset = this.reset.toString
 
-        var field = new Field 
-
-        // Name
-        field.name = this.name.data
-
-        // Desc
-        if (this.description!=null)
-            field.description = this.description.data
-
-        // reset
-        field.reset = this.reset.toString
-
-        field
-    }
+    field
+  }
 
 }
 object Field {
 
-    implicit val defaultClosure : (Field => Unit) = { t => }
+  implicit val defaultClosure: (Field => Unit) = { t => }
 
 }
 
-@xelement(name="reserved")
+@xelement(name = "reserved")
 class Reserved extends ElementBuffer {
 
-    // Attributes
-    //-----------------
+  // Attributes
+  //-----------------
 
-    /**
-        @group rf
-    */
-    @xattribute
-    var width : IntegerBuffer = null
+  /**
+   * @group rf
+   */
+  @xattribute
+  var width: IntegerBuffer = null
 
 }

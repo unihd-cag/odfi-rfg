@@ -1,161 +1,171 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>uni.hd.cag.rfg</groupId>
-    <artifactId>rf-interface</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>uni.hd.cag.rfg</groupId>
+	<artifactId>rf-interface</artifactId>
+	<version>1.0.0-SNAPSHOT</version>
 
-    <!-- use OSI Scala Parent pom to have scala enabled -->
-    <!-- ################# -->
-    <parent>
-        <groupId>com.idyria.osi</groupId>
-        <artifactId>project-scala</artifactId>
-        <version>2.10.1.r21</version>
-    </parent>  
-
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>net.alchim31.maven</groupId>
-                <artifactId>scala-maven-plugin</artifactId>
-                <version>${scala.plugin.version}</version>
-                <configuration>
-                    <useZincServer>true</useZincServer>
-                    <addZincArgs>-no-color</addZincArgs>
-                </configuration>
-                <executions>
-                  <execution>
-                    <id>add-source</id>
-                    <phase>generate-sources</phase>
-                    <goals>
-                      <goal>add-source</goal>
-                    </goals>
-                    <configuration>
-                      <sourceDir>${basedir}/target/generated-sources/java</sourceDir>
-                    </configuration>
-                  </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-site-plugin</artifactId>
-                <version>3.3</version>
-                <configuration>
-                  <reportPlugins>
-                    <plugin>
-                      <artifactId>maven-project-info-reports-plugin</artifactId>
-                      <version>2.2</version>
-                    </plugin>
-                    <plugin>
-                      <groupId>net.alchim31.maven</groupId>
-                      <artifactId>scala-maven-plugin</artifactId>
-                      <version>${scala.plugin.version}</version>
-                      <configuration>
-                        <jvmArgs>
-                          <jvmArg>-Xms64m</jvmArg>
-                          <jvmArg>-Xmx1024m</jvmArg>
-                        </jvmArgs>
-                        <args>
-                            <arg>-diagrams</arg>
-                            <arg>-groups</arg>
-                        </args>
-                        <doctitle>RFG Interface API</doctitle>
-                      </configuration>
-                    </plugin>
-                  </reportPlugins>
-                </configuration>
-              </plugin>
-        </plugins>
-    </build>
+	<!-- use OSI Scala Parent pom to have scala enabled -->
+	<!-- ################# -->
+	<parent>
+		<groupId>com.idyria.osi</groupId>
+		<artifactId>project-scala</artifactId>
+		<version>2.10.2.r2</version>
+	</parent>
 
 
-    <!-- Repositories to find packages -->
-    <!-- ############################################## -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/groups/public</url>
-        </pluginRepository>
-        <!-- For old snapshots, please use groupId `com.jnaerator` and the
-            following repo -->
-        <pluginRepository>
-            <id>nativelibs4java-repo</id>
-            <url>http://nativelibs4java.sourceforge.net/maven</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>idyria.central</id>
-            <name>plugins-release</name>
-            <url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>idyria.snapshots</id>
-            <name>plugins-snapshot</name>
-            <url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>sonatype</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/groups/public</url>
-        </repository>
-        <!-- For old snapshots, please use groupId `com.jnaerator` and the
-            following repo -->
-        <repository>
-            <id>nativelibs4java-repo</id>
-            <url>http://nativelibs4java.sourceforge.net/maven</url>
-        </repository>
-        <repository>
-            <snapshots>
-                    <enabled>false</enabled>
-            </snapshots>
-            <id>idyria.central</id>
-            <name>libs-release</name>
-            <url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
-        </repository>
-        <repository>
-                <snapshots>
-                        <enabled>true</enabled>
-                </snapshots>
-                <id>idyria.snapshots</id>
-                <name>libs-snapshot</name>
-                <url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
-        </repository>
-    </repositories>
-    <dependencies>
-        <dependency>
-            <groupId>com.idyria.osi.ooxoo</groupId>
-            <artifactId>ooxoo-core</artifactId>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<version>${scala.plugin.version}</version>
+				<configuration>
+					<useZincServer>true</useZincServer>
+					<addZincArgs>-no-color</addZincArgs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>add-source</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>add-source</goal>
+						</goals>
+						<configuration>
+							<sourceDir>${basedir}/target/generated-sources/scala</sourceDir>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.3</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>2.2</version>
+						</plugin>
+						<plugin>
+							<groupId>net.alchim31.maven</groupId>
+							<artifactId>scala-maven-plugin</artifactId>
+							<version>${scala.plugin.version}</version>
+							<configuration>
+								<jvmArgs>
+									<jvmArg>-Xms64m</jvmArg>
+									<jvmArg>-Xmx1024m</jvmArg>
+								</jvmArgs>
+								<args>
+									<arg>-diagrams</arg>
+									<arg>-groups</arg>
+								</args>
+								<doctitle>RFG Interface API</doctitle>
+							</configuration>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+
+	<!-- Repositories to find packages -->
+	<!-- ############################################## -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>sonatype</id>
+			<name>Sonatype OSS Snapshots Repository</name>
+			<url>http://oss.sonatype.org/content/groups/public</url>
+		</pluginRepository>
+		<!-- For old snapshots, please use groupId `com.jnaerator` and the following 
+			repo -->
+		<pluginRepository>
+			<id>nativelibs4java-repo</id>
+			<url>http://nativelibs4java.sourceforge.net/maven</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>idyria.central</id>
+			<name>plugins-release</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>idyria.snapshots</id>
+			<name>plugins-snapshot</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
+		</pluginRepository>
+	</pluginRepositories>
+	<repositories>
+		<repository>
+			<id>sonatype</id>
+			<name>Sonatype OSS Snapshots Repository</name>
+			<url>http://oss.sonatype.org/content/groups/public</url>
+		</repository>
+		<!-- For old snapshots, please use groupId `com.jnaerator` and the following 
+			repo -->
+		<repository>
+			<id>nativelibs4java-repo</id>
+			<url>http://nativelibs4java.sourceforge.net/maven</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>idyria.central</id>
+			<name>libs-release</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>idyria.snapshots</id>
+			<name>libs-snapshot</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
+		</repository>
+	</repositories>
+	<dependencies>
+		<dependency>
+			<groupId>com.idyria.osi.vui</groupId>
+			<artifactId>vui-core</artifactId>
+			<version>1.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+            <groupId>com.idyria.osi.aib</groupId>
+            <artifactId>aib-core</artifactId>
             <version>3.0.0-SNAPSHOT</version>
         </dependency>
-        <dependency>
-            <groupId>com.idyria.osi.tea</groupId>
-            <artifactId>tea</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>com.idyria.osi.ooxoo</groupId>
+			<artifactId>ooxoo-db</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</dependency>
+		<dependency>
+			<groupId>com.idyria.osi.tea</groupId>
+			<artifactId>tea</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
 
-    <!-- Distribution -->
-    <!-- ############ -->
-    <distributionManagement>
-        <repository>
-            <id>extoll.release</id>
-            <name>Extoll Public Release Repository</name>
-            <url>http://extoll.de/schloss/nexus/content/repositories/releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>extoll.snapshot</id>
-            <name>Extoll Public Snapshot Repository</name>
-            <url>http://extoll.de/schloss/nexus/content/repositories/snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
+	<!-- Distribution -->
+	<!-- ############ -->
+	<distributionManagement>
+		<repository>
+			<id>extoll.release</id>
+			<name>Extoll Public Release Repository</name>
+			<url>http://extoll.de/schloss/nexus/content/repositories/releases/</url>
+		</repository>
+		<snapshotRepository>
+			<id>extoll.snapshot</id>
+			<name>Extoll Public Snapshot Repository</name>
+			<url>http://extoll.de/schloss/nexus/content/repositories/snapshots/</url>
+		</snapshotRepository>
+	</distributionManagement>
 
 </project>

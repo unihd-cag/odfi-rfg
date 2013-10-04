@@ -13,6 +13,13 @@ package uni.hd.cag.osys.rfg.rf.device
 trait Device {
 
   /**
+   *
+   */
+  def open 
+  
+  def close
+  
+  /**
     Should Return a Long value for the register @ provided address
 
   */
@@ -39,6 +46,18 @@ object Device extends Device {
 
     var targetDevice : Device = null
 
+     def open = {
+      
+    }
+  
+     def close = {
+       
+       if (this.targetDevice==null)
+              throw new RuntimeException("Cannot use Device before that a Device.targetDevice has been properly set up")
+       this.targetDevice.close
+       
+     }
+    
     def readRegister( nodeId : Short, address : Long) : Option[Long] = {
 
           if (this.targetDevice==null)

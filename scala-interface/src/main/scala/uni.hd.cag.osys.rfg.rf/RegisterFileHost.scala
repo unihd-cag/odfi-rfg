@@ -56,7 +56,7 @@ trait RegisterFileHost {
 
 
         } finally {
-            println("-- Discard transaction --")
+            //println("-- Discard transaction --")
             Transaction.discard()
 
         }
@@ -76,7 +76,7 @@ trait RegisterFileHost {
 
     def registerValue( search : String ) : Long = {
 
-        println("-- Get Register Value --")
+        //println("-- Get Register Value --")
         var value : Long = 0
         this.onRegisterFile {
 
@@ -92,7 +92,7 @@ trait RegisterFileHost {
 
 }
 
-class DummmyRegisterfileHost (
+class DummyRegisterfileHost (
 
     var id  : Short,
     var registerFile : RegisterFile
