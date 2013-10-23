@@ -18,7 +18,7 @@ import uni.hd.cag.osys.rfg.rf._
 
 
 */
-class DeviceInterfaceBuffer extends BaseBuffer {
+class DeviceInterfaceBuffer extends BaseBufferTrait {
 
 
     // DU Context Informations

@@ -1024,8 +1024,8 @@ class Field extends ElementBuffer with Named {
     var resultingValue = TeaBitUtil.setBits(actualValue, offset, offset + (width - 1), newData)
     var scalResult = this.testSetBits(actualValue, offset, offset + (width - 1), newData)
 
-    //println(s"Changing value of field $name (${offset+(width-1)}:$offset) to ${java.lang.Long.toHexString(newData)}, reg was ${java.lang.Long.toHexString(actualValue)}, is now: ${java.lang.Long.toHexString(resultingValue)}")
-    //println(s"Scal result: ${java.lang.Long.toHexString(scalResult)}")
+    //println(s"Changing value of field $name (${offset+(width-1)}:$offset) to ${java.lang.Long.toHexString(newData)}, reg was ${java.lang.Long.toHexString(actualValue)}, is now: ${java.lang.Long.toHexString(scalResult)}")
+   // println(s"Scal result: ${java.lang.Long.toHexString(scalResult)}")
     // println(s"Setting to: ${this.parentRegister.name}")
 
     // Modify / Write
