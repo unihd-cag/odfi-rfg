@@ -141,10 +141,22 @@ class RegisterFileTest extends FlatSpec with ShouldMatchers {
       assert(controlReg.field("Valid").parentRegister!=null,"Register field from repeat block must have parent register")
       
       
+      // Control Register
+      //---------------------
       expectResult("control")(controlReg.name.toString)
       assert(controlReg.absoluteAddress != null)
       expectResult(intervalGroupBaseAddress)(controlReg.absoluteAddress.data)
 
+      //println(s"Control register $i address: ${controlReg.absoluteAddress.data}")
+      
+      // Control Field
+      //-------------------------
+     // println(s"Control register $i address from field: ${controlReg.field("Valid").parentRegister.absoluteAddress.data}")
+      var validField = controlReg.field("Valid")
+      assert(validField.parentRegister==controlReg)
+      
+      
+      
       var startaddrReg = registerFile.register(s"extoll_rf/smfu_rf/interval_$i/startaddr")
       assert(startaddrReg != null)
 

@@ -753,8 +753,11 @@ class Register extends ElementBuffer with NamedAddressed {
     if (this.absoluteAddress != null)
       reg.absoluteAddress = this.absoluteAddress.data
 
-    // Fields
+    // Fields : Clone and update to new Register
     this.fields.foreach(reg.fields += _.clone)
+    reg.fields.foreach {
+      f => f.parentRegister = reg
+    }
 
     reg
   }
