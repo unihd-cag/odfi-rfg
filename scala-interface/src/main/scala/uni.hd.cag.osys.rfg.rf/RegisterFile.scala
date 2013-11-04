@@ -104,10 +104,11 @@ class VerilogLongValue extends LongBuffer {
       //-> Decimal match, let normal long parse value
       case Some(m) if (m.group(2) == "d") =>
 
-        resValue = m.groupCount match {
-          case 4 => super.dataFromString(m.group(3))
-          case _ => 0
-        } 
+  
+        resValue = m.group(3) match {
+          case null => 0
+          case v => super.dataFromString(v)
+        }
 
       //-> No match, let normal long parse value
       case None if (str.matches("[0-9]+")) =>

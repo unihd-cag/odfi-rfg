@@ -38,6 +38,13 @@ class BaseTypesTest extends FeatureSpec with ShouldMatchers with GivenWhenThen {
             expectResult("444c")(java.lang.Long.toHexString(buffer.dataFromString("32'd17484")))
  
         }
+        
+        scenario("Decimal Value with empty value") {
+
+            var buffer = new VerilogLongValue()
+            expectResult("0")(java.lang.Long.toHexString(buffer.dataFromString("32'd")))
+ 
+        }
     }
 
 }
