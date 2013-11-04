@@ -82,7 +82,7 @@ class VerilogLongValue extends LongBuffer {
     var resValue: Long = 0
     //println("Parsing: "+str)
 
-    var expr = """(?i)([0-9]+)'(b|h|d)([A-Fa-f0-9]+)""".r
+    var expr = """(?i)([0-9]+)'(b|h|d)([A-Fa-f0-9]+)?""".r
     expr.findFirstMatchIn(str) match {
 
       //-> HEx Match, parse value
@@ -104,7 +104,10 @@ class VerilogLongValue extends LongBuffer {
       //-> Decimal match, let normal long parse value
       case Some(m) if (m.group(2) == "d") =>
 
-        resValue = super.dataFromString(m.group(3))
+        resValue = m.groupCount match {
+          case 4 => super.dataFromString(m.group(3))
+          case _ => 0
+        } 
 
       //-> No match, let normal long parse value
       case None if (str.matches("[0-9]+")) =>
@@ -357,6 +360,11 @@ class Group  extends DynamicSearchable with ElementBuffer with Named {
    */
   def group(searchAndApply: String)(implicit closure: Group => Unit): Group = {
 
+    
+    if (searchAndApply=="") {
+      return this
+    }
+    
     // Split regroot names
     //-----------------
     var regRoots = searchAndApply.split("/")
@@ -549,7 +557,7 @@ class RepeatGroup(var parent: Group) extends Group with NamedAddressed {
         var newRepeat = this.clone
 
         // Update
-        newRepeat.name = s"""${newRepeat.name}[$i]"""
+        newRepeat.name = s"""${newRepeat.name}_$i"""
         newRepeat.absoluteAddress = this.absoluteAddress + (i * repeatSize)
         newRepeat.registers.foreach(reg => reg.absoluteAddress = newRepeat.absoluteAddress + (newRepeat.registers.indexOf(reg) * 8))
 
@@ -558,7 +566,7 @@ class RepeatGroup(var parent: Group) extends Group with NamedAddressed {
       }
 
       //-- Update current group as number 0
-      this.name = s"""${this.name}[0]"""
+      this.name = s"""${this.name}_0"""
       this.registers.foreach {
         reg =>
           var index = this.registers.indexOf(reg)
@@ -1083,6 +1091,19 @@ class Field extends ElementBuffer with Named {
 
     // reset
     field.reset = this.reset.toString
+    
+    // Parent register
+    field.parentRegister = this.parentRegister
+    
+    // Width
+    field.width = this.width
+    
+    // SW/hw
+    field.sw = this.sw
+    field.hw = this.hw
+    
+    // Offset
+    field.offset = this.offset
 
     field
   }

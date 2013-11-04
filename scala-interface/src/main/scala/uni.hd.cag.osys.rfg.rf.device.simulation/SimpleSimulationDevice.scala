@@ -35,7 +35,7 @@ class SimpleSimulationDevice extends Device {
 
   def readRegister(nodeId: Short, address: Long): Option[Long] = {
 
-    println("Read from  " + nodeId)
+ //   println("Read from  " + nodeId)
 
     // Get node Map and read
     //-----------
@@ -45,7 +45,8 @@ class SimpleSimulationDevice extends Device {
 
   def writeRegister(nodeId: Short, address: Long, value: Long) = {
 
-    println("Writing to " + nodeId)
+  //  println("Writing to " + nodeId)
+    
     this.getNodeMap(nodeId) += (address -> value)
   }
 

@@ -102,13 +102,13 @@ class RegisterFileTest extends FlatSpec with ShouldMatchers {
 
     // Search a reg64
     //---------------------------
-    var smfuIntervalControl = registerFile.register("extoll_rf/smfu_rf/interval[0]/control")
+    var smfuIntervalControl = registerFile.register("extoll_rf/smfu_rf/interval_0/control")
     assert(smfuIntervalControl != null)
 
     // test closure execution
     //----------------------------------
     var closureReached = false
-    registerFile.register("extoll_rf/smfu_rf/interval[0]/control") {
+    registerFile.register("extoll_rf/smfu_rf/interval_0/control") {
       reg =>
         closureReached = true
         expectResult("control")(reg.name.toString)
@@ -126,24 +126,26 @@ class RegisterFileTest extends FlatSpec with ShouldMatchers {
 
       // Get Group and Check attributes
       //----------
-      var intervalGroup: RepeatGroup = registerFile.group(s"extoll_rf/smfu_rf/interval[$i]").asInstanceOf[RepeatGroup]
+      var intervalGroup: RepeatGroup = registerFile.group(s"extoll_rf/smfu_rf/interval_$i").asInstanceOf[RepeatGroup]
 
       var intervalGroupBaseAddress = baseAbsoluteAddress + (i * regCount * 8)
 
       assert(intervalGroup != null)
-      expectResult(s"interval[$i]")(intervalGroup.name.toString)
+      expectResult(s"interval_$i")(intervalGroup.name.toString)
       expectResult(intervalGroupBaseAddress)(intervalGroup.absoluteAddress.data)
 
       // Get  Registers and check attributes
       //------------------------
-      var controlReg = registerFile.register(s"extoll_rf/smfu_rf/interval[$i]/control")
+      var controlReg = registerFile.register(s"extoll_rf/smfu_rf/interval_$i/control")
       assert(controlReg != null)
-
+      assert(controlReg.field("Valid").parentRegister!=null,"Register field from repeat block must have parent register")
+      
+      
       expectResult("control")(controlReg.name.toString)
       assert(controlReg.absoluteAddress != null)
       expectResult(intervalGroupBaseAddress)(controlReg.absoluteAddress.data)
 
-      var startaddrReg = registerFile.register(s"extoll_rf/smfu_rf/interval[$i]/startaddr")
+      var startaddrReg = registerFile.register(s"extoll_rf/smfu_rf/interval_$i/startaddr")
       assert(startaddrReg != null)
 
       expectResult("startaddr")(startaddrReg.name.toString)

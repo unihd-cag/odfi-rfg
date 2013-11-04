@@ -189,6 +189,18 @@ trait RFLanguage {
       this
     }
     
+    def into(destination: (Group,String)) : Destination = {
+      
+      destination._1.search(destination._2) match {
+         case r : Register => r.value = value
+         case f: Field => f.value = value
+         case _ => throw new RuntimeException("unsupported path: $str")
+      }
+      
+      this
+      
+    }
+    
     def ->( destination: String) : Destination = into(destination)
     
     def :->(destination: String) : Destination= into(destination)
@@ -223,7 +235,7 @@ trait RFLanguage {
    * 
    * Ex: write(80) into "/path/to/destination"
    */
-  def write(v:Int) : Destination = new Destination(v)
+  def write(v:Long) : Destination = new Destination(v)
   
   
   

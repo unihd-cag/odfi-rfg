@@ -101,6 +101,26 @@ For this purpose, the target node must be an instance of an object implementing 
 
 ## Search String
 
+- Group: "path/to/regroot"
+
+	Examples:
+
+	group.group("extoll_rf/info_rf")
+	registerFile.group("path/to/regroot") // The RegisterFile class inherits Group
+
+- Register: "path/to/register"
+
+	Examples:
+
+	group.register("extoll_rf/info_rf/node")
+
+- Register Field: "path/to/register.field"
+
+	Examples:
+
+	group.field("extoll_rf/info_rf/node.id")
+	
+
 ## Select Node Target
 
 	// Enclosing class must mix the RegisterFileLanguage trait
