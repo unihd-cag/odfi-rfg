@@ -3,10 +3,9 @@ package uni.hd.cag.osys.rfg.rf
 import com.idyria.osi.ooxoo.core.buffers.structural._
 import com.idyria.osi.ooxoo.core.buffers.datatypes._
 import com.idyria.osi.ooxoo.core.buffers.extras.transaction._
- 
 import uni.hd.cag.osys.rfg.rf.device._
-
 import scala.language.implicitConversions
+import com.idyria.osi.tea.listeners.ListeningSupport
 
 /**
 
@@ -27,7 +26,7 @@ class RegisterTransactionBuffer (
         */
         var register : Register
 
-    ) extends LongBuffer {
+    ) extends LongBuffer with ListeningSupport {
 
 
     // Chain: -> TransactionBuffer -> DeviceInterfaceBuffer
@@ -128,6 +127,8 @@ class RegisterTransactionBuffer (
     */
     override def push( du : DataUnit) = {
 
+    	 this.@->("push")
+      
         // Set DataUnit Context
         //---------------
 

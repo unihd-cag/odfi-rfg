@@ -169,6 +169,16 @@ trait RFLanguage {
     
   }
   
+  def read(destination: (Group,String)) : Long = {
+    
+    destination._1.search(destination._2) match {
+      case r : Register => r.value
+      case f: Field => f.value
+      case _ => throw new RuntimeException("unsupported path: $str")
+    }
+    
+  }
+  
   // Write Language
   //-----------------------
   class Destination(value: Long) {
@@ -237,6 +247,12 @@ trait RFLanguage {
    */
   def write(v:Long) : Destination = new Destination(v)
   
+  
+  // Search
+  //---------------
+  def search(s: String) : Any = {
+    currentHost.registerFile.search(s)
+  }
   
   
 }

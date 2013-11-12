@@ -33,7 +33,7 @@ trait RegisterFileHost {
 
         // Begin Transaction
         //----------------------
-        Transaction(this)
+        Transaction.begin(this)
 
         // Execute
         //--------------
