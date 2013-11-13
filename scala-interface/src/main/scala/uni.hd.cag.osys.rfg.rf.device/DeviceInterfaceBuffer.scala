@@ -44,7 +44,19 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
         // Gather context and perform
         //---------------
         this.getNodeAndRegister(du) match {
-
+        	
+        	// Host is a Device also, map to it instead of global singleton device
+        	//----------------
+          	case Some((host : Device,register)) => 
+            
+          	  host.readRegister(host.id,register.absoluteAddress) match {
+                    case Some(value) => du.value = value.toString
+                    case _ =>
+                }
+                du
+          	  
+        	// Host and Register, Use global Singleton Device
+        	//--------
             case Some((host,register)) =>
                 Device.readRegister(host.id,register.absoluteAddress) match {
                     case Some(value) => du.value = value.toString
@@ -70,7 +82,16 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
         //---------------
         this.getNodeAndRegister(du) match {
 
-            case Some((host,register)) => Device.writeRegister(host.id,register.absoluteAddress,java.lang.Long.decode(du.value))
+        	// Host is a Device also, map to it instead of global singleton device
+        	//----------------
+          	case Some((host : Device,register)) => 
+            
+          	  host.writeRegister(host.id,register.absoluteAddress,java.lang.Long.decode(du.value))
+               
+            // Host and Register, Use global Singleton Device
+        	//--------
+            case Some((host,register)) => 
+              	Device.writeRegister(host.id,register.absoluteAddress,java.lang.Long.decode(du.value))
             case None =>
                 throw new IllegalArgumentException("Cannot Perform Device write from Data Unit because Node and/or register are missing from DataUnit context")
         }
