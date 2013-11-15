@@ -2,9 +2,7 @@ RFG User guide
 ==========================
 
 RFG is the new port of old RFS
-The goal is to define a cleaner Interface, that nicely integrates with other tools existing tools, like the Driver Generator, or upcoming ones
-
-
+The goal is to define a cleaner interface, that nicely integrates with other existing tools, like the Driver Generator, or upcoming ones
 
 # Register File Definition syntax
 
@@ -13,16 +11,44 @@ The goal is to define a cleaner Interface, that nicely integrates with other too
 In RFS, an XML input file was used, because the Register file is a hierarchical model
 However, XML is only a static descriptive language, which does not support constructions like loops, if else etc...
 
-To leverage this issue, RFS was issuing following strategies:
+    <regroot name="info_rf">   
+
+        ...
+
+        <reg64 name="driver">                                              
+            <hwreg name="ver" width="32" sw="ro" hw="" reset="32'd18253" />
+        </reg64>
+        
+        ...
+
+        <reg64 name="tsc_global_load_value" desc="This register specifies the value the TSC register will be loaded with, in case of an global interrupt.">
+    #ifdef ASIC
+                <hwreg name="tsc_data" width="64" sw="rw" hw="ro"/>
+    #else
+                <hwreg name="tsc_data" width="48" sw="rw" hw="ro"/>
+    #endif
+        </reg64>
+
+        ...
+
+        <repeat loop="8" name="scratchpad">
+            <reg64 name="scratchpad" desc="This register is one entry of the 64 byte scratchpad space offered by EXTOLL.">
+                <hwreg name="data" width="64" sw="rw" hw="" reset="64'h0" desc="Scratchpad data."/>
+            </reg64>
+        </repeat>
+
+    </regroot>
+
+To leverage this issue, RFS was using following strategies:
 
 - `<repeat>` elements to describe loops
-- C preprocessor definitions like #ifdef and usage of macros, which we resolved by calls the to C preprocessor to transform file before actual processing
+- C preprocessor definitions like #ifdef and usage of macros, which were resolved by calls the to the C preprocessor to transform the file(s) before actual processing
 
 ## TCL model script format
 
 A cleaner and more user friendly way to specify a Register File would be to avoid writing the XML directly, and use an API instead.
 
-Normal classical languages like C/C++/TCL/Java don't natively support a user friendly way to write code that would mirror the hierarchy of the Register File.
+Normal classical script languages (compiled languages are not really convienient here) don't natively support a user friendly way to write code that would mirror the hierarchy of the Register File (it is possible, but that would make XML writing easier)
 
 Using a Domain Specific Language that would be parsed to produce data structures then exported to XML is a possibility, however it imposes to have a language parser, which would need maintenance.
 
@@ -34,7 +60,7 @@ This is very advantageous, because we only need to specify an API, the user writ
 
 ## Simple Example
 
-Let's Take this simple example, showing an extract of the info_rf registerfile:
+Let's have a look at this simple example, showing an extract of the info_rf registerfile:
 
     registerFile "extoll_rf" {
 
@@ -58,13 +84,13 @@ Let's Take this simple example, showing an extract of the info_rf registerfile:
 
     }
 
-This syntax stay quite clean, and the imbrication of the code blocks exactly mirrors the final structure:
+This syntax stays quite clean, and the imbrication of the code blocks exactly mirrors the final structure:
 
 > an **info_rf** registers group, with a **driver** register, containing a 32 bits wide field named **ver**
 
 ## XML Output
 
-An XML format will still be offered by the tool, as it is very convienient to integrate the Register file definition with other languages, and other tools
+An XML format will still be offered by the tool, as it is very convenient in order to integrate the Register file definition with other languages, and other tools.
 This format will then, like in RFS, be a fully descriptive and expanded format
 
 Preview of the first tests (info_rf as register file, converted using rfs to rfg tool):
@@ -147,12 +173,15 @@ Preview of the first tests (info_rf as register file, converted using rfs to rfg
 
 [TODO] Usage flow of RFG
 
+- Write the register file scripts
+- Write a top script with top registerfile definition, and add in it (for example by sourcing other scripts) the actual definition
+- Call on the generators to create the outputs
 
 # Porting From RFS XML
 
-As mentioned in previous chapter, the RFS XML files contain so `<repeat>` elements to modelize loops, and some C style `#ifdef ... #else ... #endif` to define if-else control structures.
+As mentioned in previous chapter, the RFS XML files contains some `<repeat>` elements to modelize loops, and some C style `#ifdef ... #else ... #endif` to define if-else control structures.
 
-Using the new syntax, the user can simply use normal TCL control structures, makind the need of such special modelisations obsolete
+Using the new syntax, the user can simply call normal TCL control structures, makind the need of such special modelisations obsolete
 
 ## Repeat 
 
@@ -222,13 +251,13 @@ RFG:
 
 ## Automatic Conversion
 
-Considering that the RFS format is an XML tree, and that the new RFG scripts are also structured like a tree, it is possible to transform an RFS XML tree to and RFG code tree.
+Considering that the RFS format is an XML tree, and that the new RFG scripts are also structured like a tree, it is possible to transform a RFS XML tree to a RFG code tree.
 
-This is easily achievable using an XML Transformation Stylesheet (XSLT)
+This is easily achievable using a XML Transformation Stylesheet (XSLT)
 
 ### RFS XML preparation
 
-Before conversion, the user MUST clean the RFS XML, because a very few things a preventing XML parsing from conversion tool:
+Before conversion, the user MUST clean the RFS XML, because a very few things a preventing correct XML parsing:
 
 - `reset=DEFINE` must be converted to `reset="DEFINE"`
 
