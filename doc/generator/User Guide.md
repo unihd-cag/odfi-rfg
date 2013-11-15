@@ -202,7 +202,7 @@ RFG:
 
     }
 
-    ## Alternative: This ::repeat function is not standard TCL, but convinient because the for loop syntax is not so great
+    ## Alternative: This ::repeat function is not standard TCL, but convenient because the for loop syntax is not so great
     ::repeat 8 {
 
         # $i variable is implicit, and contains the actual offset
