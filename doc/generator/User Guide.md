@@ -173,8 +173,12 @@ Preview of the first tests (info_rf as register file, converted using rfs to rfg
 
 [TODO] Usage flow of RFG
 
+Tool location:
+    
+    http://webserver.ziti.uni-heidelberg.de/wiki/index.php/ODFI_Tools
+
 - Write the register file scripts
-- Write a top script with top registerfile definition, and add in it (for example by sourcing other scripts) the actual definition
+- Write a top script with top registerfile definition, and add the actual definition (for example by sourcing other scripts)
 - Call on the generators to create the outputs
 
 # Porting From RFS XML
