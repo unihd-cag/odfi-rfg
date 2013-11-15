@@ -1,0 +1,56 @@
+#!/usr/bin/env tclsh8.5
+
+
+## Pacakges Loading
+###################
+set rfgVersion [package require osys::rfg]
+package require osys::rfg::xmlgenerator 
+
+puts "Welcome to RFG: $rfgVersion"
+
+
+
+## RFG SCript path
+##########################
+
+set rfgScript [info script]
+
+puts "RFG script is at: $rfgScript"
+
+## Local Script input script 
+##########################
+set definitionScript ""
+if {[llength $::argv] >0} {
+
+    set definitionScript [lindex $argv 0]
+}
+
+puts "Definition Script: $definitionScript"
+
+## Check definition script 
+if {![file exists $definitionScript]} {
+    odfi::common::logError "Ćould not find Registerfile definition script: $definitionScript"
+    exit -1
+}
+
+
+## Source definitions 
+###########################
+source $definitionScript
+
+
+## XML Output
+######################
+
+foreach rf [itcl::find objects -isa osys::rfg::RegisterFile ] {
+
+    set xmlgenerator [::new osys::rfg::xmlgenerator::XMLGenerator #auto $rf]
+
+
+    puts [$xmlgenerator produce]
+
+}
+
+
+
+

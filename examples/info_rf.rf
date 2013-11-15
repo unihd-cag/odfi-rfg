@@ -1,0 +1,76 @@
+#!/usr/bin/env rfg
+
+
+## Create Register File
+osys::rfg::registerFile info_rf {
+
+    group info_rf {
+
+        register driver {
+
+            field version {
+
+                ## Width Declaration Examples
+
+                # verbose language bit(s) or byte(s) definition
+                it is 32 bits wide
+                it is 2 bytes wide 
+
+                # Direct variable set
+                width 16
+
+                ## Rights Declaration Examples
+
+                # verbose language
+                it is software readable
+                it is software writable,readable
+                it is hardware readable
+
+                # Direct variable set
+                software r w
+                hardware r
+
+                ## Reset value 
+                reset 0x12abcd
+
+                ## Other language possibilities (non implemented, but could be possible)
+                #with software readable
+                #with 32 bits wide
+                #with 32 bits
+                #is 32 bits
+            }
+        }
+
+        register node {
+
+            field id {
+
+                width 16
+
+                
+            }
+
+            field guid {
+
+                width 24
+                reset 0x12abcd
+
+                software r w
+                hardware r
+
+            }
+
+            field vpids {
+
+                width 16
+
+            }
+
+        }
+
+    }
+
+    source /path/to/group/definition
+
+
+}

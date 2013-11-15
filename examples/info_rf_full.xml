@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<regroot name="info_rf">																<!-- a regroot is a second hierarchy level in RF -->
+	<reg64 name="driver">												<!-- a 64 Bit register accessable with a unique address -->
+		<hwreg name="ver" width="32" sw="ro" hw="" reset="32'd18253" />	<!-- a field inside a 64 Bit register -->
+	</reg64>
+	<reg64 name="node">													<!-- a 64 Bit register accessable with a unique address -->
+		<hwreg name="guid" width="24" sw="rw" hw="ro" reset="24'h12abcd" />
+		<hwreg name="id" width="16" sw="rw" hw="ro" sw_written="2"  reset="16'h0" />
+		<hwreg name="vpids" width="16" sw="ro" hw="" reset="NUM_VPIDS" />
+	</reg64>
+	<reg64 name="management_sw">
+		<hwreg name="cfg_ip" width="32" sw="rw" hw="" reset="32'h0"
+			desc="IP address of the backend process that started the latest enumeration"/>
+		<hwreg name="enum_cnt" width="8" sw="rw" hw="" reset="8'h0"
+			desc="Count that specifies the latest enumeration attempt that reached this node"/>
+		<hwreg name="cfg_count" width="8" sw="rw" hw="" reset="8'h0"
+			desc="Count that specifies the latest configuration attempt that reached this node"/>
+		<reserved width="15"/>
+		<hwreg name="backend" width="1" sw="rw" hw="" reset="1'h0" desc="This bit is set on nodes that currently have a backend enumeration or configuration attempt running"/>
+	</reg64>
+
+	<reg64 name="ip_addresses" desc = "This register holds the primary IP address of the node as well as the IP address given to the EXTOLL interface (if any). Both registers are initialized by node system software.">
+		<hwreg name="primary_ip_address" width="32" sw="rw" hw="" reset="32'h0"
+			desc="Primary IP address of the node (in network byte order). It can be used to get the hostname of the node using a reverse DNS lookup" />
+		<hwreg name="extoll_ip_address"  width="32" sw="rw" hw="" reset="32'h0"
+			desc="IP address of the EXTOLL interface (in network byte order). Usefull for ARP implementation over EXTOLL." />
+	</reg64>
+
+	<reg64 name="mgt_ip_addresses" desc="This register should be set by system software and give directions to find the primary management entity in the system.">
+		<hwreg name="primary_mgt_ip_address" width="32" sw="rw" hw="" reset="32'h0"
+			desc="The EXTOLL Node ID of the primary management ID for this node." />
+		<hwreg name="extoll_mgt_ip_address"  width="32" sw="rw" hw="" reset="32'h0"
+			desc="The IP Address of the primary management ID for this node." />
+	</reg64>
+	<reg64 name="tsc" desc="This register implements the EXTOLL time stamp counter (TSC). The counter is incremented at every clock cycle. A software write to the register loads the counter with the given value. In addition, the counter can be set from the global interrupt hardware to implement a globally sychronized time source.">
+#ifdef ASIC
+			<hwreg counter="1" width="64" sw="rw" hw="rw" hw_wen="1"/>
+#else
+			<hwreg counter="1" width="48" sw="rw" hw="rw" hw_wen="1"/>
+#endif
+	</reg64>
+	<reg64 name="tsc_global_load_value" desc="This register specifies the value the TSC register will be loaded with, in case of an global interrupt.">
+#ifdef ASIC
+			<hwreg name="tsc_data" width="64" sw="rw" hw="ro"/>
+#else
+			<hwreg name="tsc_data" width="48" sw="rw" hw="ro"/>
+#endif
+	</reg64>
+	<repeat loop="8" name="scratchpad">
+		<reg64 name="scratchpad" desc="This register is one entry of the 64 byte scratchpad space offered by EXTOLL.">
+			<hwreg name="data" width="64" sw="rw" hw="" reset="64'h0" desc="Scratchpad data."/>
+		</reg64>
+	</repeat>
+	<reg64 name="tsc_global_load_enable" desc="Enable/Disable TSC loading from the 4 global interrupt sources and control re-init of the timer interrupt logic from global interrupts">
+	  <hwreg name="tsc_load_en_irq0" width="1" sw="rw" hw="ro" desc="Enable global interrupt 0 to load the tsc with the value from the tsc_global_load_value register"/>
+	  <hwreg name="tsc_load_en_irq1" width="1" sw="rw" hw="ro" desc="Enable global interrupt 1 to load the tsc with the value from the tsc_global_load_value register"/>
+	  <hwreg name="tsc_load_en_irq2" width="1" sw="rw" hw="ro" desc="Enable global interrupt 2 to load the tsc with the value from the tsc_global_load_value register"/>
+	  <hwreg name="tsc_load_en_irq3" width="1" sw="rw" hw="ro" desc="Enable global interrupt 3 to load the tsc with the value from the tsc_global_load_value register"/>
+	  <reserved width="4"/>
+  	  <hwreg name="global_irq_reinit_en0" width="1" sw="rw" hw="ro" desc="Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"/>
+	  <hwreg name="global_irq_reinit_en1" width="1" sw="rw" hw="ro" desc="Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"/>
+	  <hwreg name="global_irq_reinit_en2" width="1" sw="rw" hw="ro" desc="Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"/>
+	  <hwreg name="global_irq_reinit_en3" width="1" sw="rw" hw="ro" desc="Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"/>
+
+	</reg64>
+	
+	<reg64 name="timer_interrupt" tdg="timer_interrupt" desc="Control the integrated timer." >
+	  <hwreg name="timer_interrupt_period" width="48" sw="rw" hw="ro" desc="The period of the timer in clock cycles. Timer will count down from this value to zero and fire."/>
+	  <hwreg name="timer_interrupt_enable" width="1" sw="rw" hw="rw" sw_written="1" hw_wen="1" desc="Set this bit to one to enable the logic. Will be reset to 0 if a one-shot has occured."/>
+	  <hwreg name="timer_interrupt_one_shot" width="1" sw="rw" hw="ro" desc="Set this bit to one, to run timer logic in one-shot logic, i.e. once an interrupt has fired wait. 
+										 Otherwise logic will run in recurring mode and fire again after period cycles."/>
+	  <reserved width="6"/>
+	  <hwreg name="timer_interrupt_toggle" te="timer_interrupt" width="1" sw="ro" hw="wo" desc="Toggles everytime an interrupt is fired."/>
+	</reg64> 
+	
+</regroot>
+
