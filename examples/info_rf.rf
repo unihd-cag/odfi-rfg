@@ -70,7 +70,7 @@ osys::rfg::registerFile info_rf {
 
     }
 
-    source /path/to/group/definition
+    #source /path/to/group/definition
 
 
 }
