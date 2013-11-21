@@ -96,6 +96,7 @@ namespace eval osys::rfg::xmlgenerator {
             set reset "reset=\"[$field reset]\""
 
             ## Output 
+            ##odfi::common::println "<Field name=\"[$field name]\"  width=\"[$field width]\" $reset [join $rightsString]/>"  $out 
             odfi::common::println "<Field name=\"[$field name]\"  width=\"[$field width]\" $reset >"  $out 
             odfi::common::printlnIndent
             $field onEachAttributes {
