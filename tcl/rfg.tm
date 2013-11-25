@@ -9,7 +9,7 @@ namespace eval osys::rfg {
     ##########################
     ## Common Types
     #########################
-    
+  
     ## This class contains the base informations for a RF modelisation like name etc...
     itcl::class Common {
 
@@ -138,17 +138,10 @@ namespace eval osys::rfg {
                     $node onEachRegister {
                         lappend groupsFifo $node $it
                     }
-                    
+                   
                 }
-
             }
-           
-
-           
-
-
         }
-
     }
 
     ############################
@@ -209,7 +202,6 @@ namespace eval osys::rfg {
     #####################
     itcl::class Attributes {
         inherit Common 
-        #public variable attr_list
         odfi::common::classField public attr_list {}
         constructor {cName cClosure} {Common::constructor $cName} {
 
@@ -218,14 +210,11 @@ namespace eval osys::rfg {
         }
         
         public method addAttribute {fname args} {
-            set a {}
-            if { [string length $args] == 0} {
-                lappend a $fname
+            if { [llength $args] == 0} {
+                lappend attr_list $fname
             } else {
-                lappend a $fname 
-                lappend a $args
-            }
-            lappend attr_list $a                  
+                lappend attr_list [list $fname [lindex $args 0]]
+            }                
         }
     }
 
@@ -274,31 +263,6 @@ namespace eval osys::rfg {
 
             }
         }
-    
-
-
-
-        ## Set Software rights 
-        public method software args {
-
-            foreach right $args {
-                set rights [odfi::list::arrayConcat $rights software $right]
-            }
-
-        }
-
-        ## Set hardware rights 
-        public method hardware args {
-            
-            foreach right $args {
-                set rights [odfi::list::arrayConcat $rights hardware $right]
-            }
-
-        }
-
-        ## Reset 
-        #######################
-
 
         ## Language
         ######################
@@ -377,26 +341,20 @@ namespace eval osys::rfg {
         return [::new RegisterFile ::$name $name $closure]
 
     }
+    proc attributeFunction {fname} {  
+        proc $fname args {
+            uplevel 1 addAttribute [lindex [info level 0] 0] $args 
+        }    
+    }  
 
     itcl::class RegisterFile {
         inherit Group
-
- 
-
         ## Constructor
         ## Call the parent Group constructor with empty closure, otherwise code won't see this registerfile special functions
         constructor {cName cClosure} {Group::constructor $cName {}} {
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
-
-
-
         }
-
-        
-
     }
-
-
 }

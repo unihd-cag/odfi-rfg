@@ -18,6 +18,16 @@ namespace eval osys::rfg::xmlgenerator {
             set registerFile $cRegisterFile
         }
 
+        public method writeDescription {out object} {
+            if {[$object description] != ""} {
+                odfi::common::println "<Description>"  $out
+                odfi::common::printlnIndent
+                odfi::common::println "<!\[CDATA\[[$object description]\]\]>"  $out
+                odfi::common::printlnOutdent            
+                odfi::common::println "</Description>"  $out
+            }
+        }
+
         public method produce args {
 
 
@@ -26,13 +36,7 @@ namespace eval osys::rfg::xmlgenerator {
 
             odfi::common::println "<RegisterFile name=\"[$registerFile name]\">"  $out 
             odfi::common::printlnIndent
-            if {[$registerFile description] != ""} {
-                odfi::common::println "<Description>"  $out
-                odfi::common::printlnIndent
-                odfi::common::println "<!\[CDATA\[[$registerFile description]\]\]>"  $out
-                odfi::common::printlnOutdent            
-                odfi::common::println "</Description>"  $out
-            }
+            writeDescription $out $registerFile
             ## Write Groups 
             $registerFile onEachGroup {
                 writeGroup $out $it
@@ -63,13 +67,7 @@ namespace eval osys::rfg::xmlgenerator {
 
             odfi::common::println "<Group name=\"[$group name]\">"  $out 
             odfi::common::printlnIndent
-            if {[$group description] != ""} {
-                odfi::common::println "<Description>"  $out
-                odfi::common::printlnIndent
-                odfi::common::println "<!\[CDATA\[[$group description]\]\]>"  $out
-                odfi::common::printlnOutdent            
-                odfi::common::println "</Description>"  $out
-            }
+            writeDescription $out $group
             ## Write Groups 
             $group onEachGroup {
                 writeGroup $out $it
@@ -83,20 +81,13 @@ namespace eval osys::rfg::xmlgenerator {
             odfi::common::printlnOutdent
             odfi::common::println "</Group>"  $out 
 
-
         }
 
         public method writeRegister {out register} {
 
             odfi::common::println "<Register name=\"[$register name]\">"  $out 
             odfi::common::printlnIndent
-            if {[$register description] != ""} {
-                odfi::common::println "<Description>"  $out
-                odfi::common::printlnIndent
-                odfi::common::println "<!\[CDATA\[[$register description]\]\]>"  $out
-                odfi::common::printlnOutdent            
-                odfi::common::println "</Description>"  $out
-            }
+            writeDescription $out $register
             ## Write Fields
             $register onEachField {
                 writeField $out $it
@@ -116,13 +107,7 @@ namespace eval osys::rfg::xmlgenerator {
             ## Output 
             odfi::common::println "<Field name=\"[$field name]\"  width=\"[$field width]\" $reset >"  $out 
             odfi::common::printlnIndent
-            if {[$field description] != ""} {
-                odfi::common::println "<Description>"  $out
-                odfi::common::printlnIndent
-                odfi::common::println "<!\[CDATA\[[$field description]\]\]>"  $out
-                odfi::common::printlnOutdent            
-                odfi::common::println "</Description>"  $out
-            }
+            writeDescription $out $field
             $field onEachAttributes {
                     writeAttributes $out $it        
             }
@@ -134,16 +119,10 @@ namespace eval osys::rfg::xmlgenerator {
                        
             odfi::common::println "<Attributes for=\"[$attributes name]\">"  $out
             odfi::common::printlnIndent
-            if {[$attributes description] != ""} {
-                odfi::common::println "<Description>"  $out
-                odfi::common::printlnIndent
-                odfi::common::println "<!\[CDATA\[[$attributes description]\]\]>"  $out
-                odfi::common::printlnOutdent            
-                odfi::common::println "</Description>"  $out
-            }
+            writeDescription $out $attributes            
             foreach element [$attributes attr_list] { ## write each attribute
                if {[llength $element] == 2} {
-                    odfi::common::println "<Attribute name=\"[lindex $element 0]\"> [lindex $element 1] </Attribute>"  $out
+                    odfi::common::println "<Attribute name=\"[lindex $element 0]\">[lindex $element 1]</Attribute>"  $out
                } else {
                     odfi::common::println "<Attribute name=\"$element\"/>"  $out
                }
