@@ -908,8 +908,31 @@ object RamBlock {
 /**
  * Represents a value entry in a RAM
  */
-class RamEntry(var ramBlock: RamBlock, var index: Integer) {
+class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddressed {
 
+  // Resolve address from ramblock base address
+  this.name = s"${ramBlock.name}[$index]"
+  
+  // Addresses are always 64 bits (8bytes) aligned
+  this.absoluteAddress = ramBlock.absoluteAddress + (index.toLong * 8 )
+  
+  /**
+   * @group rf
+   */
+  var valueBuffer = RegisterTransactionBuffer(this)
+
+  def value = this.valueBuffer
+
+  /**
+   *
+   * Enables register.value = Long  syntax
+   *
+   * @group rf
+   */
+  def value_=(data: Long) = this.valueBuffer.set(data)
+  
+  
+  
 }
 
 @xelement(name = "field")
@@ -958,20 +981,76 @@ class RamField extends ElementBuffer with Named {
     newField
  
   }
+ 
+  
+  def value: Long = {
+
+    // Read
+    var actualValue = entry.value
+
+    // Extract
+    TeaBitUtil.extractBits(actualValue, offset, offset + width - 1)
+  }
+  
+  /**
+   * Returns the value of this field based on the actual memory value of the register, with no read
+   */
+  def memoryValue : Long = {
+    
+    // Read
+    var actualValue = entry.value
+
+    // Extract
+    TeaBitUtil.extractBits(actualValue.data, offset, offset + width - 1)
+    
+  }
+
+  /**
+   * Set the value of this field:
+   *
+   * - Read register value
+   * - Modify field bits
+   * - write register value back
+   *
+   * @group rf
+   */
+  def value_=(newData: java.lang.Long) = {
+
+    // Read
+    var actualValue: Long = entry.value
+
+    var scalResult = Field.setBits(actualValue, offset, offset + (width - 1), newData)
+
+    
+    // Modify / Write
+    this.entry.value = scalResult
+    
+   // this.@->("value.updated")
+
+    ///println(s"Now val is ${java.lang.Long.toHexString(this.parentRegister.value)}")
+
+  }
+  
   
   override def clone: RamField = {
 
     // Create
     var field = new RamField
 
-    // Width
+    
+    // Name 
     field.name = this.name.data
-
+    
+    
+    // Width
+    field.width = this.width
+    
     // Offset
     field.offset = this.offset
 
     // Parent
     field.parent = this.parent
+    
     
 
     field

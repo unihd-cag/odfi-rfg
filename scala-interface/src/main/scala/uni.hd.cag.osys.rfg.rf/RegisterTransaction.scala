@@ -24,7 +24,7 @@ class RegisterTransactionBuffer (
         /*
             The register this buffer is operating on
         */
-        var register : Register
+        var target : NamedAddressed
 
     ) extends LongBuffer with ListeningSupport {
 
@@ -51,11 +51,11 @@ class RegisterTransactionBuffer (
 
             case null =>
 
-                    throw new RegisterTransactionException(register,s"No initiator provided in current transaction, cannot used registerfile without a node initiator")
+                    throw new RegisterTransactionException(target,s"No initiator provided in current transaction, cannot used registerfile without a node initiator")
 
             case initiator if (!initiator.isInstanceOf[RegisterFileHost]) =>
 
-                    throw new RegisterTransactionException(register,s"The transaction initiator is not a Node type (Detected: ${initiator.getClass.getName}), which is mandatory to be able to send read/writes to the correct node")
+                    throw new RegisterTransactionException(target,s"The transaction initiator is not a Node type (Detected: ${initiator.getClass.getName}), which is mandatory to be able to send read/writes to the correct node")
 
             // Success :)
             case _ =>
@@ -75,7 +75,7 @@ class RegisterTransactionBuffer (
         //---------------
 
         du( "node" -> this.getContextNode)
-        du( "register" -> this.register)
+        du( "target" -> this.target)
 
         // Delegate To Parent
         //--------------
@@ -91,7 +91,10 @@ class RegisterTransactionBuffer (
         if (du.value==null) {
 
             //println(s"Reading register: ${this.register.name} , got no value, so setting to reset: ${this.register.getResetValue}")
-            du.value = this.register.getResetValue.toString
+            du.value = this.target match {
+              case r: Register => r.getResetValue.toString
+              case _ => "0"
+            }
 
         }
         super.importDataUnit(du)
@@ -133,7 +136,7 @@ class RegisterTransactionBuffer (
         //---------------
 
         du( "node" -> this.getContextNode)
-        du( "register" -> this.register)
+        du( "target" -> this.target)
 
 
         // Delegate to parent
@@ -156,7 +159,7 @@ class RegisterTransactionBuffer (
 */
 object RegisterTransactionBuffer {
 
-    def apply(register : Register) = new RegisterTransactionBuffer(register)
+    def apply(target : NamedAddressed) = new RegisterTransactionBuffer(target)
 
     // Conversion to/from long
     implicit def convertValueBufferToLong( b : RegisterTransactionBuffer) : Long = {b.pull();b.data }
@@ -165,7 +168,7 @@ object RegisterTransactionBuffer {
 }
 
 
-class RegisterTransactionException( register: Register,message : String)  extends Exception(s"On Register: ${register.name}, happened: $message") {
+class RegisterTransactionException(target : NamedAddressed,message : String)  extends Exception(s"On Register: ${target.name}, happened: $message") {
 
 
 
