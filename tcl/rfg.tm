@@ -217,8 +217,8 @@ namespace eval osys::rfg {
         ## Reset value
         odfi::common::classField public reset 0
 
-        ## Rights 
-        odfi::common::classField public rights {}
+        ## Attributes 
+        odfi::common::classField public attributes {}
 
 
 
@@ -232,7 +232,9 @@ namespace eval osys::rfg {
         ######################
 
         ## Set Software rights 
-        public method software args {
+        public method software closure {
+
+            lappend attributes [::new Attributes #auto "software" $closure]
 
             foreach right $args {
                 set rights [odfi::list::arrayConcat $rights software $right]

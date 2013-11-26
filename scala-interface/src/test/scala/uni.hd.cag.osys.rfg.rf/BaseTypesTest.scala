@@ -2,7 +2,8 @@ package uni.hd.cag.osys.rfg.rf
 
 import com.idyria.osi.ooxoo.core.buffers.structural._
 import org.scalatest._
-import com.idyria.utils.java.bit.TeaBitUtil
+
+
 class BaseTypesTest extends FeatureSpec with ShouldMatchers with GivenWhenThen {
 
   feature("Verilog Value") {
