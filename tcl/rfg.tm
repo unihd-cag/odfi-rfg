@@ -30,13 +30,20 @@ namespace eval osys::rfg {
     ######################
     itcl::class Group {
         inherit Common
+        
+        ## maximal allowed register size                 
+        odfi::common::classField public register_size 64
+        
+        ## list for address mapping
+        odfi::common::classField public address_list {}
 
         ## Groups : List of subgroups
         public variable groups {}
 
         ## Registers : List of registers 
         public variable registers {}
-
+        
+        public variable address 0
         constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 
@@ -81,10 +88,22 @@ namespace eval osys::rfg {
 
             ## Create 
             set newRegister [::new [namespace parent]::Register $name.$rName.#auto $rName $closure]
-
+            
             ## Add to list
             lappend registers $newRegister 
-
+            
+            ## Check Registers size
+            set register_width 0            
+            $newRegister onEachField {
+                incr register_width [$it width]
+            }
+            if {$register_width > $register_size} {
+                error "The register $newRegister is $register_width wide and exceeds the allowed $register_size bits!"
+            }
+            
+            ## calculate address
+            lappend address_list [list $address $newRegister]
+            incr address [expr "$register_size/8"] 
             ## Return 
             return $newRegister 
 
