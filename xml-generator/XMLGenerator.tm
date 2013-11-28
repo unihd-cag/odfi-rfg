@@ -62,7 +62,6 @@ namespace eval osys::rfg::xmlgenerator {
 
         }
 
-
         public method writeGroup {out group} {
 
             odfi::common::println "<Group name=\"[$group name]\">"  $out 

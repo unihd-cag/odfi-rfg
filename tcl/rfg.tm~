@@ -24,26 +24,29 @@ namespace eval osys::rfg {
         }
 
     }
+    #####################
+    ## Address
+    #####################
+    itcl::class Address {
         
+        odfi::common::classField public address 0
+
+        odfi::common::classField public size 0
+
+    }    
     ######################
     ## Group 
     ######################
-    itcl::class Group {
-        inherit Common
+    itcl::class Group {       
+        inherit Common Address
         
         ## maximal allowed register size                 
         odfi::common::classField public register_size 64
         
-        ## list for address mapping
-        odfi::common::classField public address_list {}
-
-        ## Groups : List of subgroups
-        public variable groups {}
-
-        ## Registers : List of registers 
-        public variable registers {}
+        ## Components
+         odfi::common::classField public components {}        
         
-        public variable address 0
+        public variable address_int 0
         constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 
@@ -61,23 +64,40 @@ namespace eval osys::rfg {
             set newGroup [::new [namespace current] $name.$gName.#auto $gName $closure]
  
             ## Add to list
-            lappend groups $newGroup 
-
-            ## Return 
+            lappend components $newGroup
+            ## calculate size
+            set size_int 0
+            
+            $newGroup onEachComponent {
+                incr size_int [$it size]
+            }
+            ## set address calculate new address 
+            $newGroup address $address_int
+            $newGroup size $size_int
+            incr address_int $size_int            
+            puts "Size $newGroup : [$newGroup size]"
+            puts "Address $newGroup : [$newGroup address]"
+            ## Return
             return $newGroup 
 
         }
 
+        public method onEachComponent closure {
+            foreach it $components {
+                odfi::closures::doClosure $closure 1
+            }        
+        }
+
         public method onEachGroup closure {
 
-            foreach it $groups {
-
+            foreach it $components {
                 #uplevel "set it $it"
-                odfi::closures::doClosure $closure 1
+                if {[$it isa osys::rfg::Group]} {
+                    odfi::closures::doClosure $closure 1
+                }
             }
 
         }
-
 
         ## Registers 
         ###################
@@ -90,22 +110,24 @@ namespace eval osys::rfg {
             set newRegister [::new [namespace parent]::Register $name.$rName.#auto $rName $closure]
             
             ## Add to list
-            lappend registers $newRegister 
-            
+            lappend components $newRegister 
             ## Check Registers size
             set register_width 0            
             $newRegister onEachField {
                 incr register_width [$it width]
             }
+            
             if {$register_width > $register_size} {
                 error "The register $newRegister is $register_width wide and exceeds the allowed $register_size bits!"
             }
             
             ## calculate address
-            lappend address_list [list $address $newRegister]
-            puts $address_list
-            incr address [expr "$register_size/8"] 
+            $newRegister address $address_int
+            $newRegister size 8            
+            ##lappend address_list [list $address $newRegister]
+            incr address_int [expr "$register_size/8"] 
             ## Return 
+            ##puts $newRegister
             return $newRegister 
 
 
@@ -113,10 +135,10 @@ namespace eval osys::rfg {
 
         public method onEachRegister closure {
 
-            odfi::list::each $registers {
-
-                odfi::closures::doClosure $closure 1
-
+            odfi::list::each $components {
+                if {[$it isa osys::rfg::Register]} {
+                    odfi::closures::doClosure $closure 1
+                }
 
             }
 
@@ -168,7 +190,7 @@ namespace eval osys::rfg {
     ## Register 
     #############################
     itcl::class Register {
-        inherit Common 
+        inherit Common Address
         
         ## List of fields
         public variable fields {}
@@ -361,10 +383,14 @@ namespace eval osys::rfg {
         return [::new RegisterFile ::$name $name $closure]
 
     }
-    proc attributeFunction {fname} {  
-        proc $fname args {
-            uplevel 1 addAttribute [lindex [info level 0] 0] $args 
-        }    
+
+    proc attributeFunction {fname} {
+  
+        set res "proc $fname args {
+            uplevel 1 addAttribute [string trimleft $fname ::] \$args 
+        }"
+        uplevel 1 $res 
+ 
     }  
 
     itcl::class RegisterFile {
