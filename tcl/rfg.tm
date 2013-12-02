@@ -37,9 +37,6 @@ namespace eval osys::rfg {
         public method addOffset {object offset} {
             $object onEachComponent {
                 $it absolute_address [expr "[$it address] + $offset"]
-                ##puts $it
-                ##puts "Addresse: [$it absolute_address]"
-                ##puts "Offset: $offset"
                 if {[$it isa osys::rfg::Group]} {
                     addOffset $it [$it absolute_address]
                 }          
