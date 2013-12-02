@@ -16,7 +16,8 @@ namespace eval osys::rfg {
         odfi::common::classField public name ""
 
         odfi::common::classField public description ""
-
+        
+        odfi::common::classField public parent ""
 
         constructor {cName} {
 
@@ -30,9 +31,26 @@ namespace eval osys::rfg {
     itcl::class Address {
         
         odfi::common::classField public address 0
-
+        odfi::common::classField public absolute_address 0
         odfi::common::classField public size 0
 
+        public method addOffset {object offset} {
+            $object onEachComponent {
+                $it absolute_address [expr "[$it address] + $offset"]
+                puts $it
+                puts "Addresse: [$it absolute_address]"
+                puts "Offset: $offset"
+                if {[$it isa osys::rfg::Group]} {
+                    addOffset $it [$it absolute_address]
+                }          
+            }
+        }
+        public method getAbsoluteAddress {} {           
+            ## if parent is Register file calculate absolute addresses
+            if {[[$this parent] isa  osys::rfg::RegisterFile]} {
+                addOffset $this 0               
+            }
+        }
     }    
     ######################
     ## Group 
@@ -46,9 +64,8 @@ namespace eval osys::rfg {
         ## Components
          odfi::common::classField public components {}        
         
-        public variable address_int 0
+        public variable address_counter 0
         constructor {cName cClosure} {Common::constructor $cName} {
-
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
@@ -67,16 +84,10 @@ namespace eval osys::rfg {
             lappend components $newGroup
             ## calculate size
             set size_int 0
-            
-            $newGroup onEachComponent {
-                incr size_int [$it size]
-            }
-            ## set address calculate new address 
-            $newGroup address $address_int
-            $newGroup size $size_int
-            incr address_int $size_int            
-            puts "Size $newGroup : [$newGroup size]"
-            puts "Address $newGroup : [$newGroup address]"
+                
+            $newGroup address $size
+            incr size [$newGroup size]
+            $newGroup parent $this                            
             ## Return
             return $newGroup 
 
@@ -122,12 +133,12 @@ namespace eval osys::rfg {
             }
             
             ## calculate address
-            $newRegister address $address_int
-            $newRegister size 8            
-            ##lappend address_list [list $address $newRegister]
-            incr address_int [expr "$register_size/8"] 
+            $newRegister address $size
+            $newRegister size [expr "$register_size/8"]            
+            incr size [expr "$register_size/8"]
             ## Return 
             ##puts $newRegister
+            $newRegister parent $this
             return $newRegister 
 
 
