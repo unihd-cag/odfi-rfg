@@ -62,21 +62,28 @@ namespace eval osys::rfg::xmlgenerator {
 
         }
 
-
         public method writeGroup {out group} {
 
-            odfi::common::println "<Group name=\"[$group name]\">"  $out 
+            odfi::common::println "<Group name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
+                                    absolute_address=\"0x[format %X [$group absolute_address]]\" size=\"[$group size]\">"  $out 
             odfi::common::printlnIndent
             writeDescription $out $group
-            ## Write Groups 
-            $group onEachGroup {
-                writeGroup $out $it
-            }
+            ## Write Groups and Registers
+            $group onEachComponent {
+                if {[$it isa osys::rfg::Group]} {
+                    writeGroup $out $it                
+                } else {
+                    writeRegister $out $it
+                }
+            } 
+            ##$group onEachGroup {
+            ##    writeGroup $out $it
+            ##}
 
             ## Write Registers 
-            $group onEachRegister {
-                writeRegister $out $it
-            }
+            ##$group onEachRegister {
+            ##    writeRegister $out $it
+            ##}
 
             odfi::common::printlnOutdent
             odfi::common::println "</Group>"  $out 
@@ -85,7 +92,8 @@ namespace eval osys::rfg::xmlgenerator {
 
         public method writeRegister {out register} {
 
-            odfi::common::println "<Register name=\"[$register name]\">"  $out 
+            odfi::common::println "<Register name=\"[$register name]\" relative_address=\"[$register address]\" \
+                                    absolute_address=\"[$register absolute_address]\" size=\"[$register size]\">"  $out 
             odfi::common::printlnIndent
             writeDescription $out $register
             ## Write Fields
