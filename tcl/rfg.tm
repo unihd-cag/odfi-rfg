@@ -34,18 +34,20 @@ namespace eval osys::rfg {
         odfi::common::classField public absolute_address 0
         odfi::common::classField public size 0
 
-        public method addOffset {object offset} {
+        public method addOffset {object} {
             $object onEachComponent {
-                $it absolute_address [expr "[$it address] + $offset"]
+                $it absolute_address [expr "[$it address] + [$object absolute_address]"]
                 if {[$it isa osys::rfg::Group]} {
-                    addOffset $it [$it absolute_address]
+                    addOffset $it 
                 }          
             }
         }
         public method getAbsoluteAddress {} {           
             ## if parent is Register file calculate absolute addresses
-            if {[[$this parent] isa  osys::rfg::RegisterFile]} {
-                addOffset $this 0               
+            puts $this            
+            puts [$this parent]
+            if {[$this parent] == ""} {
+                addOffset $this               
             }
         }
     }    

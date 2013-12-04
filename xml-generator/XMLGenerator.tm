@@ -34,7 +34,8 @@ namespace eval osys::rfg::xmlgenerator {
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
 
-            odfi::common::println "<RegisterFile name=\"[$registerFile name]\">"  $out 
+            odfi::common::println "<RegisterFile name=\"[$registerFile name]\" relative_address=\"0x[format %X [$registerFile address]]\" \
+                                    absolute_address=\"0x[format %X [$registerFile absolute_address]]\" size=\"[$registerFile size]\">"  $out 
             odfi::common::printlnIndent
             writeDescription $out $registerFile
             ## Write Groups 

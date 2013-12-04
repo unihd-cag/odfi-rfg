@@ -34,7 +34,8 @@ namespace eval osys::rfg::xmlgenerator {
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
 
-            odfi::common::println "<RegisterFile name=\"[$registerFile name]\">"  $out 
+            odfi::common::println "<RegisterFile name=\"[$registerFile name]\" relative_address=\"0x[format %X [$group address]]\" \
+                                    absolute_address=\"0x[format %X [$group absolute_address]]\" size=\"[$group size]\">"  $out 
             odfi::common::printlnIndent
             writeDescription $out $registerFile
             ## Write Groups 
@@ -76,14 +77,6 @@ namespace eval osys::rfg::xmlgenerator {
                     writeRegister $out $it
                 }
             } 
-            ##$group onEachGroup {
-            ##    writeGroup $out $it
-            ##}
-
-            ## Write Registers 
-            ##$group onEachRegister {
-            ##    writeRegister $out $it
-            ##}
 
             odfi::common::printlnOutdent
             odfi::common::println "</Group>"  $out 
