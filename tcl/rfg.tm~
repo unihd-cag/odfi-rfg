@@ -25,6 +25,7 @@ namespace eval osys::rfg {
         }
 
     }
+
     #####################
     ## Address
     #####################
@@ -44,13 +45,12 @@ namespace eval osys::rfg {
         }
         public method getAbsoluteAddress {} {           
             ## if parent is Register file calculate absolute addresses
-            puts $this            
-            puts [$this parent]
             if {[$this parent] == ""} {
-                addOffset $this 0               
+                addOffset $this               
             }
         }
-    }    
+    } 
+   
     ######################
     ## Group 
     ######################
@@ -315,72 +315,6 @@ namespace eval osys::rfg {
 
             }
         }
-
-        ## Language
-        ######################
-
-        ## Configure the object using a special language, like
-        public method it args {
-
-            ## Size
-            ###############
-
-
-            if {[regexp {is\s+([0-9]+)\s+bit(?:s)?\s+wide} "$args" -> nwidth]} {
-
-                ## Size in bits
-                #####################
-
-                width $nwidth
-
-            } elseif {[regexp {is\s+([0-9]+)\s+byte(?:s)?\s+wide} "$args" -> nwidth]} {
-
-                ## Size in bytes
-                #####################
-
-                width [expr $nwidth*8]
-
-            } elseif {[regexp {is\s+([\w]+)?\s+((?:writable,?)?(?:readable,?)?)} "$args" -> readTarget newRights]} {
-
-                ## Global Rights
-                #####################
-                foreach right [split $newRights ,] {
-
-                    switch -exact -- $right {
-                        readable {
-                            set right r
-                        }
-                        writable {
-                            set right w
-                        }
-                        
-                    }
-                    set rights [odfi::list::arrayConcat $rights $readTarget $right]
-                }
-                
-           
-
-            } elseif {[regexp {is\s+([\w]+)?\s+readable} "$args" -> readTarget]} {
-
-                ## Readable Rights
-                #####################
-                set rights [odfi::list::arrayConcat $rights $readTarget r]
-           
-
-            } elseif {[regexp {is\s+([\w]+)?\s+writable} "$args" -> readTarget]} {
-
-                ## Readable Rights
-                #####################
-                set rights [odfi::list::arrayConcat $rights $readTarget w]
-           
-
-            } else {
-
-                odfi::common::logWarn "Configuration of field $name using non supported language sentence: it $args"
-            }
-
-        }
-
     }
 
     #######################
