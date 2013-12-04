@@ -91,7 +91,18 @@ namespace eval osys::rfg {
             return $newGroup 
 
         }
+        public method aligner {bits} {
+            set size [expr "2**$bits"]
+        } 
 
+        public method checker {bits closure} {
+            set start_address $size
+            odfi::closures::doClosure $closure 1
+            set end_address $size
+            if {[expr "$end_address-$start_address"]>[expr "2**$bits"]} {
+                error "The addresspan within the checker in $this is [expr "$end_address-$start_address"] but only [expr "2**$bits"] addresses are allowed!"
+            }  
+        }
         public method onEachComponent closure {
             foreach it $components {
                 odfi::closures::doClosure $closure 1

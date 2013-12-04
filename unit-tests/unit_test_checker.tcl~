@@ -1,0 +1,35 @@
+source ../../tcl/rfg.tm
+source ../../xml-generator/XMLGenerator.tm
+
+set result "No error!!!"
+catch {source unit_test_checker_valid.rf} result
+if {$result != "::extoll_rf"} {
+    puts "unit test (invalid) failed!!!"
+    puts "There should not be an error the valid Registerfile, but error is: "
+    puts "Result: $result"
+} else {
+    puts "unit test (valid) succeeded!!!"
+    set filename "unit_tests_valid.xml"
+    set fileId [open $filename "w"]
+    foreach rf [itcl::find objects -isa osys::rfg::RegisterFile] {
+            $rf getAbsoluteAddress        
+    }
+
+    foreach rf [itcl::find objects -isa osys::rfg::RegisterFile ] {
+        set xmlgenerator [::new osys::rfg::xmlgenerator::XMLGenerator #auto $rf]
+        puts -nonewline $fileId [$xmlgenerator produce]
+    }
+}
+
+set compare_message "The addresspan within the checker in ::osys::rfg::Group::extoll_rf.info_rf.group1 is 4104 but only 4096 addresses are allowed!"
+catch {source unit_test_checker_invalid.rf} result
+
+if {$result == $compare_message} {
+    puts "unit test (invalid) succeeded!!!"
+} else {
+    puts "unit test (invalid) failed!!!"
+    puts "resulting message was:"
+    puts $result
+    puts "expected message was:"
+    puts $compare_message
+}
