@@ -69,6 +69,17 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
 
+        public method registerFile {gName closure} {
+            set newregisterFile [::new [namespace current] $name.$gName.#auto $gName $closure]
+            lappend components $newregisterFile
+
+            $newregisterFile address $size
+            incr size [$newregisterFile size]
+            $newregisterFile parent $this                            
+            ## Return
+            return $newregisterFile 
+        }
+
         ## Groups 
         #################
 
@@ -99,8 +110,6 @@ namespace eval osys::rfg {
             set start_address $size
             odfi::closures::doClosure $closure 1
             set end_address $size
-            puts [expr "2**$bits"]
-            puts [expr "$end_address-$start_address"]
             if {[expr "$end_address-$start_address"]>[expr "2**$bits"]} {
                 error "The addresspan within the checker in $this is [expr "$end_address-$start_address"] but only [expr "2**$bits"] addresses are allowed!"
             }  

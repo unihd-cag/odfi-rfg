@@ -38,16 +38,16 @@ namespace eval osys::rfg::xmlgenerator {
                                     absolute_address=\"0x[format %X [$registerFile absolute_address]]\" size=\"[$registerFile size]\">"  $out 
             odfi::common::printlnIndent
             writeDescription $out $registerFile
-            ## Write Groups 
-            $registerFile onEachGroup {
-                writeGroup $out $it
-            }
 
-            ## Write Registers 
-            $registerFile onEachRegister {
-                writeRegister $out $it
+            ## Write Components
+            $registerFile onEachComponent {
+                if {[$it isa osys::rfg::Group]} {
+                    writeGroup $out $it                
+                } else {
+                    writeRegister $out $it
+                }
             }
-
+ 
             odfi::common::printlnOutdent
             odfi::common::println "</RegisterFile>"  $out 
 
@@ -64,9 +64,13 @@ namespace eval osys::rfg::xmlgenerator {
         }
 
         public method writeGroup {out group} {
-
-            odfi::common::println "<Group name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
-                                    absolute_address=\"0x[format %X [$group absolute_address]]\" size=\"[$group size]\">"  $out 
+            if {[$group isa osys::rfg::RegisterFile]} {
+                odfi::common::println "<RegisterFile name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
+                                        absolute_address=\"0x[format %X [$group absolute_address]]\" size=\"[$group size]\">"  $out
+            } else {
+                odfi::common::println "<Group name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
+                                        absolute_address=\"0x[format %X [$group absolute_address]]\" size=\"[$group size]\">"  $out
+            } 
             odfi::common::printlnIndent
             writeDescription $out $group
             ## Write Groups and Registers
@@ -79,7 +83,11 @@ namespace eval osys::rfg::xmlgenerator {
             } 
 
             odfi::common::printlnOutdent
-            odfi::common::println "</Group>"  $out 
+            if {[$group isa osys::rfg::RegisterFile]} {
+                odfi::common::println "</RegisterFile>"  $out 
+            } else {
+                odfi::common::println "</Group>"  $out 
+            }
 
         }
 

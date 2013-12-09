@@ -69,6 +69,17 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
 
+        public method registerFile {gName closure} {
+            set newregisterFile [::new [namespace parent]::RegisterFile $name.$gName.#auto $gName $closure]
+            lappend components $newregisterFile
+
+            $newregisterFile address $size
+            incr size [$newregisterFile size]
+            $newregisterFile parent $this                            
+            ## Return
+            return $newregisterFile 
+        }
+
         ## Groups 
         #################
 
