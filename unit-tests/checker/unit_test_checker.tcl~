@@ -20,9 +20,11 @@ if {$result != "::extoll_rf"} {
             $rf getAbsoluteAddress        
     }
 
-    foreach rf [itcl::find objects -isa osys::rfg::RegisterFile ] {
-        set xmlgenerator [::new osys::rfg::xmlgenerator::XMLGenerator #auto $rf]
-        puts -nonewline $fileId [$xmlgenerator produce]
+    foreach rf [itcl::find objects -isa osys::rfg::RegisterFile ] {       
+        if {[$rf parent] == ""} {
+            set xmlgenerator [::new osys::rfg::xmlgenerator::XMLGenerator #auto $rf]
+            puts -nonewline $fileId [$xmlgenerator produce]
+        }
     }
 }
 
