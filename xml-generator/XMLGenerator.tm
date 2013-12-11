@@ -92,9 +92,13 @@ namespace eval osys::rfg::xmlgenerator {
         }
 
         public method writeRegister {out register} {
-
-            odfi::common::println "<Register name=\"[$register name]\" relative_address=\"0x[format %X [$register address]]\" \
-                                    absolute_address=\"0x[format %X [$register absolute_address]]\" size=\"[$register size]\">"  $out 
+            if {[$register isa osys::rfg::RamBlock]} {
+                odfi::common::println "<RamBlock name=\"[$register name]\" depth=\"[$register depth]\" relative_address=\"0x[format %X [$register address]]\" \
+                                        absolute_address=\"0x[format %X [$register absolute_address]]\" size=\"[$register size]\">"  $out                         
+            } else {
+                odfi::common::println "<Register name=\"[$register name]\" relative_address=\"0x[format %X [$register address]]\" \
+                                        absolute_address=\"0x[format %X [$register absolute_address]]\" size=\"[$register size]\">"  $out 
+            }
             odfi::common::printlnIndent
             writeDescription $out $register
             ## Write Fields
@@ -103,7 +107,11 @@ namespace eval osys::rfg::xmlgenerator {
             }
 
             odfi::common::printlnOutdent
-            odfi::common::println "</Register>"  $out 
+            if {[$register isa osys::rfg::RamBlock]} {
+                odfi::common::println "</RamBlock>"  $out            
+            } else {
+                odfi::common::println "</Register>"  $out
+            } 
 
 
         }
