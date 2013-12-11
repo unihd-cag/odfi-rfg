@@ -35,8 +35,8 @@ if {$result != "::extoll_rf"} {
     set fileId_compare [open "compare_data/regfile_compare.xml" "w"]
 
     ## write xml
-    puts -nonewline $fileId_xml [::dom::DOMImplementation serialize $xml -method xml -indent true -encoding UTF-8]
-    puts -nonewline $fileId_compare [::dom::DOMImplementation serialize $compare -method xml -indent true -encoding UTF-8]
+    puts -nonewline $fileId_xml [::dom::DOMImplementation serialize $xml -method xml  -encoding UTF-8]
+    puts -nonewline $fileId_compare [::dom::DOMImplementation serialize $compare -method xml  -encoding UTF-8]
     close $fileId_xml
     close $fileId_compare
     puts "xml parsing successfull!"
