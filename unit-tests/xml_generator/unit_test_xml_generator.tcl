@@ -24,12 +24,11 @@ if {$result != "::extoll_rf"} {
         }
     }
     close $fileId
-    puts "xml is written!!!"
+    puts "xml is written!"
     set xml [odfi::dom::buildDocumentFromFile "compare_data/regfile.xml"]
     set compare [odfi::dom::buildDocumentFromFile "compare_data/regfile_compare.xml"] 
-    #odfi::dom::toIndentedString $xml
+    odfi::dom::toIndentedString $xml
     odfi::dom::toIndentedString $compare
-    #set root_xml [$xml documentElement]
     set fileId_xml [open "compare_data/regfile.xml" "w"]
     set fileId_compare [open "compare_data/regfile_compare.xml" "w"]
 
@@ -37,8 +36,14 @@ if {$result != "::extoll_rf"} {
     puts -nonewline $fileId_compare [::dom::DOMImplementation serialize $compare -method xml -indent true -encoding UTF-8]
     close $fileId_xml
     close $fileId_compare
-    exec diff compare_data/regfile.xml compare_data/regfile_compare.xml
-    puts "xml parsing successfull!!!"
+    puts "xml parsing successfull!"
+    catch {exec diff compare_data/regfile.xml compare_data/regfile_compare.xml} result
+    if {$result != ""} {
+        error("unit test failed the generated xml differs from the compare file a diff gives the following error:\n $result")
+    } else {
+        puts "unit test succeeded!"
+    }
+    
 }
 
 
