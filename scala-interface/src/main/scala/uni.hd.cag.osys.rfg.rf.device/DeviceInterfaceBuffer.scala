@@ -24,12 +24,12 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
     // DU Context Informations
     //---------------
 
-    def getNodeAndRegister(du : DataUnit) : Option[(RegisterFileHost , Register)] = {
+    def getNodeAndTarget(du : DataUnit) : Option[(RegisterFileHost , NamedAddressed)] = {
 
-        (du("node") , du("register")) match {
+        (du("node") , du("target")) match {
 
-            case (Some(node),Some(reg))  =>
-                Option(node.asInstanceOf[RegisterFileHost],reg.asInstanceOf[Register])
+            case (Some(node),Some(target))  =>
+                Option(node.asInstanceOf[RegisterFileHost],target.asInstanceOf[NamedAddressed])
             case _ =>
                 None
         }
@@ -43,13 +43,13 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
 
         // Gather context and perform
         //---------------
-        this.getNodeAndRegister(du) match {
+        this.getNodeAndTarget(du) match {
         	
         	// Host is a Device also, map to it instead of global singleton device
         	//----------------
-          	case Some((host : Device,register)) => 
+          	case Some((host : Device,target)) => 
             
-          	  host.readRegister(host.id,register.absoluteAddress) match {
+          	  host.readRegister(host.id,target.absoluteAddress) match {
                     case Some(value) => du.value = value.toString
                     case _ =>
                 }
@@ -57,8 +57,8 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
           	  
         	// Host and Register, Use global Singleton Device
         	//--------
-            case Some((host,register)) =>
-                Device.readRegister(host.id,register.absoluteAddress) match {
+            case Some((host,target)) =>
+                Device.readRegister(host.id,target.absoluteAddress) match {
                     case Some(value) => du.value = value.toString
                     case _ =>
                 }
@@ -80,18 +80,18 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
 
         // Gather context and perform
         //---------------
-        this.getNodeAndRegister(du) match {
+        this.getNodeAndTarget(du) match {
 
         	// Host is a Device also, map to it instead of global singleton device
         	//----------------
-          	case Some((host : Device,register)) => 
+          	case Some((host : Device,target)) => 
             
-          	  host.writeRegister(host.id,register.absoluteAddress,java.lang.Long.decode(du.value))
+          	  host.writeRegister(host.id,target.absoluteAddress,java.lang.Long.decode(du.value))
                
             // Host and Register, Use global Singleton Device
         	//--------
-            case Some((host,register)) => 
-              	Device.writeRegister(host.id,register.absoluteAddress,java.lang.Long.decode(du.value))
+            case Some((host,target)) => 
+              	Device.writeRegister(host.id,target.absoluteAddress,java.lang.Long.decode(du.value))
             case None =>
                 throw new IllegalArgumentException("Cannot Perform Device write from Data Unit because Node and/or register are missing from DataUnit context")
         }
