@@ -105,20 +105,20 @@ For this purpose, the target node must be an instance of an object implementing 
 
 	Examples:
 
-	group.group("extoll_rf/info_rf")
-	registerFile.group("path/to/regroot") // The RegisterFile class inherits Group
+		group.group("extoll_rf/info_rf")
+		registerFile.group("path/to/regroot") // The RegisterFile class inherits Group
 
 - Register: "path/to/register"
 
 	Examples:
 
-	group.register("extoll_rf/info_rf/node")
+		group.register("extoll_rf/info_rf/node")
 
 - Register Field: "path/to/register.field"
 
 	Examples:
 
-	group.field("extoll_rf/info_rf/node.id")
+		group.field("extoll_rf/info_rf/node.id")
 	
 
 ## Select Node Target
@@ -136,12 +136,12 @@ For this purpose, the target node must be an instance of an object implementing 
 ## Write
 
 
-	write value into "searchstring"
+	write(value) into "searchstring"
 
 value is a Long in scala/java syntax:
 
-	write 80   into "searchString" // 80 decimal
-	write 0x80 into "searchString" // 80 hex
+	write(80)   into "searchString" // 80 decimal
+	write(0x80) into "searchString" // 80 hex
 
 
 
@@ -152,6 +152,8 @@ value is a Long in scala/java syntax:
 ## Poll
 
 Sometimes it is required to poll on a value to synchronise with the hardware
+The poll function will perform read on the provided register/field, until a specific value is matched.
+If the value is not matched after the specified delay, an exception is thrown as an error
 	
 
 	poll on "search/string" until ( Long => Boolean) during timeInms now
@@ -180,6 +182,16 @@ with:
 			println("Polled value was 1")
 		case Poll(2) => 
 			println("Polled value was 2")
+	}
+
+### Catch poll fail
+
+	try {
+		(poll on "path" until {value => value == 1 || value == 2} during 500 now)
+	} catch {
+		case e : Throwable => 
+
+			println(s"Polling Failed here")
 	}
 
 # Data Reference

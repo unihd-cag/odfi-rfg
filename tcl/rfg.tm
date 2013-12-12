@@ -6,6 +6,52 @@ package require odfi::list 2.0.0
 
 namespace eval osys::rfg {
 
+
+    #############################
+    ## Generator Search
+    ##############################
+
+    ## Tries to instanciate a generator using provided full name class
+    ## If not found, tries to load a package using: package require $name
+    proc getGenerator {name registerFile} {
+
+        ## Search for class 
+        set generators [itcl::find classes $name]
+
+        if {[llength $generators]==0} {
+
+            ## Not Found, try to load package 
+            #########
+            set packageName "osys::rfg::generator::[string tolower $name]"
+            set generatorName "::${packageName}::$name"
+            if {[catch "package require $packageName"]} {
+                
+                ## Error 
+                error "Generator class $name was not found, and no package having conventional name $packageName could be found"
+
+            } else {
+
+                ## Research and fail if not found
+                set generators [itcl::find classes $generatorName]
+                if {[llength $generators]==0} {
+
+                    ## Error
+                    error "After loading conventionally named package $packageName, conventional generator $generatorName could not be found "
+
+                } else {
+
+                    return [::new $generatorName #auto $registerFile]
+                }
+            }
+        } else {
+
+            ## Found -> instanciate 
+            ############
+            return [::new $name #auto $registerFile]
+        }
+
+    }
+
     ##########################
     ## Common Types
     #########################
@@ -22,6 +68,20 @@ namespace eval osys::rfg {
         constructor {cName} {
 
             set name $cName
+        }
+
+        ## Returns a list of the parents, from top to this (first is top)
+        public method parents args {
+
+            set parents {}
+            set current $this
+            while {$current!=""} {
+                lappend parents $current
+                set current [$current parent]
+            }
+            set parents [lreverse $parents]
+            return $parents
+
         }
 
     }
@@ -185,7 +245,7 @@ namespace eval osys::rfg {
 
             ## Prepare list : Pairs of Parent / node
             ##################
-            set groupsFifo [list "" $this]
+            set componentsFifo [list $this]
 
             ## First call -> this with no parent 
             #########
@@ -197,22 +257,23 @@ namespace eval osys::rfg {
 
             ## Go on FIFO 
             ##################
-            foreach {parent node} $groupsFifo {
+            while {[llength $componentsFifo]>0} {
 
-                odfi::closures::doClosure $closure 
+                set item [lindex $componentsFifo 0]
+                set componentsFifo [lreplace $componentsFifo 0 0]
+
+
+                odfi::closures::doClosure $closure 1
 
                 ## Group -> add all subgroups and registers as next possible Continue 
                 ##############
-                if {[odfi::common::isClass $node [namespace current]]} {
+                if {[$item isa [namespace current]]} {
                    
-                    $node onEachGroup {
-                        lappend groupsFifo $node $it
-                    }
-
-                    $node onEachRegister {
-                        lappend groupsFifo $node $it
-                    }
+                   #::puts "Gound gorupd"
+                   set componentsFifo [concat $componentsFifo [$item components]]
                    
+                } elseif {[$item isa [namespace parent]::Register]} {
+                    set componentsFifo [concat $componentsFifo [$item fields]]
                 }
             }
         }
@@ -225,7 +286,7 @@ namespace eval osys::rfg {
         inherit Common Address
         
         ## List of fields
-        public variable fields {}
+       odfi::common::classField public fields {}
 
         constructor {cName cClosure} {Common::constructor $cName} {
 
@@ -290,6 +351,29 @@ namespace eval osys::rfg {
                 lappend attr_list [list $fname [lindex $args 0]]
             }                
         }
+
+        ## Execute closure on each Attribute value, with variable names: $attr $value
+        public method onEachAttribute closure {
+
+            foreach attrContent $attr_list {
+
+                uplevel "set attr [lindex $attrContent 0]"
+                uplevel "set value \"\""
+                if {[llength $attrContent]>1} {
+                    uplevel "set value [lindex $attrContent 1]"
+                }
+
+                odfi::closures::doClosure $closure 1
+            }
+            #odfi::list::each $attributes {
+
+            #    odfi::closures::doClosure $closure 1
+
+
+            #}
+        } 
+
+
     }
 
     #####################
@@ -304,8 +388,6 @@ namespace eval osys::rfg {
         odfi::common::classField public reset 0
 
         ## Attributes
-        
-        ## List of fields
         public variable attributes {}
         
         constructor {cName cClosure} {Common::constructor $cName} {
@@ -328,14 +410,18 @@ namespace eval osys::rfg {
             return $newAttribute
 	    }  
 
+        ## Execute closure on each Attributes, with variable name: $attrs
         public method onEachAttributes closure {
 
-            odfi::list::each $attributes {
-
+            foreach attrs $attributes {
                 odfi::closures::doClosure $closure 1
-
-
             }
+            #odfi::list::each $attributes {
+
+            #    odfi::closures::doClosure $closure 1
+
+
+            #}
         }
     }
 

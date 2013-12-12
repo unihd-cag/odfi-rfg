@@ -170,6 +170,7 @@ trait RFLanguage {
       case r: Register  => r.value
       case f: Field     => f.value
       case rf: RamField => rf.value
+      case re: RamEntry => re.value
       case _            => throw new RuntimeException(s"unsupported path: $str")
     }
 
@@ -181,6 +182,7 @@ trait RFLanguage {
       case r: Register  => r.value
       case f: Field     => f.value
       case rf: RamField => rf.value
+      case re: RamEntry => re.value
       case _            => throw new RuntimeException(s"unsupported path: ${destination._1}/${destination._2}")
     }
 
@@ -199,6 +201,7 @@ trait RFLanguage {
         case r: Register  => r.value = value
         case f: Field     => f.value = value
         case rf: RamField => rf.value = value
+        case re: RamEntry => re.value = value
         case _            => throw new RuntimeException(s"unsupported path: $destination")
       }
 
@@ -211,6 +214,7 @@ trait RFLanguage {
         case r: Register  => r.value = value
         case f: Field     => f.value = value
         case rf: RamField => rf.value = value
+        case re: RamEntry => re.value = value
         case _            => throw new RuntimeException(s"unsupported path: ${destination._1}/${destination._2}")
       }
 
@@ -256,5 +260,16 @@ trait RFLanguage {
   def search(s: String): Any = {
     currentHost.registerFile.search(s)
   }
+
+  // Explain
+  //------------
+  /*def explain(s: String): Unit = {
+    search(s) match {
+      case r: Register  => r.explain
+      case f: Field     => println(s"Field: ${f.name} , value: ${f.value}")
+      case rf: RamField => rf
+      case r            => throw new RuntimeException(s"unsupported path for explanation: $s , type: ${r.getClass.getCanonicalName()}")
+    }
+  }*/
 
 }
