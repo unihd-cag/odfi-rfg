@@ -400,7 +400,9 @@ namespace eval osys::rfg {
     #####################
     itcl::class Attributes {
         inherit Common 
+
         odfi::common::classField public attr_list {}
+        
         constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 

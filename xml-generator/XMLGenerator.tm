@@ -125,7 +125,7 @@ namespace eval osys::rfg::xmlgenerator {
             odfi::common::printlnIndent
             writeDescription $out $field
             $field onEachAttributes {
-                    writeAttributes $out $it        
+                    writeAttributes $out $attrs        
             }
             odfi::common::printlnOutdent
             odfi::common::println "</Field>" $out
