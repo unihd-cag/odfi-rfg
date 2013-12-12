@@ -126,6 +126,11 @@ namespace eval osys::rfg {
             }
             
         }
+
+        ## Returns the absolute Adress as HEX string
+        public method getAbsoluteAddressHex args {
+            format "%X" [getAbsoluteAddress]
+        }
     } 
    
     ######################

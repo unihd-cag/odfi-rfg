@@ -45,6 +45,12 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
         
 <xsl:value-of select="$hier-level-tab"/> group <xsl:value-of select="@name"/> {
 
+<!-- Absolute Address --> 
+<xsl:value-of select="$hier-level-tab"/>    setAbsoluteAddressFromHex <xsl:value-of select="@_absoluteAddress"/>
+<xsl:text>
+    
+</xsl:text>
+
 <xsl:apply-templates/>
 
 <xsl:value-of select="$hier-level-tab"/> }
@@ -71,6 +77,12 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
     <xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
 
 <xsl:value-of select="$hier-level-tab"/>register <xsl:value-of select="$name"/> {
+
+<!-- Absolute Address --> 
+<xsl:value-of select="$hier-level-tab"/>    setAbsoluteAddressFromHex <xsl:value-of select="@_absoluteAddress"/>
+<xsl:text>
+    
+</xsl:text>
 
 <xsl:apply-templates />
 
@@ -139,6 +151,13 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 
 </xsl:template>
     
+
+    <!-- ################## -->
+    <!-- attributes --> 
+    <!-- ################## -->
+    <template match="@_absoluteAddress">absoluteAddress <xsl:value-of select="."/>
+        
+    </template>
     
     <!-- ################## -->
     <!-- Repeat --> 
