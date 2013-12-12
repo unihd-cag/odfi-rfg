@@ -90,24 +90,41 @@ namespace eval osys::rfg {
     ## Address
     #####################
     itcl::class Address {
-        
+        inherit Common
+
         odfi::common::classField public address 0
-        odfi::common::classField public absolute_address 0
+        odfi::common::classField public absoluteAddress -1
         odfi::common::classField public size 0
 
-        public method addOffset {object} {
-            $object onEachComponent {
-                $it absolute_address [expr "[$it address] + [$object absolute_address]"]
-                if {[$it isa osys::rfg::Group]} {
-                    addOffset $it 
-                }          
+
+        ## Resolve Absolute address by parent calling, return result if already defined
+        public method getAbsoluteAddress args {     
+
+            if {$absoluteAddress!=-1} {
+                ## Already defined 
+                return $absoluteAddress
+            } else {
+                ## Not Defined
+                if {[$this parent] != ""} {
+
+                    ## Resolve using parent
+                    return [expr [[$this parent] getAbsoluteAddress]+$address]
+
+                } else {
+
+                    ## No parent -> 0
+                    return 0
+                }
             }
         }
-        public method getAbsoluteAddress {} {           
-            ## if parent is Register file calculate absolute addresses
-            if {[$this parent] == ""} {
-                addOffset $this               
+
+        public method setAbsoluteAddressFromHex args {
+
+            if {$args !=""} {
+                set absoluteAddress [scan $args 0x%x]
+
             }
+            
         }
     } 
    
@@ -115,7 +132,7 @@ namespace eval osys::rfg {
     ## Group 
     ######################
     itcl::class Group {       
-        inherit Common Address
+        inherit Address
         
         ## maximal allowed register size                 
         odfi::common::classField public register_size 64
@@ -311,7 +328,7 @@ namespace eval osys::rfg {
     ## Register 
     ############################
     itcl::class Register {
-        inherit Common Address
+        inherit Address
         
         ## List of fields
        odfi::common::classField public fields {}
