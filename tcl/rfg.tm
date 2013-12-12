@@ -83,6 +83,36 @@ namespace eval osys::rfg {
             return $parents
 
         }
+                ## Attributes
+        public variable attributes {}
+
+        public method attributes {fName closure} {
+            ## Create 
+            set newAttribute [::new [namespace parent]::Attributes $name.$fName.#auto $fName $closure]
+
+
+            ##puts "Created field: $newField"
+
+            ## Add to list
+            lappend attributes $newAttribute 
+
+            ## Return 
+            return $newAttribute
+        }  
+
+        ## Execute closure on each Attributes, with variable name: $attrs
+        public method onEachAttributes closure {
+
+            foreach attrs $attributes {
+                odfi::closures::doClosure $closure 1
+            }
+            #odfi::list::each $attributes {
+
+            #    odfi::closures::doClosure $closure 1
+
+
+            #}
+        }
 
     }
 
@@ -351,8 +381,6 @@ namespace eval osys::rfg {
         ## @return the register instance
         public method field {fName closure} {
 
-
-
             ## Create 
             set newField [::new [namespace parent]::Field $this.$fName.#auto $fName $closure]
 
@@ -368,6 +396,17 @@ namespace eval osys::rfg {
 
         }
 
+        public method reserved {fName closure} {
+
+            ## Create
+            set newReserved [::new [namespace parent]::Reserved $this.$fName.#auto $fName $closure]
+
+            ## Add to list
+            lappend fields $newField
+
+            ## Return 
+            return $newField
+        }
 
         public method onEachField closure {
 
@@ -389,6 +428,21 @@ namespace eval osys::rfg {
         inherit Register
         odfi::common::classField public depth 1
         constructor {cName cClosure} {Register::constructor $cName {}} {
+
+            ## Execute closure 
+            odfi::closures::doClosure $cClosure
+        }
+    }
+
+    ###########################
+    ## Reserved
+    ###########################
+    itcl::class Reserved {
+        inherit Field
+        ## Width Always in bits
+        odfi::common::classField public width 0
+
+        constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
@@ -451,42 +505,11 @@ namespace eval osys::rfg {
 
         ## Reset value
         odfi::common::classField public reset 0
-
-        ## Attributes
-        public variable attributes {}
         
         constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
-        }
-
-   	    public method attributes {fName closure} {
-            ## Create 
-            set newAttribute [::new [namespace parent]::Attributes $name.$fName.#auto $fName $closure]
-
-
-            ##puts "Created field: $newField"
-
-            ## Add to list
-            lappend attributes $newAttribute 
-
-            ## Return 
-            return $newAttribute
-	    }  
-
-        ## Execute closure on each Attributes, with variable name: $attrs
-        public method onEachAttributes closure {
-
-            foreach attrs $attributes {
-                odfi::closures::doClosure $closure 1
-            }
-            #odfi::list::each $attributes {
-
-            #    odfi::closures::doClosure $closure 1
-
-
-            #}
         }
     }
 
@@ -509,6 +532,13 @@ namespace eval osys::rfg {
         uplevel 1 $res 
  
     }  
+
+    proc attributeGroup {fname} {
+        set res "proc $fname args {
+            uplevel 1 attributes [string trimleft $fname ::] \$args
+        }"
+        uplevel 1 $res
+    }
 
     itcl::class RegisterFile {
         inherit Group
