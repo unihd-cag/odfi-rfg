@@ -203,6 +203,7 @@ namespace eval osys::rfg {
             
             ## Add to list
             lappend components $newRegister 
+ 
             ## Check Registers size
             set register_width 0            
             $newRegister onEachField {
@@ -217,6 +218,7 @@ namespace eval osys::rfg {
             $newRegister address $size
             $newRegister size [expr "$register_size/8"]            
             incr size [expr "$register_size/8"]
+
             ## Return 
             ##puts $newRegister
             $newRegister parent $this
@@ -224,7 +226,33 @@ namespace eval osys::rfg {
 
 
         }
+        public method ramBlock {rName closure} {
+            
+            ## Create
+            set newRamBlock [::new [namespace parent]::RamBlock $name.$rName.#auto $rName $closure]
+            
+            ## Add to list
+            lappend components $newRamBlock
 
+            ## Check RamBlock width
+            set ramBlock_width 0
+            $newRamBlock onEachField {
+                incr ramBlock_width [$it width]
+            }
+
+            if {$ramBlock_width > $register_size} {
+                error "The ramblock width $newRamBlock is $ramBlock_width wide and exceeds the allowed $register_size bits!"                           
+            }
+            
+            ## calculate address
+            $newRamBlock address $size
+            $newRamBlock size [expr "[$newRamBlock depth] * $register_size/8"] 
+            incr size [expr "[$newRamBlock depth] * $register_size/8"]        
+
+            ## Return 
+            $newRamBlock parent $this
+            return $newRamBlock                
+        }
         public method onEachRegister closure {
 
             odfi::list::each $components {
@@ -281,7 +309,7 @@ namespace eval osys::rfg {
 
     ############################
     ## Register 
-    #############################
+    ############################
     itcl::class Register {
         inherit Common Address
         
@@ -330,6 +358,19 @@ namespace eval osys::rfg {
 
         }
 
+    }
+
+    ############################
+    ## RamBlock 
+    ############################
+    itcl::class RamBlock {
+        inherit Register
+        odfi::common::classField public depth 1
+        constructor {cName cClosure} {Register::constructor $cName {}} {
+
+            ## Execute closure 
+            odfi::closures::doClosure $cClosure
+        }
     }
 
     #####################

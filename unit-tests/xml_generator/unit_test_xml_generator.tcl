@@ -14,37 +14,26 @@ if {$result != "::extoll_rf"} {
     ## write xml file from parsed register file
     set filename "compare_data/regfile.xml"
     set fileId [open $filename "w"]
-    foreach rf [itcl::find objects -isa osys::rfg::RegisterFile] {
-            $rf getAbsoluteAddress        
-    }
+    
+    ## calculate the addresses    
+    $result getAbsoluteAddress
 
-    foreach rf [itcl::find objects -isa osys::rfg::RegisterFile ] {       
-        if {[$rf parent] == ""} {
-            set xmlgenerator [::new osys::rfg::xmlgenerator::XMLGenerator #auto $rf]
-            puts -nonewline $fileId [$xmlgenerator produce]
-        }
-    }
+    ## generate xml and write into file
+    set xmlgenerator [::new osys::rfg::xmlgenerator::XMLGenerator #auto $result]
+    puts -nonewline $fileId [$xmlgenerator produce]
     close $fileId
     puts "xml is written!"
-    ## parse compare xml and written xml 
+    
+    ## parse compare xml and read xml into a string 
     set xml [odfi::dom::buildDocumentFromFile "compare_data/regfile.xml"]
     set compare [odfi::dom::buildDocumentFromFile "compare_data/regfile_compare.xml"] 
-    odfi::dom::toIndentedString $xml
-    odfi::dom::toIndentedString $compare
-    set fileId_xml [open "compare_data/regfile.xml" "w"]
-    set fileId_compare [open "compare_data/regfile_compare.xml" "w"]
-
-    ## write xml
-    puts -nonewline $fileId_xml [::dom::DOMImplementation serialize $xml -method xml -indent false -encoding UTF-8]
-    puts -nonewline $fileId_compare [::dom::DOMImplementation serialize $compare -method xml -indent false -encoding UTF-8]
-    close $fileId_xml
-    close $fileId_compare
+    set xml_string [odfi::dom::toIndentedString $xml]
+    set compare_string [odfi::dom::toIndentedString $compare]
     puts "xml parsing successfull!"
     
-    ## make a diff on the two files catch resulting output
-    catch {exec diff compare_data/regfile.xml compare_data/regfile_compare.xml} result
-    if {$result != ""} {
-        error("unit test failed the generated xml differs from the compare file a diff gives the following error:\n $result")
+    ## compare the two strings
+    if {$xml_string != $compare_string} {
+        error("unit test failed the generated xml differs from the compare file!\n")
     } else {
         puts "unit test succeeded!"
     }
