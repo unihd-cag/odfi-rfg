@@ -14,9 +14,6 @@ if {$result != "::extoll_rf"} {
     ## write xml file from parsed register file
     set filename "compare_data/regfile.xml"
     set fileId [open $filename "w"]
-    
-    ## calculate the addresses    
-    $result getAbsoluteAddress
 
     ## generate xml and write into file
     set xmlgenerator [::new osys::rfg::xmlgenerator::XMLGenerator #auto $result]
