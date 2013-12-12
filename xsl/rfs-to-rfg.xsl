@@ -15,15 +15,15 @@
 
     <!--Top :Regfile or Regroot -->
     <!-- ####################### -->
-    <xsl:template match="//regfile">
+    <xsl:template match="/regfile">
 osys::rfg::registerFile <xsl:value-of select="./regroot/@name"/> {
     
-<xsl:apply-templates/>
+<xsl:apply-templates select="./regroot/*"/>
 }
 
     </xsl:template>
 
-    <xsl:template match="//regroot">#!/usr/bin/env rfg
+    <xsl:template match="/regroot">#!/usr/bin/env rfg
 
 osys::rfg::registerFile <xsl:value-of select="@name"/> {
     
@@ -101,7 +101,7 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 
 <!-- Description -->
 <xsl:if test="@desc">
-    <xsl:value-of select="$hier-level-tab-more"/>description "<xsl:value-of select="@desc"/>"
+    <xsl:value-of select="$hier-level-tab-more"/>description "<xsl:value-of select="fn:replace(@desc,'\[','\\[')"/>"
 </xsl:if>
    
 
@@ -112,7 +112,7 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
     
     <!-- Reset -->
     <xsl:value-of select="$hier-level-tab-more"/><xsl:choose>
-        <xsl:when test="fn:matches(@reset,'[A-Z_]+')">reset        $<xsl:value-of select="@reset"/></xsl:when>
+        <xsl:when test="fn:matches(@reset,'^[A-Z_]+')">reset        $<xsl:value-of select="@reset"/></xsl:when>
         <xsl:otherwise>reset        <xsl:value-of select="@reset"/></xsl:otherwise>
     </xsl:choose>
     
@@ -120,11 +120,18 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 </xsl:text>
 
     <!-- Rights --> 
-    <xsl:value-of select="$hier-level-tab-more"/>software     <xsl:value-of select="@sw"/>
+    <xsl:value-of select="$hier-level-tab-more"/>attributes software {
+        verilog.rights <xsl:value-of select="@sw"/>
+    }    
+
 <xsl:text>  
 </xsl:text>
 
-    <xsl:value-of select="$hier-level-tab-more"/>hardware      <xsl:value-of select="@hw"/>
+    <xsl:value-of select="$hier-level-tab-more"/>attributes hardware {
+        verilog.rights <xsl:value-of select="@hw"/>
+
+    }
+
 <xsl:text>
 </xsl:text>
 

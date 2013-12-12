@@ -1,0 +1,13 @@
+#!/bin/bash
+
+location=$(dirname "$(readlink -f ${BASH_SOURCE[0]})")
+
+if [[ -z $1 || ! -f $1 ]]
+then
+    echo "Usage: rfs_to_rfg [/path/to/rfs.xml] (RFG script outputed to stdout)"
+    echo "Example: rfs_to_rfg [/path/to/rfs.xml] > [/path/to/rfg.rf]"
+    exit -1
+fi
+
+odfi_saxon_transform -xsl:${location}/../xsl/rfs-to-rfg.xsl -s:$1
+
