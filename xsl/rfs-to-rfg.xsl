@@ -46,10 +46,13 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 <xsl:value-of select="$hier-level-tab"/> group <xsl:value-of select="@name"/> {
 
 <!-- Absolute Address --> 
+<xsl:if test="@_absoluteAddress">
 <xsl:value-of select="$hier-level-tab"/>    setAbsoluteAddressFromHex <xsl:value-of select="@_absoluteAddress"/>
 <xsl:text>
     
-</xsl:text>
+</xsl:text>   
+</xsl:if>
+
 
 <xsl:apply-templates/>
 
@@ -79,10 +82,12 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 <xsl:value-of select="$hier-level-tab"/>register <xsl:value-of select="$name"/> {
 
 <!-- Absolute Address --> 
+<xsl:if test="@_absoluteAddress">
 <xsl:value-of select="$hier-level-tab"/>    setAbsoluteAddressFromHex <xsl:value-of select="@_absoluteAddress"/>
 <xsl:text>
     
-</xsl:text>
+</xsl:text>   
+</xsl:if>
 
 <xsl:apply-templates />
 
@@ -133,16 +138,19 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 
     <!-- Rights --> 
     <xsl:value-of select="$hier-level-tab-more"/>attributes software {
-        verilog.rights <xsl:value-of select="@sw"/>
-    }    
+    <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}    
 
 <xsl:text>  
 </xsl:text>
 
     <xsl:value-of select="$hier-level-tab-more"/>attributes hardware {
-        verilog.rights <xsl:value-of select="@hw"/>
-
-    }
+    <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}
 
 <xsl:text>
 </xsl:text>
