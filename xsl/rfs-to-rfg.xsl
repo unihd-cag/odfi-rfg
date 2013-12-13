@@ -136,7 +136,7 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 <xsl:text>
 </xsl:text>
 
-    <!-- Rights --> 
+    <!-- Rights and attributes--> 
     <xsl:value-of select="$hier-level-tab-more"/>attributes software {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>
@@ -147,7 +147,21 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 </xsl:text>
 
     <xsl:value-of select="$hier-level-tab-more"/>attributes hardware {
+
     <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
+    <xsl:text>
+</xsl:text>
+    
+    <!-- Special Attributes -->
+    <!-- ################### -->
+    <xsl:if test="@counter">
+        <xsl:value-of select="$hier-level-tab-more"/>    counter
+    </xsl:if>
+    <xsl:if test="@rreinit">
+        <xsl:value-of select="$hier-level-tab-more"/>    rreinit
+    </xsl:if>
+    
+
     <xsl:text>
 </xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/>}

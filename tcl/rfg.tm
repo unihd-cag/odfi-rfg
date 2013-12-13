@@ -402,7 +402,7 @@ namespace eval osys::rfg {
         inherit Common 
 
         odfi::common::classField public attr_list {}
-        
+
         constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 
@@ -503,8 +503,15 @@ namespace eval osys::rfg {
 
     proc attributeFunction {fname} {
   
+        set attributeName [string trimleft $fname ::]
+
+        ## If name is not categorized using xx.xxx.attributeName, set it to global.attributeName
+        if {![string match *.* $attributeName]} {
+            set attributeName "global.$attributeName"
+        }
+
         set res "proc $fname args {
-            uplevel 1 addAttribute [string trimleft $fname ::] \$args 
+            uplevel 1 addAttribute $attributeName \$args 
         }"
         uplevel 1 $res 
  
@@ -520,4 +527,6 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
     }
+
+    source [file dirname [info script]]/globalfunctions.tcl
 }
