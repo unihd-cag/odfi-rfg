@@ -268,18 +268,11 @@ Before conversion, the user MUST clean the RFS XML, because a very few things a 
 ### Usage 
     
     // Usage:
-    $ rfs_to_rfg <standard Input RFS> <standard Output RFG>
+    $ rfs_to_rfg <standard Input RFS file> <standard Output RFG>
 
     // Input file to output file :
-    $ rfs_to_rfg < info_rf.xml > info_rf.rfg
+    $ rfs_to_rfg info_rf.xml > info_rf.rfg
 
-    // Standard input paste :
-    $ rfs_to_rfg
-
-      paste some RFS here
-      CTRL + D to send End of File
-
-      The RFG Script gets written to stdout
 
 ### Supported Constructs
 

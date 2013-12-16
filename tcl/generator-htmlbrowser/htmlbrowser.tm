@@ -4,7 +4,7 @@ package require Itcl 3.4
 package require odfi::common
 package require odfi::list 2.0.0
 
-package require odfi::ewww::webdata 1.0.0
+#package require odfi::ewww::webdata 1.0.0
 
 
 namespace eval osys::rfg::generator::htmlbrowser {
