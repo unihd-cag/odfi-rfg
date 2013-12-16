@@ -1,18 +1,27 @@
-#!/usr/bin/env rfg
 
-set NUM_VPIDS 10
 
-osys::rfg::registerFile info_rf {
+group info_rf {
     
     register driver {
 
+ 
         field ver {
 
 
             width        32
             reset        32'd18253
-            software     ro  
-            hardware      
+            attributes software {
+                ro
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
     }
@@ -20,13 +29,24 @@ osys::rfg::registerFile info_rf {
 
     register node {
 
+ 
         field guid {
 
 
             width        24
             reset        24'h12abcd
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field id {
@@ -34,8 +54,20 @@ osys::rfg::registerFile info_rf {
 
             width        16
             reset        16'h0
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+                counter
+                    rreinit
+    
+            }
+
+
         }
 
         field vpids {
@@ -43,8 +75,18 @@ osys::rfg::registerFile info_rf {
 
             width        16
             reset        $NUM_VPIDS
-            software     ro  
-            hardware      
+            attributes software {
+                ro
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
     }
@@ -52,14 +94,25 @@ osys::rfg::registerFile info_rf {
 
     register management_sw {
 
+ 
         field cfg_ip {
 
 
             description "IP address of the backend process that started the latest enumeration"
             width        32
             reset        32'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
         field enum_cnt {
@@ -68,8 +121,18 @@ osys::rfg::registerFile info_rf {
             description "Count that specifies the latest enumeration attempt that reached this node"
             width        8
             reset        8'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
         field cfg_count {
@@ -78,8 +141,18 @@ osys::rfg::registerFile info_rf {
             description "Count that specifies the latest configuration attempt that reached this node"
             width        8
             reset        8'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
         field backend {
@@ -88,8 +161,18 @@ osys::rfg::registerFile info_rf {
             description "This bit is set on nodes that currently have a backend enumeration or configuration attempt running"
             width        1
             reset        1'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
     }
@@ -97,14 +180,25 @@ osys::rfg::registerFile info_rf {
 
     register ip_addresses {
 
+ 
         field primary_ip_address {
 
 
             description "Primary IP address of the node (in network byte order). It can be used to get the hostname of the node using a reverse DNS lookup"
             width        32
             reset        32'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
         field extoll_ip_address {
@@ -113,8 +207,18 @@ osys::rfg::registerFile info_rf {
             description "IP address of the EXTOLL interface (in network byte order). Usefull for ARP implementation over EXTOLL."
             width        32
             reset        32'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
     }
@@ -122,14 +226,25 @@ osys::rfg::registerFile info_rf {
 
     register mgt_ip_addresses {
 
+ 
         field primary_mgt_ip_address {
 
 
             description "The EXTOLL Node ID of the primary management ID for this node."
             width        32
             reset        32'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
         field extoll_mgt_ip_address {
@@ -138,8 +253,18 @@ osys::rfg::registerFile info_rf {
             description "The IP Address of the primary management ID for this node."
             width        32
             reset        32'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
     }
@@ -147,6 +272,7 @@ osys::rfg::registerFile info_rf {
 
     register tsc {
 
+ 
 
         if {[info exists ASIC]} {
 
@@ -155,8 +281,19 @@ osys::rfg::registerFile info_rf {
 
             width        64
             reset        
-            software     rw  
-            hardware      rw
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                rw
+                counter
+    
+            }
+
+
         }
 
 
@@ -169,8 +306,19 @@ osys::rfg::registerFile info_rf {
 
             width        48
             reset        
-            software     rw  
-            hardware      rw
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                rw
+                counter
+    
+            }
+
+
         }
 
 
@@ -182,6 +330,7 @@ osys::rfg::registerFile info_rf {
 
     register tsc_global_load_value {
 
+ 
 
         if {[info exists ASIC]} {
 
@@ -190,8 +339,18 @@ osys::rfg::registerFile info_rf {
 
             width        64
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
 
@@ -204,8 +363,18 @@ osys::rfg::registerFile info_rf {
 
             width        48
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
 
@@ -221,14 +390,25 @@ osys::rfg::registerFile info_rf {
     
         register scratchpad_$i {
 
+ 
         field data {
 
 
             description "Scratchpad data."
             width        64
             reset        64'h0
-            software     rw  
-            hardware      
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                
+
+            }
+
+
         }
 
     }
@@ -240,14 +420,25 @@ osys::rfg::registerFile info_rf {
 
         register tsc_global_load_enable {
 
+ 
         field tsc_load_en_irq0 {
 
 
             description "Enable global interrupt 0 to load the tsc with the value from the tsc_global_load_value register"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field tsc_load_en_irq1 {
@@ -256,8 +447,18 @@ osys::rfg::registerFile info_rf {
             description "Enable global interrupt 1 to load the tsc with the value from the tsc_global_load_value register"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field tsc_load_en_irq2 {
@@ -266,8 +467,18 @@ osys::rfg::registerFile info_rf {
             description "Enable global interrupt 2 to load the tsc with the value from the tsc_global_load_value register"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field tsc_load_en_irq3 {
@@ -276,8 +487,18 @@ osys::rfg::registerFile info_rf {
             description "Enable global interrupt 3 to load the tsc with the value from the tsc_global_load_value register"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field global_irq_reinit_en0 {
@@ -286,8 +507,18 @@ osys::rfg::registerFile info_rf {
             description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field global_irq_reinit_en1 {
@@ -296,8 +527,18 @@ osys::rfg::registerFile info_rf {
             description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field global_irq_reinit_en2 {
@@ -306,8 +547,18 @@ osys::rfg::registerFile info_rf {
             description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field global_irq_reinit_en3 {
@@ -316,8 +567,18 @@ osys::rfg::registerFile info_rf {
             description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
     }
@@ -325,14 +586,25 @@ osys::rfg::registerFile info_rf {
 
     register timer_interrupt {
 
+ 
         field timer_interrupt_period {
 
 
             description "The period of the timer in clock cycles. Timer will count down from this value to zero and fire."
             width        48
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field timer_interrupt_enable {
@@ -341,8 +613,18 @@ osys::rfg::registerFile info_rf {
             description "Set this bit to one to enable the logic. Will be reset to 0 if a one-shot has occured."
             width        1
             reset        
-            software     rw  
-            hardware      rw
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                rw
+
+            }
+
+
         }
 
         field timer_interrupt_one_shot {
@@ -351,8 +633,18 @@ osys::rfg::registerFile info_rf {
             description "Set this bit to one, to run timer logic in one-shot logic, i.e. once an interrupt has fired wait.             Otherwise logic will run in recurring mode and fire again after period cycles."
             width        1
             reset        
-            software     rw  
-            hardware      ro
+            attributes software {
+                rw
+            }    
+
+  
+            attributes hardware {
+
+                ro
+
+            }
+
+
         }
 
         field timer_interrupt_toggle {
@@ -361,8 +653,18 @@ osys::rfg::registerFile info_rf {
             description "Toggles everytime an interrupt is fired."
             width        1
             reset        
-            software     ro  
-            hardware      wo
+            attributes software {
+                ro
+            }    
+
+  
+            attributes hardware {
+
+                wo
+
+            }
+
+
         }
 
     }

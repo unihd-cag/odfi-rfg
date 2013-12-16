@@ -390,6 +390,9 @@ namespace eval osys::rfg {
             ## Add to list
             lappend fields $newField 
 
+            ## Set parent
+            $newField parent $this
+
             ## Return 
             return $newField 
 
@@ -455,14 +458,24 @@ namespace eval osys::rfg {
     itcl::class Attributes {
         inherit Common 
 
+        ## List format: { {name value?}}
         odfi::common::classField public attr_list {}
-        
+
         constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
         
+        public method contains name {
+            foreach {pair} $attr_list {
+                if {[lindex $pair 0]==$name} {
+                    return true
+                }
+            }
+            return false
+        }
+
         public method addAttribute {fname args} {
             if { [llength $args] == 0} {
                 lappend attr_list $fname
@@ -514,7 +527,7 @@ namespace eval osys::rfg {
     }
 
     #######################
-    ## Register File : Top Definition
+    ## Register File : Top Definitions
     #########################
 
     ## Main Factory  : Object name is the provided name, beware of conflicts
@@ -524,10 +537,24 @@ namespace eval osys::rfg {
 
     }
 
+    ## Main Factory  : Object name is the provided name, beware of conflicts
+    proc group {name closure} {
+
+        return [::new Group ::$name $name $closure]
+
+    }
+
     proc attributeFunction {fname} {
   
+        set attributeName [string trimleft $fname ::]
+
+        ## If name is not categorized using xx.xxx.attributeName, set it to global.attributeName
+        if {![string match *.* $attributeName]} {
+            set attributeName "global.$attributeName"
+        }
+
         set res "proc $fname args {
-            uplevel 1 addAttribute [string trimleft $fname ::] \$args 
+            uplevel 1 addAttribute $attributeName \$args 
         }"
         uplevel 1 $res 
  
@@ -550,4 +577,6 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
     }
+
+    source [file dirname [info script]]/globalfunctions.tcl
 }

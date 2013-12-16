@@ -23,9 +23,9 @@ osys::rfg::registerFile <xsl:value-of select="./regroot/@name"/> {
 
     </xsl:template>
 
-    <xsl:template match="/regroot">#!/usr/bin/env rfg
+    <xsl:template match="/regroot">
 
-osys::rfg::registerFile <xsl:value-of select="@name"/> {
+group <xsl:value-of select="@name"/> {
     
 <xsl:apply-templates>
 </xsl:apply-templates>
@@ -46,10 +46,13 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 <xsl:value-of select="$hier-level-tab"/> group <xsl:value-of select="@name"/> {
 
 <!-- Absolute Address --> 
+<xsl:if test="@_absoluteAddress">
 <xsl:value-of select="$hier-level-tab"/>    setAbsoluteAddressFromHex <xsl:value-of select="@_absoluteAddress"/>
 <xsl:text>
     
-</xsl:text>
+</xsl:text>   
+</xsl:if>
+
 
 <xsl:apply-templates/>
 
@@ -79,10 +82,12 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 <xsl:value-of select="$hier-level-tab"/>register <xsl:value-of select="$name"/> {
 
 <!-- Absolute Address --> 
+<xsl:if test="@_absoluteAddress">
 <xsl:value-of select="$hier-level-tab"/>    setAbsoluteAddressFromHex <xsl:value-of select="@_absoluteAddress"/>
 <xsl:text>
     
-</xsl:text>
+</xsl:text>   
+</xsl:if>
 
 <xsl:apply-templates />
 
@@ -131,18 +136,35 @@ osys::rfg::registerFile <xsl:value-of select="@name"/> {
 <xsl:text>
 </xsl:text>
 
-    <!-- Rights --> 
+    <!-- Rights and attributes--> 
     <xsl:value-of select="$hier-level-tab-more"/>attributes software {
-        verilog.rights <xsl:value-of select="@sw"/>
-    }    
+    <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}    
 
 <xsl:text>  
 </xsl:text>
 
     <xsl:value-of select="$hier-level-tab-more"/>attributes hardware {
-        verilog.rights <xsl:value-of select="@hw"/>
 
-    }
+    <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
+    <xsl:text>
+</xsl:text>
+    
+    <!-- Special Attributes -->
+    <!-- ################### -->
+    <xsl:if test="@counter">
+        <xsl:value-of select="$hier-level-tab-more"/>    counter
+    </xsl:if>
+    <xsl:if test="@rreinit">
+        <xsl:value-of select="$hier-level-tab-more"/>    rreinit
+    </xsl:if>
+    
+
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}
 
 <xsl:text>
 </xsl:text>

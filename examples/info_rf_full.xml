@@ -5,7 +5,7 @@
 	</reg64>
 	<reg64 name="node">													<!-- a 64 Bit register accessable with a unique address -->
 		<hwreg name="guid" width="24" sw="rw" hw="ro" reset="24'h12abcd" />
-		<hwreg name="id" width="16" sw="rw" hw="ro" sw_written="2"  reset="16'h0" />
+		<hwreg name="id" width="16" sw="rw" hw="ro" sw_written="2"  counter="1" rreinit="1" reset="16'h0" />
 		<hwreg name="vpids" width="16" sw="ro" hw="" reset="NUM_VPIDS" />
 	</reg64>
 	<reg64 name="management_sw">
