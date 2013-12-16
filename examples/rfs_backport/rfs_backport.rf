@@ -1,0 +1,29 @@
+
+group top {
+    
+
+    group a {
+
+        register test {
+
+            field a {
+
+                attributes hardware {
+                    counter
+                    rreinit
+                    rw
+                }
+                attributes software {
+                    ro
+                }
+
+            }
+        }
+
+    }
+
+
+    group b {
+
+    }
+}
