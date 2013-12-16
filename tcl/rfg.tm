@@ -52,6 +52,8 @@ namespace eval osys::rfg {
 
     }
 
+    
+
     ##########################
     ## Common Types
     #########################
@@ -83,12 +85,49 @@ namespace eval osys::rfg {
             return $parents
 
         }
-                ## Attributes
+
+        #################################
+        ## Attributes Interface 
+        #################################
+
+        ## Attributes
         public variable attributes {}
 
+
+        ## name format: attributeGroupName.attributeQualified name 
+        ## Example: hardware.rw
+        public method hasAttribute qname {
+
+            set components [split $qname .]
+
+            ## Look for attribute 
+            set groupName [lindex $components 0]
+            set attributeName [join [lrange $components 1 end] .]
+
+            #::puts "Has attribute $groupName $attributeName"
+
+            #puts "Available attributes: $attributes"
+            
+            set foundAttributes [lsearch -glob -inline $attributes *$groupName]
+            if {$foundAttributes!=""} {
+
+                ## Found attributes group, look for attribute 
+                if {[$foundAttributes contains $attributeName]} {
+                    return 1
+                } else {
+                    return 0
+                }
+
+            } else {
+                return 0
+            }
+
+
+
+        }
         public method attributes {fName closure} {
             ## Create 
-            set newAttribute [::new [namespace parent]::Attributes $name.$fName.#auto $fName $closure]
+            set newAttribute [::new [namespace parent]::Attributes $name.$fName $fName $closure]
 
 
             ##puts "Created field: $newField"
@@ -113,6 +152,90 @@ namespace eval osys::rfg {
 
             #}
         }
+
+        ## Execute closure on each Attributes, with variable name: $attrs
+        public method onEachAttributes2 closure {
+
+            odfi::list::each $attributes {
+
+               odfi::closures::doClosure $closure 1
+
+
+            }
+        }
+
+    }
+
+
+    #####################
+    ## Attribute
+    #####################
+    itcl::class Attributes {
+        inherit Common 
+
+        ## List format: { {name value?}}
+        odfi::common::classField public attr_list {}
+
+        constructor {cName cClosure} {Common::constructor $cName} {
+
+            ## Execute closure 
+            odfi::closures::doClosure $cClosure
+        }
+        
+        public method contains name {
+
+            #puts "Looking for : $name"
+            foreach {pair} $attr_list {
+
+                #puts "Available $pair"
+
+                if {[lindex $pair 0]==$name} {
+                    return true
+                }
+            }
+            return false
+        }
+
+        public method addAttribute {fname args} {
+            if { [llength $args] == 0} {
+                lappend attr_list $fname
+            } else {
+                lappend attr_list [list $fname [lindex $args 0]]
+            }                
+        }
+
+        ## Execute closure on each Attribute value, with variable names: $attr $value
+        public method onEachAttribute closure {
+
+            foreach attrContent $attr_list {
+
+                uplevel "set attr [lindex $attrContent 0]"
+                uplevel "set value \"\""
+                if {[llength $attrContent]>1} {
+                    uplevel "set value [lindex $attrContent 1]"
+                }
+
+                odfi::closures::doClosure $closure 1
+            }
+            #odfi::list::each $attributes {
+
+            #    odfi::closures::doClosure $closure 1
+
+
+            #}
+        } 
+
+        ## Execute closure on each Attribute value, with variable names: $attr $value
+        public method onEachAttribute2 closure {
+
+            odfi::list::each $attr_list {
+
+                odfi::closures::doClosure $closure 1
+
+
+            }
+        } 
+
 
     }
 
@@ -445,61 +568,7 @@ namespace eval osys::rfg {
     #     }
     # }
 
-    #####################
-    ## Attribute
-    #####################
-    itcl::class Attributes {
-        inherit Common 
-
-        ## List format: { {name value?}}
-        odfi::common::classField public attr_list {}
-
-        constructor {cName cClosure} {Common::constructor $cName} {
-
-            ## Execute closure 
-            odfi::closures::doClosure $cClosure
-        }
-        
-        public method contains name {
-            foreach {pair} $attr_list {
-                if {[lindex $pair 0]==$name} {
-                    return true
-                }
-            }
-            return false
-        }
-
-        public method addAttribute {fname args} {
-            if { [llength $args] == 0} {
-                lappend attr_list $fname
-            } else {
-                lappend attr_list [list $fname [lindex $args 0]]
-            }                
-        }
-
-        ## Execute closure on each Attribute value, with variable names: $attr $value
-        public method onEachAttribute closure {
-
-            foreach attrContent $attr_list {
-
-                uplevel "set attr [lindex $attrContent 0]"
-                uplevel "set value \"\""
-                if {[llength $attrContent]>1} {
-                    uplevel "set value [lindex $attrContent 1]"
-                }
-
-                odfi::closures::doClosure $closure 1
-            }
-            #odfi::list::each $attributes {
-
-            #    odfi::closures::doClosure $closure 1
-
-
-            #}
-        } 
-
-
-    }
+    
 
     #####################
     ## Field

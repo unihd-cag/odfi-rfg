@@ -65,17 +65,24 @@ namespace eval osys::rfg::generator::rfsbackport {
         }
 
         public method writeGroup {out group} {
+
+            ## No Name on top 
+            set name ""
+            if {[$group parent]!=""} {
+                set name "name=\"[$group name]\""
+            }
+
             if {[$group isa osys::rfg::RegisterFile]} {
-                odfi::common::println "<regfile name=\"[$group name]\" external=\"1\" desc=\"[$group description]\">"  $out
+                odfi::common::println "<regfile $name external=\"1\" desc=\"[$group description]\">"  $out
             } else {
-                odfi::common::println "<regroot name=\"[$group name]\" desc=\"[$group description]\">"  $out
+                odfi::common::println "<regroot $name desc=\"[$group description]\">"  $out
             } 
             odfi::common::printlnIndent
             
 
             ## Write Groups and Registers
             $group onEachComponent {
-                puts "Component: $it"
+                #puts "Component: $it"
                 if {[$it isa osys::rfg::Group]} {
                     writeGroup $out $it                
                 } else {
@@ -94,7 +101,7 @@ namespace eval osys::rfg::generator::rfsbackport {
 
         public method writeRegister {out register} {
 
-             puts "Reg: $register"
+             #puts "Reg: $register"
 
             if {[$register isa osys::rfg::RamBlock]} {
                 odfi::common::println "<ramblock name=\"[$register name]\" desc=\"[$register description]\" addrsize=\"[string length [format %b [$register depth]]]\" width=\"[$register size]\">"  $out                         
@@ -104,7 +111,23 @@ namespace eval osys::rfg::generator::rfsbackport {
             odfi::common::printlnIndent
        
 
+            ## Specical Stuff 
+            #########################
+
+            #$register onEachAttributes2 {
+            #    puts "Attr: $it"
+#
+             #   $it onEachAttribute2 {
+             #       puts "---> $it"
+            #    }
+            # }
+            ## rreinit 
+            if {[$register hasAttribute hardware.global.rreinit_source]} {
+                odfi::common::println "<rreinit/>" $out 
+            }
+
             ## Write Fields
+            ######################
             $register onEachField {
                 writeField $out $it
             }
@@ -125,48 +148,67 @@ namespace eval osys::rfg::generator::rfsbackport {
             ## Reset 
             set reset "reset=\"[$field reset]\""
 
+
+             #$field onEachAttributes2 {
+             #   puts "Attr: $it"
+
+             #   $it onEachAttribute2 {
+             #       puts "---> $it"
+              #  }
+             #}
+
             ## Prepare attributes
             set attributes [list ]
             $field onEachAttributes {
 
-                puts "Attributes: $attrs"
+                #puts "Attributes: $attrs"
                 if {[$attrs name]=="hardware"} {
 
                     ## Rights
                     ################
                     if {[$attrs contains "global.rw"]} {
                         lappend attributes "hw=\"rw\""
-                    }
-                    if {[$attrs contains "global.ro"]} {
+                    } elseif {[$attrs contains "global.ro"]} {
                         lappend attributes "hw=\"ro\""
-                    }
-                    if {[$attrs contains "global.wo"]} {
+                    } elseif {[$attrs contains "global.wo"]} {
                         lappend attributes "hw=\"wo\""
+                    } else {
+                        lappend attributes "hw=\"\""
                     }
 
                     ## Special stuff
                     ##################
                     if {[$attrs contains "global.counter"]} {
                         lappend attributes "counter=\"1\""
+                        set reset ""
                     }
                     if {[$attrs contains "global.rreinit"]} {
                         lappend attributes "rreinit=\"1\""
+                        set reset ""
                     }
 
                 } elseif {[$attrs name]=="software"} {
 
                     if {[$attrs contains "global.rw"]} {
                         lappend attributes "sw=\"rw\""
-                    }
-                    if {[$attrs contains "global.ro"]} {
+                    } elseif {[$attrs contains "global.ro"]} {
                         lappend attributes "sw=\"ro\""
-                    }
-                    if {[$attrs contains "global.wo"]} {
+                    } elseif {[$attrs contains "global.wo"]} {
                         lappend attributes "sw=\"wo\""
+                    } else {
+                        lappend attributes "sw=\"\""
                     }
 
                 }
 
+            }
+
+            ## Make sure hw and sw attributes are present
+            if {[lsearch -glob $attributes "hw*"]==-1} {
+                lappend attributes "hw=\"\""
+            }
+            if {[lsearch -glob $attributes "sw*"]==-1} {
+                lappend attributes "sw=\"\""
             }
 
             ## Output 

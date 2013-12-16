@@ -22,16 +22,6 @@ namespace eval osys::rfg::generator::htmlbrowser {
             set registerFile $cRegisterFile
         }
 
-        public method writeDescription {out object} {
-            if {[$object description] != ""} {
-                odfi::common::println "<Description>"  $out
-                odfi::common::printlnIndent
-                odfi::common::println "<!\[CDATA\[[$object description]\]\]>"  $out
-                odfi::common::printlnOutdent            
-                odfi::common::println "</Description>"  $out
-            }
-        }
-
         public method copyDependenciesTo destination {
 
             odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/bs/ *.css
@@ -58,82 +48,6 @@ namespace eval osys::rfg::generator::htmlbrowser {
 
         }
 
-        public method writeGroup {out group} {
-            if {[$group isa osys::rfg::RegisterFile]} {
-                odfi::common::println "<RegisterFile name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
-                                        absolute_address=\"0x[format %X [$group absolute_address]]\" size=\"[$group size]\">"  $out
-            } else {
-                odfi::common::println "<Group name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
-                                        absolute_address=\"0x[format %X [$group absolute_address]]\" size=\"[$group size]\">"  $out
-            } 
-            odfi::common::printlnIndent
-            writeDescription $out $group
-            ## Write Groups and Registers
-            $group onEachComponent {
-                if {[$it isa osys::rfg::Group]} {
-                    writeGroup $out $it                
-                } else {
-                    writeRegister $out $it
-                }
-            } 
-
-            odfi::common::printlnOutdent
-            if {[$group isa osys::rfg::RegisterFile]} {
-                odfi::common::println "</RegisterFile>"  $out 
-            } else {
-                odfi::common::println "</Group>"  $out 
-            }
-
-        }
-
-        public method writeRegister {out register} {
-
-            odfi::common::println "<Register name=\"[$register name]\" relative_address=\"0x[format %X [$register address]]\" \
-                                    absolute_address=\"0x[format %X [$register absolute_address]]\" size=\"[$register size]\">"  $out 
-            odfi::common::printlnIndent
-            writeDescription $out $register
-            ## Write Fields
-            $register onEachField {
-                writeField $out $it
-            }
-
-            odfi::common::printlnOutdent
-            odfi::common::println "</Register>"  $out 
-
-
-        }
-
-        public method writeField {out field} {
-
-            ## Reset 
-            set reset "reset=\"[$field reset]\""
-
-            ## Output 
-            odfi::common::println "<Field name=\"[$field name]\"  width=\"[$field width]\" $reset >"  $out 
-            odfi::common::printlnIndent
-            writeDescription $out $field
-            $field onEachAttributes {
-                    writeAttributes $out $it        
-            }
-            odfi::common::printlnOutdent
-            odfi::common::println "</Field>" $out
-        }
-
-        public method writeAttributes {out attributes} {
-                       
-            odfi::common::println "<Attributes for=\"[$attributes name]\">"  $out
-            odfi::common::printlnIndent
-            writeDescription $out $attributes            
-            foreach element [$attributes attr_list] { ## write each attribute
-               if {[llength $element] == 2} {
-                    odfi::common::println "<Attribute name=\"[lindex $element 0]\">[lindex $element 1]</Attribute>"  $out
-               } else {
-                    odfi::common::println "<Attribute name=\"$element\"/>"  $out
-               }
-            }
-            odfi::common::printlnOutdent
-            odfi::common::println "</Attributes>" $out
-        }
 
     }
 

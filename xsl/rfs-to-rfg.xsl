@@ -60,9 +60,9 @@ group <xsl:value-of select="@name"/> {
 
     </xsl:template>
 
-
+    <!-- ########################## -->
     <!-- Reg64 --> 
-    <!-- ##### -->
+    <!-- ########################## -->
     <xsl:template match="reg64">
 
     <!-- In Repeat ? --> 
@@ -78,8 +78,14 @@ group <xsl:value-of select="@name"/> {
     <!-- Gather depth -->
     <xsl:variable name="hier-pos"><xsl:number from="regroot" count="regroot|reg64|hwreg" level="multiple" format="1"></xsl:number></xsl:variable>
     <xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
+    <xsl:variable name="hier-level-tab-more"><xsl:value-of select="$hier-level-tab"></xsl:value-of><xsl:text>    </xsl:text></xsl:variable>
 
 <xsl:value-of select="$hier-level-tab"/>register <xsl:value-of select="$name"/> {
+
+<!-- Description -->
+<xsl:if test="@desc">
+    <xsl:value-of select="$hier-level-tab-more"/>description "<xsl:value-of select="fn:replace(@desc,'\[','\\[')"/>"
+</xsl:if>
 
 <!-- Absolute Address --> 
 <xsl:if test="@_absoluteAddress">
@@ -87,6 +93,16 @@ group <xsl:value-of select="@name"/> {
 <xsl:text>
     
 </xsl:text>   
+</xsl:if>
+
+<!-- Special Attributes -->
+<!-- ################### -->
+<xsl:if test="./rreinit">
+<xsl:value-of select="$hier-level-tab"/>    attributes hardware {
+    
+    <xsl:value-of select="$hier-level-tab"/>    rreinit_source    
+
+}
 </xsl:if>
 
 <xsl:apply-templates />
@@ -123,7 +139,10 @@ group <xsl:value-of select="@name"/> {
    
 
     <!-- Width -->
-    <xsl:value-of select="$hier-level-tab-more"/>width        <xsl:value-of select="@width"/> 
+    <xsl:value-of select="$hier-level-tab-more"/><xsl:choose>
+        <xsl:when test="fn:matches(@width,'^[A-Z_]+')">width        $<xsl:value-of select="@width"/></xsl:when>
+        <xsl:otherwise>width        <xsl:value-of select="@width"/></xsl:otherwise>
+    </xsl:choose>
 <xsl:text>
 </xsl:text>
     

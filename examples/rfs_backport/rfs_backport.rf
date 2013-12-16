@@ -13,10 +13,19 @@ group top {
                     rreinit
                     rw
                 }
-                attributes software {
-                    ro
-                }
+                software ro
 
+            }
+		    
+            field b {
+		
+		    }
+        }
+
+        register reset_source {
+
+            attributes hardware {
+                rreinit_source
             }
         }
 
