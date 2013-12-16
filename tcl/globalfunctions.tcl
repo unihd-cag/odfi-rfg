@@ -1,6 +1,11 @@
+## Groups
+########################
+
+attributeGroup ::hardware
+attributeGroup ::software
 
 ## Rights
-##################
+########################
 
 attributeFunction ::rw
 attributeFunction ::ro

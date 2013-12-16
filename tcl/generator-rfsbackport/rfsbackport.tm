@@ -3,6 +3,7 @@ package require osys::rfg
 package require Itcl 3.4
 package require odfi::common
 package require odfi::list 2.0.0
+package require odfi::files
 
 package require odfi::ewww::webdata 1.0.0
 
@@ -194,14 +195,24 @@ namespace eval osys::rfg::generator::rfsbackport {
 
 
     ## Converts the file at provided location to RFS and returns the result as string
-    proc convertFileToRFS filePath {
+    proc convertFileToRFS {filePath {targetFile ""}} {
 
-
+        ## Convert 
+        ################
         set res [namespace eval ::osys::rfg "source $filePath"]
 
         set gen [osys::rfg::getGenerator "RFSBackport" $res]
 
         set res [$gen produce]
+
+        ## Write to file if required
+        ####################
+        if {$targetFile!=""} {
+            odfi::files::writeToFile $targetFile $res
+        }
+
+        ## Return 
+        return $res
 
     }
 

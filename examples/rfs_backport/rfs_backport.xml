@@ -1,0 +1,9 @@
+<regroot name="top" desc="">
+    <regroot name="a" desc="">
+        <reg64 name="test" desc="" >
+            <hwreg name="a"  width="0" desc="" reset="0" hw="rw" counter="1" rreinit="1" sw="ro" />
+        </reg64>
+    </regroot>
+    <regroot name="b" desc="">
+    </regroot>
+</regroot>
