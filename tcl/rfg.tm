@@ -362,6 +362,9 @@ namespace eval osys::rfg {
             ## Add to list
             lappend fields $newField 
 
+            ## Set parent
+            $newField parent $this
+
             ## Return 
             return $newField 
 
@@ -401,6 +404,7 @@ namespace eval osys::rfg {
     itcl::class Attributes {
         inherit Common 
 
+        ## List format: { {name value?}}
         odfi::common::classField public attr_list {}
 
         constructor {cName cClosure} {Common::constructor $cName} {
@@ -409,6 +413,15 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
         
+        public method contains name {
+            foreach {pair} $attr_list {
+                if {[lindex $pair 0]==$name} {
+                    return true
+                }
+            }
+            return false
+        }
+
         public method addAttribute {fname args} {
             if { [llength $args] == 0} {
                 lappend attr_list $fname
@@ -491,13 +504,20 @@ namespace eval osys::rfg {
     }
 
     #######################
-    ## Register File : Top Definition
+    ## Register File : Top Definitions
     #########################
 
     ## Main Factory  : Object name is the provided name, beware of conflicts
     proc registerFile {name closure} {
 
         return [::new RegisterFile ::$name $name $closure]
+
+    }
+
+    ## Main Factory  : Object name is the provided name, beware of conflicts
+    proc group {name closure} {
+
+        return [::new Group ::$name $name $closure]
 
     }
 

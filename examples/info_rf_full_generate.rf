@@ -1,8 +1,6 @@
-#!/usr/bin/env rfg
 
-set NUM_VPIDS 12
 
-osys::rfg::registerFile info_rf {
+group info_rf {
     
     register driver {
 
