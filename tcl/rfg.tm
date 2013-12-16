@@ -399,16 +399,9 @@ namespace eval osys::rfg {
 
         }
 
-        public method reserved {fName closure} {
+        public method reserved {reserved_width} {
 
-            ## Create
-            set newReserved [::new [namespace parent]::Reserved $this.$fName.#auto $fName $closure]
-
-            ## Add to list
-            lappend fields $newField
-
-            ## Return 
-            return $newField
+            field Reserved {width $reserved_width}
         }
 
         public method onEachField closure {
@@ -440,17 +433,17 @@ namespace eval osys::rfg {
     ###########################
     ## Reserved
     ###########################
-    itcl::class Reserved {
-        inherit Field
-        ## Width Always in bits
-        odfi::common::classField public width 0
+    # itcl::class Reserved {
+    #     inherit Field
+    #     ## Width Always in bits
+    #     odfi::common::classField public width 0
 
-        constructor {cName cClosure} {Common::constructor $cName} {
+    #     constructor {cName cClosure} {Common::constructor $cName} {
 
-            ## Execute closure 
-            odfi::closures::doClosure $cClosure
-        }
-    }
+    #         ## Execute closure 
+    #         odfi::closures::doClosure $cClosure
+    #     }
+    # }
 
     #####################
     ## Attribute
