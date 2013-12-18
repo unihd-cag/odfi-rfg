@@ -1,0 +1,42 @@
+## Create Register File
+osys::rfg::registerFile info_rf {
+
+    group info_rf {
+
+        register driver {
+
+            field version {
+
+                # Direct variable set
+                width 24
+
+                # Direct variable set
+                software rw
+                hardware ro
+
+                ## Reset value 
+                reset 0x12abcd
+            }
+        }
+
+        register node {
+
+            field id {
+
+                width 16
+            }
+
+            field guid {
+
+                width 24
+                reset 0x12abcd
+
+                software rw
+                hardware ro
+            }
+            field vpids {
+                width 16
+            }
+        }
+    }
+}
