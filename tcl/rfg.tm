@@ -104,13 +104,12 @@ namespace eval osys::rfg {
             set groupName [lindex $components 0]
             set attributeName [join [lrange $components 1 end] .]
 
-            #::puts "Has attribute $groupName $attributeName"
+            #puts "Has attribute $groupName $attributeName"
 
             #puts "Available attributes: $attributes"
             
             set foundAttributes [lsearch -glob -inline $attributes *$groupName]
             if {$foundAttributes!=""} {
-
                 ## Found attributes group, look for attribute 
                 if {[$foundAttributes contains $attributeName]} {
                     return 1

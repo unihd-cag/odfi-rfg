@@ -1,25 +1,73 @@
 <%
 	proc writeTemplate {object} {
-		
+		set first 0
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
 				writeTemplate $it
 			} else {
 				set register $it
 				$it onEachField {
-					puts "	.[$register name]_[$it name](),"				
+					if {$first != 0} {
+						puts ","	
+					}
+					puts  -nonewline "	.[$register name]_[$it name]()"
+					set first 1				
 				}
 			}
 		}
 
 	}
 	
-	proc writeBlackbox {registerFile} {
-		puts "writeBlackbox"
+	proc writeBlackbox {object} {
+		$object onEachComponent {
+			if {[$it isa osys::rfg::Group]} {
+				writeBlackbox $it
+			} else {
+				set register $it
+				$it onEachField {
+					if {[$it hasAttribute hardware.global.rw]} {
+						if {[$it width] == 1} {
+							puts "	input wire [$register name]_[$it name]_next;"
+							puts "	output reg [$register name]_[$it name];"
+						} else {
+							puts "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next;"
+							puts "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+						}
+					} elseif {[$it hasAttribute hardware.global.wo]} {
+						if {[$it width] == 1} {
+							puts "	input wire [$register name]_[$it name]_next;"
+						} else {
+							puts "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next;"
+						}
+					} elseif {[$it hasAttribute hardware.global.ro]} {
+						if {[$it width] == 1} {
+							puts "	output reg [$register name]_[$it name];"
+						} else {
+							puts "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+						}
+					} 
+				}
+			}
+		}
 	}
 
-	proc writeRegisternames {registerFile} {
-		puts "writeRegisternames"
+	proc writeRegisternames {object} {
+		$object onEachComponent {
+			if {[$it isa osys::rfg::Group]} {
+				writeRegisternames $it
+			} else {
+				set register $it
+				$it onEachField {
+					if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
+						if {[$it width] == 1} {
+							puts "reg [$register name]_[$it name];"
+						} else {
+							puts "reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+						}
+					}
+				}
+			}
+		}
 	}
 
 	proc writeRegister {registerFile} {
@@ -45,8 +93,22 @@
 <% writeTemplate $registerFile %>);
 */
 module <%puts [$registerFile name]%>(
-	<% writeBlackbox $registerFile %>
-);
+	///\defgroup sys
+	///@{ 
+	input wire res_n,
+	input wire clk,
+	///}@ 
+	///\defgroup rw_if
+	///@{ 
+	input wire[6:3] address,
+	output reg[63:0] read_data,
+	output reg invalid_address,
+	output reg access_complete,
+	input wire read_en,
+	input wire write_en,
+	input wire[63:0] write_data,
+	///}@ 
+<% writeBlackbox $registerFile %>);
 
 <% writeRegisternames $registerFile %>
 

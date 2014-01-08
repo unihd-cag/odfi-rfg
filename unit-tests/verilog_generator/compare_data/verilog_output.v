@@ -14,16 +14,32 @@ info_rf info_rf_I (
 	.driver_version(),
 	.node_id(),
 	.node_guid(),
-	.node_vpids(),
-);
+	.node_vpids());
 */
 module info_rf
 (
-	writeBlackbox
-
+	///\defgroup sys
+	///@{ 
+	input wire res_n,
+	input wire clk,
+	///}@ 
+	///\defgroup rw_if
+	///@{ 
+	input wire[6:3] address,
+	output reg[63:0] read_data,
+	output reg invalid_address,
+	output reg access_complete,
+	input wire read_en,
+	input wire write_en,
+	input wire[63:0] write_data,
+	///}@ 
+	output reg[15:0] node_id;
+	input wire[23:0] node_guid_next;
 );
 
-writeRegisternames
+reg[23:0] driver_version;
+reg[23:0] node_guid;
+reg[15:0] node_vpids;
 
 
 writeRegister
