@@ -10,9 +10,18 @@
 	<parent>
 		<groupId>com.idyria.osi</groupId>
 		<artifactId>project-scala</artifactId>
-		<version>2.10.2.r2</version>
+		<version>2.10.3.r2</version>
 	</parent>
 
+
+	<!-- SCM -->
+	<!-- #### -->
+	<scm>
+		<connection>scm:git:git://gitlab@lebleu/cag-osys/rfg.git</connection>
+		<developerConnection>scm:git:gitlab@lebleu:cag-osys/rfg.git</developerConnection>
+		<url>http://http://lebleu/gitlab/cag-osys/rfg</url>
+		<tag>HEAD</tag>
+	</scm>
 
 	<build>
 		<plugins>
@@ -71,147 +80,137 @@
 
 
 	<!-- Repositories to find packages -->
-    <!-- ############################################## -->
-    <pluginRepositories>
-        <pluginRepository>
-            <id>sonatype</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/groups/public</url>
-        </pluginRepository>
-        <!-- For old snapshots, please use groupId `com.jnaerator` and the following 
-            repo -->
-        <pluginRepository>
-            <id>nativelibs4java-repo</id>
-            <url>http://nativelibs4java.sourceforge.net/maven</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>idyria.central</id>
-            <name>plugins-release</name>
-            <url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>idyria.snapshots</id>
-            <name>plugins-snapshot</name>
-            <url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>central</id>
-            <name>plugins-release</name>
-            <url>http://dev:8081/artifactory/plugins-release</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots />
-            <id>snapshots</id>
-            <name>plugins-snapshot</name>
-            <url>http://dev:8081/artifactory/plugins-snapshot</url>
-        </pluginRepository>
-    </pluginRepositories>
-    <repositories>
-        <repository>
-            <id>sonatype</id>
-            <name>Sonatype OSS Snapshots Repository</name>
-            <url>http://oss.sonatype.org/content/groups/public</url>
-        </repository>
-        <!-- For old snapshots, please use groupId `com.jnaerator` and the following 
-            repo -->
-        <repository>
-            <id>nativelibs4java-repo</id>
-            <url>http://nativelibs4java.sourceforge.net/maven</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>idyria.central</id>
-            <name>libs-release</name>
-            <url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <id>idyria.snapshots</id>
-            <name>libs-snapshot</name>
-            <url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
-        </repository>
-        <repository>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-            <id>central</id>
-            <name>libs-release</name>
-            <url>http://dev:8081/artifactory/libs-release</url>
-        </repository>
-        <repository>
-            <snapshots />
-            <id>snapshots</id>
-            <name>libs-snapshot</name>
-            <url>http://dev:8081/artifactory/libs-snapshot</url>
-        </repository>
-    </repositories>
+	<!-- ############################################## -->
+	<pluginRepositories>
+		<pluginRepository>
+			<id>sonatype</id>
+			<name>Sonatype OSS Snapshots Repository</name>
+			<url>http://oss.sonatype.org/content/groups/public</url>
+		</pluginRepository>
+		<!-- For old snapshots, please use groupId `com.jnaerator` and the following 
+			repo -->
+		<pluginRepository>
+			<id>nativelibs4java-repo</id>
+			<url>http://nativelibs4java.sourceforge.net/maven</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>idyria.central</id>
+			<name>plugins-release</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>idyria.snapshots</id>
+			<name>plugins-snapshot</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>plugins-release</name>
+			<url>http://dev:8081/artifactory/plugins-release</url>
+		</pluginRepository>
+		<pluginRepository>
+			<snapshots />
+			<id>snapshots</id>
+			<name>plugins-snapshot</name>
+			<url>http://dev:8081/artifactory/plugins-snapshot</url>
+		</pluginRepository>
+	</pluginRepositories>
+	<repositories>
+		<repository>
+			<id>sonatype</id>
+			<name>Sonatype OSS Snapshots Repository</name>
+			<url>http://oss.sonatype.org/content/groups/public</url>
+		</repository>
+		<!-- For old snapshots, please use groupId `com.jnaerator` and the following 
+			repo -->
+		<repository>
+			<id>nativelibs4java-repo</id>
+			<url>http://nativelibs4java.sourceforge.net/maven</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>idyria.central</id>
+			<name>libs-release</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-release</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>idyria.snapshots</id>
+			<name>libs-snapshot</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
+		</repository>
+		<repository>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>libs-release</name>
+			<url>http://dev:8081/artifactory/libs-release</url>
+		</repository>
+		<repository>
+			<snapshots />
+			<id>snapshots</id>
+			<name>libs-snapshot</name>
+			<url>http://dev:8081/artifactory/libs-snapshot</url>
+		</repository>
+	</repositories>
 
-
-    <!-- Distribution -->
-    <!-- ############ -->
-    <distributionManagement>
-        <repository>
-            <id>dev</id>
-            <name>dev-releases</name>
-            <url>http://dev:8081/artifactory/libs-release-local</url>
-        </repository>
-        <snapshotRepository>
-            <id>dev</id>
-            <name>dev-snapshots</name>
-            <url>http://dev:8081/artifactory/libs-snapshot-local</url>
-        </snapshotRepository>
-    </distributionManagement>
-	
 
 	<!-- Distribution -->
 	<!-- ############ -->
-<!-- 	<distributionManagement> -->
-<!-- 		<repository> -->
-<!-- 			<id>extoll.release</id> -->
-<!-- 			<name>Extoll Public Release Repository</name> -->
-<!-- 			<url>https://www.extoll.de/schloss/nexus/content/repositories/releases/</url> -->
-<!-- 		</repository> -->
-<!-- 		<snapshotRepository> -->
-<!-- 			<id>extoll.snapshot</id> -->
-<!-- 			<name>Extoll Public Snapshot Repository</name> -->
-<!-- 			<url>https://www.extoll.de/schloss/nexus/content/repositories/snapshots/</url> -->
-<!-- 		</snapshotRepository> -->
-<!-- 	</distributionManagement> -->
+	<distributionManagement>
+		<repository>
+			<id>dev</id>
+			<name>dev-releases</name>
+			<url>http://dev:8081/artifactory/libs-release-local</url>
+		</repository>
+		<snapshotRepository>
+			<id>dev</id>
+			<name>dev-snapshots</name>
+			<url>http://dev:8081/artifactory/libs-snapshot-local</url>
+		</snapshotRepository>
+	</distributionManagement>
 
-<dependencies>
-        <dependency>
-            <groupId>com.idyria.osi.vui</groupId>
-            <artifactId>vui-core</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.idyria.osi.aib</groupId>
-            <artifactId>aib-core</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.idyria.osi.ooxoo</groupId>
-            <artifactId>ooxoo-db</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>com.idyria.osi.tea</groupId>
-            <artifactId>tea</artifactId>
-            <version>3.0.0-SNAPSHOT</version>
-        </dependency>
-    </dependencies>
+
+	<!-- Distribution -->
+	<!-- ############ -->
+	<!-- <distributionManagement> -->
+	<!-- <repository> -->
+	<!-- <id>extoll.release</id> -->
+	<!-- <name>Extoll Public Release Repository</name> -->
+	<!-- <url>https://www.extoll.de/schloss/nexus/content/repositories/releases/</url> -->
+	<!-- </repository> -->
+	<!-- <snapshotRepository> -->
+	<!-- <id>extoll.snapshot</id> -->
+	<!-- <name>Extoll Public Snapshot Repository</name> -->
+	<!-- <url>https://www.extoll.de/schloss/nexus/content/repositories/snapshots/</url> -->
+	<!-- </snapshotRepository> -->
+	<!-- </distributionManagement> -->
+
+	<dependencies>
+		<dependency>
+			<groupId>com.idyria.osi.aib</groupId>
+			<artifactId>aib-core</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>com.idyria.osi.tea</groupId>
+			<artifactId>tea</artifactId>
+			<version>3.0.0</version>
+		</dependency>
+	</dependencies>
 
 </project>
