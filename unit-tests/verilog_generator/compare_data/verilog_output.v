@@ -25,7 +25,7 @@ module info_rf
 	///}@ 
 	///\defgroup rw_if
 	///@{ 
-	input wire[6:3] address,
+	input wire[3:3] address,
 	output reg[63:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
@@ -37,15 +37,64 @@ module info_rf
 	input wire[23:0] node_guid_next;
 );
 
-reg[23:0] driver_version;
-reg[23:0] node_guid;
-reg[15:0] node_vpids;
+	reg[23:0] driver_version;
+	reg[23:0] node_guid;
+	reg[15:0] node_vpids;
 
 
-writeRegister
+	/* register driver */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			driver_version <= 0x12abcd;
+		end
+		else
+		begin
+		end
+	end
+
+	/* register node */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			node_id <= 0;
+			node_guid <= 0x12abcd;
+			node_vpids <= 0;
+		end
+		else
+		begin
+			node_guid <= node_guid_next;
+			if((address[3:3]== 1) && write_en)
+			begin
+				node_id <= write_data[15:0];
+			end
+		end
+	end
 
 
-writeAddressControl
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			invalid_address      <= 1'b0;
+			access_complete      <= 1'b0;
+			`ifdef ASIC
+			read_data   <= 64'b0;
+			`endif
+		end
+		else
+		begin
+			casex(address[3:3])
 
-
+			endcase
+		end
+	end
 endmodule;
