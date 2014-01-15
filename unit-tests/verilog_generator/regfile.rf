@@ -8,10 +8,12 @@ osys::rfg::registerFile info_rf {
             field version {
 
                 # Direct variable set
-                width 24
+                width 32
 
                 # Direct variable set
-                software ro
+               attributes software {
+                    ro
+               }
 
                 ## Reset value 
                 reset 0x12abcd

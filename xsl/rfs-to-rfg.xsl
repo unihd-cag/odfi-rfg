@@ -156,6 +156,28 @@ group <xsl:value-of select="@name"/> {
 </xsl:text>
 
     <!-- Rights and attributes--> 
+<xsl:if test="@hw_wen">
+<xsl:value-of select="$hier-level-tab-more"/>attributes hardware_wen {
+    <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@hw_wen"/>
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}    
+
+<xsl:text>  
+</xsl:text>
+</xsl:if>
+
+<xsl:if test="@sw_written">
+<xsl:value-of select="$hier-level-tab-more"/>attributes software_written {
+    <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw_written"/>
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}    
+
+<xsl:text>  
+</xsl:text>
+</xsl:if>
+
     <xsl:value-of select="$hier-level-tab-more"/>attributes software {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>

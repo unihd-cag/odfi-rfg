@@ -37,7 +37,7 @@ module info_rf
 	input wire[23:0] node_guid_next;
 );
 
-	reg[23:0] driver_version;
+	reg[31:0] driver_version;
 	reg[23:0] node_guid;
 	reg[15:0] node_vpids;
 
@@ -84,8 +84,8 @@ module info_rf
 	begin
 		if (!res_n)
 		begin
-			invalid_address      <= 1'b0;
-			access_complete      <= 1'b0;
+			invalid_address <= 1'b0;
+			access_complete <= 1'b0;
 			`ifdef ASIC
 			read_data   <= 64'b0;
 			`endif
@@ -93,7 +93,27 @@ module info_rf
 		else
 		begin
 			casex(address[3:3])
-
+				1'b0:
+				begin
+					read_data[31:0] <= driver_version;
+					read_data[63:32] <= 32'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				1'b1:
+				begin
+					read_data[15:0] <= node_id;
+					read_data[39:16] <= node_guid;
+					read_data[55:40] <= node_vpids;
+					read_data[63:56] <= 8'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				default:
+				begin
+					invalid_address <= read_en || write_en;
+					access_complete <= read_en || write_en;
+				end		
 			endcase
 		end
 	end
