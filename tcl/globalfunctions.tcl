@@ -17,3 +17,5 @@ attributeFunction ::wo
 attributeFunction ::counter
 attributeFunction ::rreinit
 attributeFunction ::rreinit_source
+attributeFunction ::software_written
+attributeFunction ::hardware_wen

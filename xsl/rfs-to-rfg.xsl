@@ -156,28 +156,6 @@ group <xsl:value-of select="@name"/> {
 </xsl:text>
 
     <!-- Rights and attributes--> 
-<xsl:if test="@hw_wen">
-<xsl:value-of select="$hier-level-tab-more"/>attributes hardware_wen {
-    <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@hw_wen"/>
-    <xsl:text>
-</xsl:text>
-    <xsl:value-of select="$hier-level-tab-more"/>}    
-
-<xsl:text>  
-</xsl:text>
-</xsl:if>
-
-<xsl:if test="@sw_written">
-<xsl:value-of select="$hier-level-tab-more"/>attributes software_written {
-    <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw_written"/>
-    <xsl:text>
-</xsl:text>
-    <xsl:value-of select="$hier-level-tab-more"/>}    
-
-<xsl:text>  
-</xsl:text>
-</xsl:if>
-
     <xsl:value-of select="$hier-level-tab-more"/>attributes software {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>
@@ -201,8 +179,14 @@ group <xsl:value-of select="@name"/> {
     <xsl:if test="@rreinit">
         <xsl:value-of select="$hier-level-tab-more"/>    rreinit
     </xsl:if>
-    
-
+    <xsl:if test="@sw_written">
+        <xsl:value-of select="$hier-level-tab-more"/>    software_written <xsl:value-of select="@sw_written"></xsl:value-of>
+        <xsl:text>
+        </xsl:text>
+    </xsl:if>
+    <xsl:if test="@hw_wen">
+        <xsl:value-of select="$hier-level-tab-more"/>hardware_wen  
+    </xsl:if>    
     <xsl:text>
 </xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/>}
@@ -213,8 +197,21 @@ group <xsl:value-of select="@name"/> {
 <xsl:value-of select="$hier-level-tab"/>}
 
 </xsl:template>
-    
-
+    <!-- ################## -->
+    <!-- Reserved           -->
+    <!-- ################## -->
+    <xsl:template match="reserved">
+    <!-- Gather depth -->
+<xsl:variable name="hier-pos"><xsl:number from="regroot" count="regroot|reg64|hwreg" level="multiple" format="1"></xsl:number></xsl:variable>
+<xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
+<xsl:variable name="hier-level-tab-more"><xsl:value-of select="$hier-level-tab"></xsl:value-of><xsl:text>    </xsl:text></xsl:variable>
+<xsl:value-of select="$hier-level-tab-more"/>reserved <xsl:choose>
+        <xsl:when test="fn:matches(@width,'^[A-Z_]+')">$<xsl:value-of select="@width"/> </xsl:when>
+        <xsl:otherwise> <xsl:value-of select="@width"/></xsl:otherwise>
+</xsl:choose>
+<xsl:text>
+</xsl:text>
+</xsl:template>
     <!-- ################## -->
     <!-- attributes --> 
     <!-- ################## -->

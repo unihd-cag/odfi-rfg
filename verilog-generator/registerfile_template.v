@@ -1,6 +1,6 @@
 <%
 	# logarithmus dualis function for address bit calculation
-	proc ld x "expr {int(log(\$x)/[expr log(2)])}"
+	proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
 	
 	# function to get the address Bits for the register file 
 	proc getAddrBits {registerfile} {
@@ -137,7 +137,7 @@
 				writeAddressControl $it
 			} else {
 				set register $it
-				puts "				[expr [getAddrBits $object]-3]'b[expr [$register getAbsoluteAddress]/8]:"
+				puts "				[expr [getAddrBits $object]-3]'h[format %x [expr [$register getAbsoluteAddress]/8]]:"
 				puts "				begin"
 				set lowerBound 0
 				$it onEachField {

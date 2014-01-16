@@ -11,10 +11,43 @@ info_rf info_rf_I (
 	.read_en(),
 	.write_en(),
 	.write_data(),
-	.driver_version(),
-	.node_id(),
+	.driver_ver(),
 	.node_guid(),
-	.node_vpids());
+	.node_id(),
+	.node_vpids(),
+	.management_sw_cfg_ip(),
+	.management_sw_enum_cnt(),
+	.management_sw_cfg_count(),
+	.management_sw_Reserved(),
+	.management_sw_backend(),
+	.ip_addresses_primary_ip_address(),
+	.ip_addresses_extoll_ip_address(),
+	.mgt_ip_addresses_primary_mgt_ip_address(),
+	.mgt_ip_addresses_extoll_mgt_ip_address(),
+	.tsc_tsc(),
+	.tsc_global_load_value_tsc_data(),
+	.scratchpad_0_data(),
+	.scratchpad_1_data(),
+	.scratchpad_2_data(),
+	.scratchpad_3_data(),
+	.scratchpad_4_data(),
+	.scratchpad_5_data(),
+	.scratchpad_6_data(),
+	.scratchpad_7_data(),
+	.tsc_global_load_enable_tsc_load_en_irq0(),
+	.tsc_global_load_enable_tsc_load_en_irq1(),
+	.tsc_global_load_enable_tsc_load_en_irq2(),
+	.tsc_global_load_enable_tsc_load_en_irq3(),
+	.tsc_global_load_enable_Reserved(),
+	.tsc_global_load_enable_global_irq_reinit_en0(),
+	.tsc_global_load_enable_global_irq_reinit_en1(),
+	.tsc_global_load_enable_global_irq_reinit_en2(),
+	.tsc_global_load_enable_global_irq_reinit_en3(),
+	.timer_interrupt_timer_interrupt_period(),
+	.timer_interrupt_timer_interrupt_enable(),
+	.timer_interrupt_timer_interrupt_one_shot(),
+	.timer_interrupt_Reserved(),
+	.timer_interrupt_timer_interrupt_toggle());
 */
 module info_rf
 (
@@ -25,7 +58,7 @@ module info_rf
 	///}@ 
 	///\defgroup rw_if
 	///@{ 
-	input wire[3:3] address,
+	input wire[7:3] address,
 	output reg[63:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
@@ -33,13 +66,49 @@ module info_rf
 	input wire write_en,
 	input wire[63:0] write_data,
 	///}@ 
-	output reg[15:0] node_id;
 	input wire[23:0] node_guid_next;
+	output reg[15:0] node_id;
+	input wire[47:0] tsc_tsc_next;
+	output reg[47:0] tsc_tsc;
+	output reg[47:0] tsc_global_load_value_tsc_data;
+	output reg tsc_global_load_enable_tsc_load_en_irq0;
+	output reg tsc_global_load_enable_tsc_load_en_irq1;
+	output reg tsc_global_load_enable_tsc_load_en_irq2;
+	output reg tsc_global_load_enable_tsc_load_en_irq3;
+	output reg tsc_global_load_enable_global_irq_reinit_en0;
+	output reg tsc_global_load_enable_global_irq_reinit_en1;
+	output reg tsc_global_load_enable_global_irq_reinit_en2;
+	output reg tsc_global_load_enable_global_irq_reinit_en3;
+	output reg[47:0] timer_interrupt_timer_interrupt_period;
+	input wire timer_interrupt_timer_interrupt_enable_next;
+	output reg timer_interrupt_timer_interrupt_enable;
+	output reg timer_interrupt_timer_interrupt_one_shot;
+	input wire timer_interrupt_timer_interrupt_toggle_next;
 );
 
-	reg[31:0] driver_version;
+	reg[31:0] driver_ver;
 	reg[23:0] node_guid;
 	reg[15:0] node_vpids;
+	reg[31:0] management_sw_cfg_ip;
+	reg[7:0] management_sw_enum_cnt;
+	reg[7:0] management_sw_cfg_count;
+	reg[14:0] management_sw_Reserved;
+	reg management_sw_backend;
+	reg[31:0] ip_addresses_primary_ip_address;
+	reg[31:0] ip_addresses_extoll_ip_address;
+	reg[31:0] mgt_ip_addresses_primary_mgt_ip_address;
+	reg[31:0] mgt_ip_addresses_extoll_mgt_ip_address;
+	reg[63:0] scratchpad_0_data;
+	reg[63:0] scratchpad_1_data;
+	reg[63:0] scratchpad_2_data;
+	reg[63:0] scratchpad_3_data;
+	reg[63:0] scratchpad_4_data;
+	reg[63:0] scratchpad_5_data;
+	reg[63:0] scratchpad_6_data;
+	reg[63:0] scratchpad_7_data;
+	reg[3:0] tsc_global_load_enable_Reserved;
+	reg[5:0] timer_interrupt_Reserved;
+	reg timer_interrupt_timer_interrupt_toggle;
 
 
 	/* register driver */
@@ -49,7 +118,7 @@ module info_rf
 	begin
 		if (!res_n)
 		begin
-			driver_version <= 0x12abcd;
+			driver_ver <= 32'd18311;
 		end
 		else
 		begin
@@ -63,16 +132,363 @@ module info_rf
 	begin
 		if (!res_n)
 		begin
-			node_id <= 0;
-			node_guid <= 0x12abcd;
-			node_vpids <= 0;
+			node_guid <= 24'h0;
+			node_id <= 16'h0;
+			node_vpids <= 16'h2323;
 		end
 		else
 		begin
 			node_guid <= node_guid_next;
-			if((address[3:3]== 1) && write_en)
+			if((address[7:3]== 1) && write_en)
 			begin
-				node_id <= write_data[15:0];
+				node_id <= write_data[39:24];
+			end
+		end
+	end
+
+	/* register management_sw */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			management_sw_cfg_ip <= 32'h0;
+			management_sw_enum_cnt <= 8'h0;
+			management_sw_cfg_count <= 8'h0;
+			management_sw_Reserved <= 0;
+			management_sw_backend <= 1'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 2) && write_en)
+			begin
+				management_sw_cfg_ip <= write_data[31:0];
+			end
+			if((address[7:3]== 2) && write_en)
+			begin
+				management_sw_enum_cnt <= write_data[39:32];
+			end
+			if((address[7:3]== 2) && write_en)
+			begin
+				management_sw_cfg_count <= write_data[47:40];
+			end
+			if((address[7:3]== 2) && write_en)
+			begin
+				management_sw_backend <= write_data[63:63];
+			end
+		end
+	end
+
+	/* register ip_addresses */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			ip_addresses_primary_ip_address <= 32'h0;
+			ip_addresses_extoll_ip_address <= 32'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 3) && write_en)
+			begin
+				ip_addresses_primary_ip_address <= write_data[31:0];
+			end
+			if((address[7:3]== 3) && write_en)
+			begin
+				ip_addresses_extoll_ip_address <= write_data[63:32];
+			end
+		end
+	end
+
+	/* register mgt_ip_addresses */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			mgt_ip_addresses_primary_mgt_ip_address <= 32'h0;
+			mgt_ip_addresses_extoll_mgt_ip_address <= 32'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 4) && write_en)
+			begin
+				mgt_ip_addresses_primary_mgt_ip_address <= write_data[31:0];
+			end
+			if((address[7:3]== 4) && write_en)
+			begin
+				mgt_ip_addresses_extoll_mgt_ip_address <= write_data[63:32];
+			end
+		end
+	end
+
+	/* register tsc */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			tsc_tsc <= 0;
+		end
+		else
+		begin
+			tsc_tsc <= tsc_tsc_next;
+			if((address[7:3]== 5) && write_en)
+			begin
+				tsc_tsc <= write_data[47:0];
+			end
+		end
+	end
+
+	/* register tsc_global_load_value */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			tsc_global_load_value_tsc_data <= 0;
+		end
+		else
+		begin
+			if((address[7:3]== 6) && write_en)
+			begin
+				tsc_global_load_value_tsc_data <= write_data[47:0];
+			end
+		end
+	end
+
+	/* register scratchpad_0 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_0_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 7) && write_en)
+			begin
+				scratchpad_0_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register scratchpad_1 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_1_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 8) && write_en)
+			begin
+				scratchpad_1_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register scratchpad_2 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_2_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 9) && write_en)
+			begin
+				scratchpad_2_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register scratchpad_3 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_3_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 10) && write_en)
+			begin
+				scratchpad_3_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register scratchpad_4 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_4_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 11) && write_en)
+			begin
+				scratchpad_4_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register scratchpad_5 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_5_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 12) && write_en)
+			begin
+				scratchpad_5_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register scratchpad_6 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_6_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 13) && write_en)
+			begin
+				scratchpad_6_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register scratchpad_7 */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			scratchpad_7_data <= 64'h0;
+		end
+		else
+		begin
+			if((address[7:3]== 14) && write_en)
+			begin
+				scratchpad_7_data <= write_data[63:0];
+			end
+		end
+	end
+
+	/* register tsc_global_load_enable */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			tsc_global_load_enable_tsc_load_en_irq0 <= 0;
+			tsc_global_load_enable_tsc_load_en_irq1 <= 0;
+			tsc_global_load_enable_tsc_load_en_irq2 <= 0;
+			tsc_global_load_enable_tsc_load_en_irq3 <= 0;
+			tsc_global_load_enable_Reserved <= 0;
+			tsc_global_load_enable_global_irq_reinit_en0 <= 0;
+			tsc_global_load_enable_global_irq_reinit_en1 <= 0;
+			tsc_global_load_enable_global_irq_reinit_en2 <= 0;
+			tsc_global_load_enable_global_irq_reinit_en3 <= 0;
+		end
+		else
+		begin
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_tsc_load_en_irq0 <= write_data[0:0];
+			end
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_tsc_load_en_irq1 <= write_data[1:1];
+			end
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_tsc_load_en_irq2 <= write_data[2:2];
+			end
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_tsc_load_en_irq3 <= write_data[3:3];
+			end
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_global_irq_reinit_en0 <= write_data[8:8];
+			end
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_global_irq_reinit_en1 <= write_data[9:9];
+			end
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_global_irq_reinit_en2 <= write_data[10:10];
+			end
+			if((address[7:3]== 15) && write_en)
+			begin
+				tsc_global_load_enable_global_irq_reinit_en3 <= write_data[11:11];
+			end
+		end
+	end
+
+	/* register timer_interrupt */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			timer_interrupt_timer_interrupt_period <= 0;
+			timer_interrupt_timer_interrupt_enable <= 0;
+			timer_interrupt_timer_interrupt_one_shot <= 0;
+			timer_interrupt_Reserved <= 0;
+			timer_interrupt_timer_interrupt_toggle <= 0;
+		end
+		else
+		begin
+			timer_interrupt_timer_interrupt_enable <= timer_interrupt_timer_interrupt_enable_next;
+			timer_interrupt_timer_interrupt_toggle <= timer_interrupt_timer_interrupt_toggle_next;
+			if((address[7:3]== 16) && write_en)
+			begin
+				timer_interrupt_timer_interrupt_period <= write_data[47:0];
+			end
+			if((address[7:3]== 16) && write_en)
+			begin
+				timer_interrupt_timer_interrupt_enable <= write_data[48:48];
+			end
+			if((address[7:3]== 16) && write_en)
+			begin
+				timer_interrupt_timer_interrupt_one_shot <= write_data[49:49];
 			end
 		end
 	end
@@ -92,20 +508,140 @@ module info_rf
 		end
 		else
 		begin
-			casex(address[3:3])
-				1'b0:
+			casex(address[7:3])
+				5'h0:
 				begin
-					read_data[31:0] <= driver_version;
+					read_data[31:0] <= driver_ver;
 					read_data[63:32] <= 32'b0
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
-				1'b1:
+				5'h1:
 				begin
-					read_data[15:0] <= node_id;
-					read_data[39:16] <= node_guid;
+					read_data[23:0] <= node_guid;
+					read_data[39:24] <= node_id;
 					read_data[55:40] <= node_vpids;
 					read_data[63:56] <= 8'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h2:
+				begin
+					read_data[31:0] <= management_sw_cfg_ip;
+					read_data[39:32] <= management_sw_enum_cnt;
+					read_data[47:40] <= management_sw_cfg_count;
+					read_data[63:63] <= management_sw_backend;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h3:
+				begin
+					read_data[31:0] <= ip_addresses_primary_ip_address;
+					read_data[63:32] <= ip_addresses_extoll_ip_address;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h4:
+				begin
+					read_data[31:0] <= mgt_ip_addresses_primary_mgt_ip_address;
+					read_data[63:32] <= mgt_ip_addresses_extoll_mgt_ip_address;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h5:
+				begin
+					read_data[47:0] <= tsc_tsc;
+					read_data[63:48] <= 16'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h6:
+				begin
+					read_data[47:0] <= tsc_global_load_value_tsc_data;
+					read_data[63:48] <= 16'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h7:
+				begin
+					read_data[63:0] <= scratchpad_0_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h8:
+				begin
+					read_data[63:0] <= scratchpad_1_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h9:
+				begin
+					read_data[63:0] <= scratchpad_2_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'ha:
+				begin
+					read_data[63:0] <= scratchpad_3_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'hb:
+				begin
+					read_data[63:0] <= scratchpad_4_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'hc:
+				begin
+					read_data[63:0] <= scratchpad_5_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'hd:
+				begin
+					read_data[63:0] <= scratchpad_6_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'he:
+				begin
+					read_data[63:0] <= scratchpad_7_data;
+					read_data[63:64] <= 0'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'hf:
+				begin
+					read_data[0:0] <= tsc_global_load_enable_tsc_load_en_irq0;
+					read_data[1:1] <= tsc_global_load_enable_tsc_load_en_irq1;
+					read_data[2:2] <= tsc_global_load_enable_tsc_load_en_irq2;
+					read_data[3:3] <= tsc_global_load_enable_tsc_load_en_irq3;
+					read_data[8:8] <= tsc_global_load_enable_global_irq_reinit_en0;
+					read_data[9:9] <= tsc_global_load_enable_global_irq_reinit_en1;
+					read_data[10:10] <= tsc_global_load_enable_global_irq_reinit_en2;
+					read_data[11:11] <= tsc_global_load_enable_global_irq_reinit_en3;
+					read_data[63:12] <= 52'b0
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				5'h10:
+				begin
+					read_data[47:0] <= timer_interrupt_timer_interrupt_period;
+					read_data[48:48] <= timer_interrupt_timer_interrupt_enable;
+					read_data[49:49] <= timer_interrupt_timer_interrupt_one_shot;
+					read_data[56:56] <= timer_interrupt_timer_interrupt_toggle;
+					read_data[63:57] <= 7'b0
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
