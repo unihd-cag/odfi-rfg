@@ -18,11 +18,42 @@
 			} else {
 				set register $it
 				$it onEachField {
-					if {$first != 0} {
-						puts ","	
+					if {[$it name] != "Reserved"} {
+						if {[$it hasAttribute hardware.global.rw]} {
+							if {$first != 0} {
+								puts ","	
+							}
+							puts "	.[$register name]_[$it name]_next(),"
+							if {[$it hasAttribute hardware.global.software_written]} {
+								puts "	.[$register name]_[$it name](),"
+								puts -nonewline "	.[$register name]_[$it name]_written()"
+								
+							} else {
+								puts -nonewline "	.[$register name]_[$it name]()"
+							}
+							set first 1	
+						}
+						if {[$it hasAttribute hardware.global.wo]} {
+							if {$first != 0} {
+								puts ","	
+							}
+							puts -nonewline "	.[$register name]_[$it name]_next()"
+							set first 1
+						}
+						if {[$it hasAttribute hardware.global.ro]} {
+							if {$first != 0} {
+								puts ","	
+							}
+							if {[$it hasAttribute hardware.global.software_written]} {
+								puts "	.[$register name]_[$it name](),"
+								puts -nonewline "	.[$register name]_[$it name]_written()"
+							} else {
+								puts -nonewline "	.[$register name]_[$it name]()"
+							}
+							set first 1
+						}
+									
 					}
-					puts  -nonewline "	.[$register name]_[$it name]()"
-					set first 1				
 				}
 			}
 		}
@@ -41,9 +72,15 @@
 						if {[$it width] == 1} {
 							puts "	input wire [$register name]_[$it name]_next;"
 							puts "	output reg [$register name]_[$it name];"
+							if {[$it hasAttribute hardware.global.software_written]} {
+								puts "	output reg [$register name]_[$it name]_written;"
+							}
 						} else {
 							puts "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next;"
 							puts "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+							if {[$it hasAttribute hardware.global.software_written]} {
+								puts "	output reg [$register name]_[$it name]_written;"
+							}
 						}
 					} elseif {[$it hasAttribute hardware.global.wo]} {
 						if {[$it width] == 1} {
@@ -54,8 +91,14 @@
 					} elseif {[$it hasAttribute hardware.global.ro]} {
 						if {[$it width] == 1} {
 							puts "	output reg [$register name]_[$it name];"
+							if {[$it hasAttribute hardware.global.software_written]} {
+								puts "	output reg [$register name]_[$it name]_written;"
+							}
 						} else {
 							puts "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+							if {[$it hasAttribute hardware.global.software_written]} {
+								puts "	output reg [$register name]_[$it name]_written;"
+							}
 						}
 					} 
 				}
@@ -71,11 +114,18 @@
 			} else {
 				set register $it
 				$it onEachField {
-					if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
-						if {[$it width] == 1} {
-							puts "	reg [$register name]_[$it name];"
-						} else {
-							puts "	reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+					if {[$it name] != "Reserved"} {
+						if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
+							if {[$it width] == 1} {
+								puts "	reg [$register name]_[$it name];"
+							} else {
+								puts "	reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+							}
+						}
+						if {[$it hasAttribute hardware.global.software_written]} {
+							if {[$it getAttributeValue hardware.global.software_written]==2} {
+								puts "	reg [$register name]_[$it name]_res_in_last_cycle;"
+							}
 						}
 					}
 				}
@@ -89,18 +139,32 @@
 			if {[$it isa osys::rfg::Group]} {
 				writeRegister $it
 			} else {
+
+				# Write always block
 				puts "	/* register [$it name] */"
 				puts "	`ifdef ASYNC_RES"
 				puts "	always @(posedge clk or negedge res_n) `else"
 				puts "	always @(posedge clk) `endif"
 				puts "	begin"
+
+				# Write reset logic
 				puts "		if (!res_n)"
 				puts "		begin"
 				set register $it
 				$it onEachField {
-					puts "			[$register name]_[$it name] <= [$it reset];"
+					if {[$it name] != "Reserved"} {
+						puts "			[$register name]_[$it name] <= [$it reset];"
+						if {[$it hasAttribute hardware.global.software_written]} {
+							puts "			[$register name]_[$it name]_written <= 1'b0;"
+							if {[$it getAttributeValue hardware.global.software_written] == 2} {
+								puts "			[$register name]_[$it name]_res_in_last_cycle <= 1'b1;"
+							}
+						}
+					}
 				}
 				puts "		end"
+
+				# Write register logic
 				puts "		else"
 				puts "		begin"
 				set register $it 
@@ -119,11 +183,33 @@
 						puts "			begin"
 						puts "				[$register name]_[$it name] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 						puts "			end"
-
+						if {[$it hasAttribute hardware.global.software_written]} {
+							if {[$it getAttributeValue hardware.global.software_written]==2} {
+								puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
+								puts "			begin"
+								puts "				[$register name]_[$it name]_written <= 1'b1;"
+								puts "				[$register name]_[$it name]_res_in_last_cycle <= 1'b0;"
+								puts "			end"
+								puts "			else"
+								puts "			begin"
+								puts "				[$register name]_[$it name]_written <= 1'b0;"
+								puts "			end"															
+							} else {
+								puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+								puts "			begin"
+								puts "				[$register name]_[$it name]_written <= 1'b1;"
+								puts "			end"
+								puts "			else"
+								puts "			begin"
+								puts "				[$register name]_[$it name]_written <= 1'b0;"
+								puts "			end"
+							}						
+						}
 					}
 					incr lowerBound [$it width]
 				}
 				puts "		end"
+
 				puts "	end"
 				puts ""
 			}
@@ -157,7 +243,7 @@
 	}
 %>
 /* auto generated by RFG */
-/*
+/* instantiation template
 <%puts -nonewline "[$registerFile name] [$registerFile name]"%>_I (
 	.res_n(),
 	.clk(),

@@ -109,6 +109,7 @@ namespace eval osys::rfg {
             #puts "Available attributes: $attributes"
             
             set foundAttributes [lsearch -glob -inline $attributes *$groupName]
+
             if {$foundAttributes!=""} {
                 ## Found attributes group, look for attribute 
                 if {[$foundAttributes contains $attributeName]} {
@@ -124,6 +125,22 @@ namespace eval osys::rfg {
 
 
         }
+
+        ## name format: attributeGroupName.attributeQualified name 
+        ## Example: hardaware.software_written
+        public method getAttributeValue qname {
+            
+            set components [split $qname .]
+            set groupName [lindex $components 0]
+            set attributeName [join [lrange $components 1 end] .]
+            set foundAttributes [lsearch -glob -inline $attributes *$groupName]
+
+            if {$foundAttributes!=""} {
+                return [$foundAttributes getValue $attributeName]
+            }
+            return false
+        }
+
         public method attributes {fName closure} {
             ## Create 
             set newAttribute [::new [namespace parent]::Attributes $name.$fName $fName $closure]
@@ -190,6 +207,15 @@ namespace eval osys::rfg {
 
                 if {[lindex $pair 0]==$name} {
                     return true
+                }
+            }
+            return false
+        }
+
+        public method getValue name {
+            foreach {pair} $attr_list {
+                if {[lindex $pair 0]==$name} {
+                    return [lindex $pair 1]
                 }
             }
             return false
