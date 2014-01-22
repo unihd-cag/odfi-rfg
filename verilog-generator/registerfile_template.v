@@ -24,6 +24,9 @@
 								puts ","	
 							}
 							puts "	.[$register name]_[$it name]_next(),"
+							if {[$it hasAttribute hardware.global.hardware_wen]} {
+								puts "	.[$register name]_[$it name]_wen(),"
+							}
 							if {[$it hasAttribute hardware.global.software_written]} {
 								puts "	.[$register name]_[$it name](),"
 								puts -nonewline "	.[$register name]_[$it name]_written()"
@@ -36,6 +39,9 @@
 						if {[$it hasAttribute hardware.global.wo]} {
 							if {$first != 0} {
 								puts ","	
+							}
+							if {[$it hasAttribute hardware.global.hardware_wen]} {
+								puts "	.[$register name]_[$it name]_wen(),"
 							}
 							puts -nonewline "	.[$register name]_[$it name]_next()"
 							set first 1
@@ -62,43 +68,53 @@
 	
 	# write Inputs and Outputs
 	proc writeBlackbox {object} {
+		set first 1
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
 				writeBlackbox $it
 			} else {
 				set register $it
 				$it onEachField {
+					if {[$it hasAttribute hardware.global.rw] || [$it hasAttribute hardware.global.ro] || [$it hasAttribute hardware.global.wo]} {
+						if {$first == 0} {
+							puts ","
+						}
+						set first 0
+					}
 					if {[$it hasAttribute hardware.global.rw]} {
+						if {[$it hasAttribute hardware.global.hardware_wen]} {
+							puts "	input wire [$register name]_[$it name]_wen,"
+						}
 						if {[$it width] == 1} {
-							puts "	input wire [$register name]_[$it name]_next;"
-							puts "	output reg [$register name]_[$it name];"
 							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	output reg [$register name]_[$it name]_written;"
+								puts "	output reg [$register name]_[$it name]_written,"
 							}
+							puts "	input wire [$register name]_[$it name]_next,"
+							puts -nonewline "	output reg [$register name]_[$it name]"
 						} else {
-							puts "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next;"
-							puts "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
 							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	output reg [$register name]_[$it name]_written;"
+								puts "	output reg [$register name]_[$it name]_written,"
 							}
+							puts "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next,"
+							puts -nonewline "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
 						}
 					} elseif {[$it hasAttribute hardware.global.wo]} {
+						if {[$it hasAttribute hardware.global.hardware_wen]} {
+							puts "	input wire [$register name]_[$it name]_wen,"
+						}
 						if {[$it width] == 1} {
-							puts "	input wire [$register name]_[$it name]_next;"
+							puts -nonewline "	input wire [$register name]_[$it name]_next"
 						} else {
-							puts "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next;"
+							puts -nonewline "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next"
 						}
 					} elseif {[$it hasAttribute hardware.global.ro]} {
+							if {[$it hasAttribute hardware.global.software_written]} {
+								puts "	output reg [$register name]_[$it name]_written,"
+							}
 						if {[$it width] == 1} {
-							puts "	output reg [$register name]_[$it name];"
-							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	output reg [$register name]_[$it name]_written;"
-							}
+							puts -nonewline "	output reg [$register name]_[$it name]"
 						} else {
-							puts "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
-							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	output reg [$register name]_[$it name]_written;"
-							}
+							puts -nonewline "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
 						}
 					} 
 				}
@@ -156,7 +172,7 @@
 						puts "			[$register name]_[$it name] <= [$it reset];"
 						if {[$it hasAttribute hardware.global.software_written]} {
 							puts "			[$register name]_[$it name]_written <= 1'b0;"
-							if {[$it getAttributeValue hardware.global.software_written] == 2} {
+							if {[$it getAttributeValue hardware.global.software_written]==2} {
 								puts "			[$register name]_[$it name]_res_in_last_cycle <= 1'b1;"
 							}
 						}
@@ -167,10 +183,20 @@
 				# Write register logic
 				puts "		else"
 				puts "		begin"
+				puts ""
 				set register $it 
 			 	$it onEachField {
 					if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
-						puts "			[$register name]_[$it name] <= [$register name]_[$it name]_next;"		
+						if {[$it hasAttribute hardware.global.hardware_wen]} {
+							puts "			if([$register name]_[$it name]_wen)"
+							puts "			begin"
+							puts "				[$register name]_[$it name] <= [$register name]_[$it name]_next;"
+							puts "			end"
+							puts ""
+						} else {
+							puts "			[$register name]_[$it name] <= [$register name]_[$it name]_next;"	
+							puts ""
+						}	
 					}
 				}
 				set reg_size [expr [$object size]/8]
@@ -183,6 +209,7 @@
 						puts "			begin"
 						puts "				[$register name]_[$it name] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 						puts "			end"
+						puts ""
 						if {[$it hasAttribute hardware.global.software_written]} {
 							if {[$it getAttributeValue hardware.global.software_written]==2} {
 								puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
@@ -193,7 +220,8 @@
 								puts "			else"
 								puts "			begin"
 								puts "				[$register name]_[$it name]_written <= 1'b0;"
-								puts "			end"															
+								puts "			end"
+								puts ""															
 							} else {
 								puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
 								puts "			begin"
@@ -203,6 +231,7 @@
 								puts "			begin"
 								puts "				[$register name]_[$it name]_written <= 1'b0;"
 								puts "			end"
+								puts ""
 							}						
 						}
 					}
@@ -234,7 +263,9 @@
 					}
 					incr lowerBound [$it width]
 				}
-				puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [$registerFile register_size]-$lowerBound]'b0"
+				if {$lowerBound !=64} {
+					puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [$registerFile register_size]-$lowerBound]'b0"
+				}
 				puts "					invalid_address <= 1'b0;"
 				puts "					access_complete <= write_en || read_en;"
 				puts "				end"
@@ -242,6 +273,7 @@
 		}
 	}
 %>
+
 /* auto generated by RFG */
 /* instantiation template
 <%puts -nonewline "[$registerFile name] [$registerFile name]"%>_I (
@@ -272,7 +304,8 @@ module <%puts [$registerFile name]%>(
 	input wire write_en,
 	input wire[<% puts -nonewline "[expr [$registerFile register_size]-1]"%>:0] write_data,
 	///}@ 
-<% writeBlackbox $registerFile %>);
+<% writeBlackbox $registerFile %>
+);
 
 <% writeRegisternames $registerFile %>
 
