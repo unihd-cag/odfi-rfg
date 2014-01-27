@@ -264,7 +264,7 @@
 					incr lowerBound [$it width]
 				}
 				if {$lowerBound !=64} {
-					puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [$registerFile register_size]-$lowerBound]'b0"
+					puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [$registerFile register_size]-$lowerBound]'b0;"
 				}
 				puts "					invalid_address <= 1'b0;"
 				puts "					access_complete <= write_en || read_en;"
@@ -333,4 +333,4 @@ module <%puts [$registerFile name]%>(
 			endcase
 		end
 	end
-endmodule;
+endmodule
