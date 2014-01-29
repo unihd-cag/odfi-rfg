@@ -149,7 +149,7 @@
 		}
 	}
 
-	# write the register function 
+	# write the register function // rewrite this there is with if else constructs...
 	proc writeRegister {object} {
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
@@ -263,7 +263,7 @@
 					}
 					incr lowerBound [$it width]
 				}
-				if {$lowerBound !=64} {
+				if {$lowerBound !=[$registerFile register_size]} {
 					puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [$registerFile register_size]-$lowerBound]'b0;"
 				}
 				puts "					invalid_address <= 1'b0;"
