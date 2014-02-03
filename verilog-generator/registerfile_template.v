@@ -116,7 +116,7 @@
 						} else {
 							puts -nonewline "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
 						}
-					} 
+					}
 				}
 			}
 		}
@@ -149,6 +149,104 @@
 		}
 	}
 
+	# write the reset logic
+	proc writeReset {register} {
+		puts "		if (!res_n)"
+		puts "		begin"
+		$register onEachField {
+			if {[$it name] != "Reserved"} {
+				puts "			[$register name]_[$it name] <= [$it reset];"
+				if {[$it hasAttribute hardware.global.software_written]} {
+					puts "			[$register name]_[$it name]_written <= 1'b0;"
+					if {[$it getAttributeValue hardware.global.software_written]==2} {
+						puts "			[$register name]_[$it name]_res_in_last_cycle <= 1'b1;"
+					}
+				}
+			}
+		}
+		puts "		end"
+	}
+
+	
+
+	# write counter instance 
+	proc writeCounterModule {register field} {
+		if {[$field hasAttribute hardware.counter]} {
+			puts "	counter48 #("
+			puts "		.DATASIZE([$field width])"
+			puts "	) [$register name]_I ("
+			puts "		.clk(clk),"
+			puts "		.res_n(res_n),"
+			puts "		.increment(),"
+			puts "		.load([$register name]_[$field name]),"
+			puts "		.load_enable([$register name]_enable),"
+			puts "		.value([$register name])"
+			puts "	);"
+		}
+	}
+
+	# write the hardware register write
+	proc writeRegisterHardwareWrite {register field} {
+			if {[$field hasAttribute hardware.global.wo] || [$field hasAttribute hardware.global.rw]} {
+				if {[$field hasAttribute hardware.global.hardware_wen]} {
+					puts "				if([$register name]_[$field name]_wen)"
+					puts "				begin"
+					puts "					[$register name]_[$field name] <= [$register name]_[$field name]_next;"
+					puts "				end"
+				} else {
+					puts "				[$register name]_[$field name] <= [$register name]_[$field name]_next;"	
+				}	
+			}	
+	}
+
+	# write Software register write calls hardware register write
+	proc writeRegisterSoftwareWrite {object register} {
+		set reg_size [expr [$object size]/8]
+		set lowerBound 0
+		$register onEachField {
+			set upperBound [expr $lowerBound+[$it width]]
+			if {[$it hasAttribute software.global.wo] || [$it hasAttribute software.global.rw]} {
+				puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+				puts "			begin"
+				puts "				[$register name]_[$it name] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+				puts "			end"
+				if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
+					puts "			else"
+					puts "			begin"
+					writeRegisterHardwareWrite $register $it
+					puts "			end"
+				}
+				if {[$it hasAttribute hardware.global.software_written]} {
+					if {[$it getAttributeValue hardware.global.software_written]==2} {
+						puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
+						puts "			begin"
+						puts "				[$register name]_[$it name]_written <= 1'b1;"
+						puts "				[$register name]_[$it name]_res_in_last_cycle <= 1'b0;"
+						puts "			end"
+						puts "			else"
+						puts "			begin"
+						puts "				[$register name]_[$it name]_written <= 1'b0;"
+						puts "			end"
+						puts ""															
+					} else {
+						puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+						puts "			begin"
+						puts "				[$register name]_[$it name]_written <= 1'b1;"
+						puts "			end"
+						puts "			else"
+						puts "			begin"
+						puts "				[$register name]_[$it name]_written <= 1'b0;"
+						puts "			end"
+						puts ""
+					}						
+				}
+			} else {
+				writeRegisterHardwareWrite $register $it
+			}
+			incr lowerBound [$it width]
+		}
+	}
+
 	# write the register function // rewrite this there is with if else constructs...
 	proc writeRegister {object} {
 		$object onEachComponent {
@@ -164,79 +262,13 @@
 				puts "	begin"
 
 				# Write reset logic
-				puts "		if (!res_n)"
-				puts "		begin"
-				set register $it
-				$it onEachField {
-					if {[$it name] != "Reserved"} {
-						puts "			[$register name]_[$it name] <= [$it reset];"
-						if {[$it hasAttribute hardware.global.software_written]} {
-							puts "			[$register name]_[$it name]_written <= 1'b0;"
-							if {[$it getAttributeValue hardware.global.software_written]==2} {
-								puts "			[$register name]_[$it name]_res_in_last_cycle <= 1'b1;"
-							}
-						}
-					}
-				}
-				puts "		end"
+				writeReset $it
 
 				# Write register logic
 				puts "		else"
 				puts "		begin"
 				puts ""
-				set register $it 
-			 	$it onEachField {
-					if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
-						if {[$it hasAttribute hardware.global.hardware_wen]} {
-							puts "			if([$register name]_[$it name]_wen)"
-							puts "			begin"
-							puts "				[$register name]_[$it name] <= [$register name]_[$it name]_next;"
-							puts "			end"
-							puts ""
-						} else {
-							puts "			[$register name]_[$it name] <= [$register name]_[$it name]_next;"	
-							puts ""
-						}	
-					}
-				}
-				set reg_size [expr [$object size]/8]
-				set register $it
-				set lowerBound 0
-				$it onEachField {
-					set upperBound [expr $lowerBound+[$it width]]
-					if {[$it hasAttribute software.global.wo] || [$it hasAttribute software.global.rw]} {
-						puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
-						puts "			begin"
-						puts "				[$register name]_[$it name] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
-						puts "			end"
-						puts ""
-						if {[$it hasAttribute hardware.global.software_written]} {
-							if {[$it getAttributeValue hardware.global.software_written]==2} {
-								puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
-								puts "			begin"
-								puts "				[$register name]_[$it name]_written <= 1'b1;"
-								puts "				[$register name]_[$it name]_res_in_last_cycle <= 1'b0;"
-								puts "			end"
-								puts "			else"
-								puts "			begin"
-								puts "				[$register name]_[$it name]_written <= 1'b0;"
-								puts "			end"
-								puts ""															
-							} else {
-								puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
-								puts "			begin"
-								puts "				[$register name]_[$it name]_written <= 1'b1;"
-								puts "			end"
-								puts "			else"
-								puts "			begin"
-								puts "				[$register name]_[$it name]_written <= 1'b0;"
-								puts "			end"
-								puts ""
-							}						
-						}
-					}
-					incr lowerBound [$it width]
-				}
+				writeRegisterSoftwareWrite $object $it
 				puts "		end"
 
 				puts "	end"

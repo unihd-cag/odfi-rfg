@@ -90,6 +90,17 @@ osys::rfg::registerFile info_rf {
             
             }
         }
+        register tsc {
+            field cnt {
+                width 48
+                software rw
+                hardware {
+                    rw
+                    hardware_wen
+                    counter
+                }
+            }
+        }
     }
 }
 

@@ -24,7 +24,10 @@ info_rf info_rf_I (
 	.r1_r1_3_written(),
 	.r1_r1_4_next(),
 	.r1_r1_4_wen(),
-	.r1_r1_4());
+	.r1_r1_4(),
+	.tsc_cnt_next(),
+	.tsc_cnt_wen(),
+	.tsc_cnt());
 */
 module info_rf
 (
@@ -55,7 +58,10 @@ module info_rf
 	output reg[15:0] r1_r1_3,
 	input wire r1_r1_4_wen,
 	input wire[15:0] r1_r1_4_next,
-	output reg[15:0] r1_r1_4
+	output reg[15:0] r1_r1_4,
+	input wire tsc_cnt_wen,
+	input wire[47:0] tsc_cnt_next,
+	output reg[47:0] tsc_cnt
 );
 
 	reg[31:0] driver_version;
@@ -71,7 +77,7 @@ module info_rf
 	begin
 		if (!res_n)
 		begin
-			driver_version <= 64'h12abcd;
+			driver_version <= 32'h12abcd;
 		end
 		else
 		begin
@@ -87,19 +93,17 @@ module info_rf
 		if (!res_n)
 		begin
 			node_id <= 0;
-			node_guid <= 64'h12abcd;
+			node_guid <= 24'h12abcd;
 			node_vpids <= 0;
 		end
 		else
 		begin
 
-			node_guid <= node_guid_next;
-
 			if((address[4:3]== 1) && write_en)
 			begin
 				node_id <= write_data[15:0];
 			end
-
+				node_guid <= node_guid_next;
 		end
 	end
 
@@ -121,27 +125,22 @@ module info_rf
 		else
 		begin
 
-			r1_r1_1 <= r1_r1_1_next;
-
-			r1_r1_2 <= r1_r1_2_next;
-
-			r1_r1_3 <= r1_r1_3_next;
-
-			if(r1_r1_4_wen)
-			begin
-				r1_r1_4 <= r1_r1_4_next;
-			end
-
 			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_1 <= write_data[15:0];
 			end
-
+			else
+			begin
+				r1_r1_1 <= r1_r1_1_next;
+			end
 			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_2 <= write_data[31:16];
 			end
-
+			else
+			begin
+				r1_r1_2 <= r1_r1_2_next;
+			end
 			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_2_written <= 1'b1;
@@ -155,7 +154,10 @@ module info_rf
 			begin
 				r1_r1_3 <= write_data[47:32];
 			end
-
+			else
+			begin
+				r1_r1_3 <= r1_r1_3_next;
+			end
 			if(((address[4:3]== 2) && write_en) || r1_r1_3_res_in_last_cycle)
 			begin
 				r1_r1_3_written <= 1'b1;
@@ -170,7 +172,39 @@ module info_rf
 			begin
 				r1_r1_4 <= write_data[63:48];
 			end
+			else
+			begin
+				if(r1_r1_4_wen)
+				begin
+					r1_r1_4 <= r1_r1_4_next;
+				end
+			end
+		end
+	end
 
+	/* register tsc */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			tsc_cnt <= 0;
+		end
+		else
+		begin
+
+			if((address[4:3]== 3) && write_en)
+			begin
+				tsc_cnt <= write_data[47:0];
+			end
+			else
+			begin
+				if(tsc_cnt_wen)
+				begin
+					tsc_cnt <= tsc_cnt_next;
+				end
+			end
 		end
 	end
 
@@ -212,6 +246,13 @@ module info_rf
 					read_data[31:16] <= r1_r1_2;
 					read_data[47:32] <= r1_r1_3;
 					read_data[63:48] <= r1_r1_4;
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
+				end
+				2'h3:
+				begin
+					read_data[47:0] <= tsc_cnt;
+					read_data[63:48] <= 16'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
