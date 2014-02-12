@@ -38,6 +38,7 @@ module verilog_output_tb();
 	    .write_data(write_data),
 	    .node_id(node_id),
 	    .node_guid_next(node_guid_next),
+        .tsc_cnt_countup(1'b1),
 	    .r1_r1_1_next(r1_r1_1_next),
 	    .r1_r1_1(r1_r1_1),
 	    .r1_r1_2_next(r1_r1_2_next),
@@ -119,8 +120,8 @@ module verilog_output_tb();
                 end
             end
             if (i == 3) begin
-                if (invalid_address != 1) begin
-                    $error("\nERROR invalid_address is not set at address 3");
+                if (invalid_address != 0) begin
+                    $error("\nERROR invalid_address was set at address 3");
                     $stop;
                 end
             end
@@ -172,19 +173,19 @@ module verilog_output_tb();
             end
             if (i == 0 && read_data != 64'h000000000012ABCD) begin
                 $error("\nERROR (Software Read) read_data has the wrong value");
-                $stop;    
+                $stop;
             end
             if (i == 1 && read_data != 64'h000000000000555A) begin
                 $error("\nERROR (Software Read) read_data has the wrong value");
-                $stop;    
+                $stop;
             end
             if (i == 2 && read_data != 64'h0000000000000000) begin
                 $error("\nERROR (Software Read) read_data has the wrong value");
-                $stop;    
+                $stop;
             end
-            if (i == 3 && invalid_address != 1) begin
-                $error("\nERROR (Software Read) invalid_address was not set");
-                $stop;    
+            if (i == 3 && invalid_address != 0) begin
+                $error("\nERROR (Software Read) invalid_address was set");
+                $stop;
             end
         end
         #100

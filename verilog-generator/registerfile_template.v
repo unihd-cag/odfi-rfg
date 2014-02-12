@@ -11,7 +11,8 @@
 	
 	# write the verilog template for an easy implementation in a higher level module 
 	proc writeTemplate {object} {
-		set first 0
+
+		set signalList {}
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
 				writeTemplate $it
@@ -20,106 +21,97 @@
 				$it onEachField {
 					if {[$it name] != "Reserved"} {
 						if {[$it hasAttribute hardware.global.rw]} {
-							if {$first != 0} {
-								puts ","	
-							}
-							puts "	.[$register name]_[$it name]_next(),"
+							lappend signalList "	.[$register name]_[$it name]_next()"
+							lappend signalList "	.[$register name]_[$it name]"
 							if {[$it hasAttribute hardware.global.hardware_wen]} {
-								puts "	.[$register name]_[$it name]_wen(),"
+								lappend signalList "	.[$register name]_[$it name]_wen()"
 							}
 							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	.[$register name]_[$it name](),"
-								puts -nonewline "	.[$register name]_[$it name]_written()"
-								
-							} else {
-								puts -nonewline "	.[$register name]_[$it name]()"
+								lappend signalList "	.[$register name]_[$it name]_written()"								
 							}
-							set first 1	
 						}
 						if {[$it hasAttribute hardware.global.wo]} {
-							if {$first != 0} {
-								puts ","	
-							}
+							lappend signalList "	.[$register name]_[$it name]_next()"
 							if {[$it hasAttribute hardware.global.hardware_wen]} {
-								puts "	.[$register name]_[$it name]_wen(),"
+								lappend signalLilst "	.[$register name]_[$it name]_wen()"
 							}
-							puts -nonewline "	.[$register name]_[$it name]_next()"
-							set first 1
 						}
 						if {[$it hasAttribute hardware.global.ro]} {
-							if {$first != 0} {
-								puts ","	
-							}
+							lappend signalList "	.[$register name]_[$it name]()"
 							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	.[$register name]_[$it name](),"
-								puts -nonewline "	.[$register name]_[$it name]_written()"
-							} else {
-								puts -nonewline "	.[$register name]_[$it name]()"
+								lappend signalList "	.[$register name]_[$it name]_written()"								
 							}
-							set first 1
 						}
-									
+						if {[$it hasAttribute hardware.global.counter]} {
+							lappend signalList "	.[$register name]_[$it name]_countup()"
+						}
 					}
 				}
 			}
 		}
-
+		puts [join $signalList ",\n"]
 	}
 	
 	# write Inputs and Outputs
 	proc writeBlackbox {object} {
-		set first 1
+
+		set signalList {}
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
-				writeBlackbox $it
+				writeBlackbox $it 
 			} else {
-				set register $it
+				set register $it 
 				$it onEachField {
-					if {[$it hasAttribute hardware.global.rw] || [$it hasAttribute hardware.global.ro] || [$it hasAttribute hardware.global.wo]} {
-						if {$first == 0} {
-							puts ","
-						}
-						set first 0
-					}
 					if {[$it hasAttribute hardware.global.rw]} {
-						if {[$it hasAttribute hardware.global.hardware_wen]} {
-							puts "	input wire [$register name]_[$it name]_wen,"
-						}
 						if {[$it width] == 1} {
-							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	output reg [$register name]_[$it name]_written,"
+							lappend signalList "	input wire [$register name]_[$it name]_next"
+							if {[$it hasAttribute hardware.global.counter]} {
+								lappend signalList "	output wire [$register name]_[$it name]"
+							} else {
+								lappend signalList "	output reg [$register name]_[$it name]"
 							}
-							puts "	input wire [$register name]_[$it name]_next,"
-							puts -nonewline "	output reg [$register name]_[$it name]"
 						} else {
-							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	output reg [$register name]_[$it name]_written,"
+							lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next"
+							if {[$it hasAttribute hardware.global.counter]} {
+								lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+							} else {
+								lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
 							}
-							puts "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next,"
-							puts -nonewline "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
 						}
 					} elseif {[$it hasAttribute hardware.global.wo]} {
-						if {[$it hasAttribute hardware.global.hardware_wen]} {
-							puts "	input wire [$register name]_[$it name]_wen,"
-						}
 						if {[$it width] == 1} {
-							puts -nonewline "	input wire [$register name]_[$it name]_next"
+							lappend signalList "	input wire [$register name]_[$it name]_next"
 						} else {
-							puts -nonewline "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next"
-						}
+							lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next"
+						}	
 					} elseif {[$it hasAttribute hardware.global.ro]} {
-							if {[$it hasAttribute hardware.global.software_written]} {
-								puts "	output reg [$register name]_[$it name]_written,"
-							}
 						if {[$it width] == 1} {
-							puts -nonewline "	output reg [$register name]_[$it name]"
+							if {[$it hasAttribute hardware.global.counter]} {
+								lappend signalList "	output wire [$register name]_[$it name]"
+							} else {
+								lappend signalList "	output reg [$register name]_[$it name]"
+							}	
 						} else {
-							puts -nonewline "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+							if {[$it hasAttribute hardware.global.counter]} {
+								lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+							} else {
+								lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+							}
 						}
+					}
+					if {[$it hasAttribute hardware.global.hardware_wen]} {
+						lappend signalList "	input wire [$register name]_[$it name]_wen"
+					}
+					if {[$it hasAttribute hardware.global.software_written]} {
+						lappend signalList "	output reg [$register name]_[$it name]_written"
+					}	
+					if {[$it hasAttribute hardware.global.counter]} {
+						lappend signalList "	input wire [$register name]_[$it name]_countup"
 					}
 				}
 			}
 		}
+		puts [join $signalList ",\n"]
 	}
 
 	# write needed internal wires and regs
@@ -143,6 +135,10 @@
 								puts "	reg [$register name]_[$it name]_res_in_last_cycle;"
 							}
 						}
+						if {[$it hasAttribute hardware.global.counter]} {
+							puts "	reg [$register name]_[$it name]_load_enable;"
+							puts "	reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_load_value;"
+						}
 					}
 				}
 			}
@@ -155,11 +151,15 @@
 		puts "		begin"
 		$register onEachField {
 			if {[$it name] != "Reserved"} {
-				puts "			[$register name]_[$it name] <= [$it reset];"
-				if {[$it hasAttribute hardware.global.software_written]} {
-					puts "			[$register name]_[$it name]_written <= 1'b0;"
-					if {[$it getAttributeValue hardware.global.software_written]==2} {
-						puts "			[$register name]_[$it name]_res_in_last_cycle <= 1'b1;"
+				if {[$it hasAttribute hardware.global.counter]} {
+					puts "			[$register name]_[$it name]_load_enable <= 1'b0;"	
+				} else {
+					puts "			[$register name]_[$it name] <= [$it reset];"
+					if {[$it hasAttribute hardware.global.software_written]} {
+						puts "			[$register name]_[$it name]_written <= 1'b0;"
+						if {[$it getAttributeValue hardware.global.software_written]==2} {
+							puts "			[$register name]_[$it name]_res_in_last_cycle <= 1'b1;"
+						}
 					}
 				}
 			}
@@ -170,18 +170,27 @@
 	
 
 	# write counter instance 
-	proc writeCounterModule {register field} {
-		if {[$field hasAttribute hardware.counter]} {
-			puts "	counter48 #("
-			puts "		.DATASIZE([$field width])"
-			puts "	) [$register name]_I ("
-			puts "		.clk(clk),"
-			puts "		.res_n(res_n),"
-			puts "		.increment(),"
-			puts "		.load([$register name]_[$field name]),"
-			puts "		.load_enable([$register name]_enable),"
-			puts "		.value([$register name])"
-			puts "	);"
+	proc writeCounterModule {object} {
+			$object onEachComponent {
+			if {[$it isa osys::rfg::Group]} {
+				writeCounterModule $it
+			} else {
+				set register $it
+				$it onEachField {
+					if {[$it hasAttribute hardware.global.counter]} {
+						puts "	counter48 #("
+						puts "		.DATASIZE([$it width])"
+						puts "	) [$register name]_I ("
+						puts "		.clk(clk),"
+						puts "		.res_n(res_n),"
+						puts "		.increment([$register name]_[$it name]_countup),"
+						puts "		.load([$register name]_[$it name]_load_value),"
+						puts "		.load_enable([$register name]_[$it name]_load_enable),"
+						puts "		.value([$register name]_[$it name])"
+						puts "	);"
+					}
+				}
+			}
 		}
 	}
 
@@ -189,12 +198,20 @@
 	proc writeRegisterHardwareWrite {register field} {
 			if {[$field hasAttribute hardware.global.wo] || [$field hasAttribute hardware.global.rw]} {
 				if {[$field hasAttribute hardware.global.hardware_wen]} {
-					puts "				if([$register name]_[$field name]_wen)"
-					puts "				begin"
-					puts "					[$register name]_[$field name] <= [$register name]_[$field name]_next;"
-					puts "				end"
+					puts "			else if([$register name]_[$field name]_wen)"
+					puts "			begin"
+					if {[$field hasAttribute hardware.global.counter]} {
+						puts "				[$register name]_[$field name]_load_enable <= 1'b1;"
+						puts "				[$register name]_[$field name]_load_value <= [$register name]_[$field name]_next;"
+					} else {
+						puts "				[$register name]_[$field name] <= [$register name]_[$field name]_next;"
+					}
+					puts "			end"
 				} else {
+					puts "			else"
+					puts "			begin"
 					puts "				[$register name]_[$field name] <= [$register name]_[$field name]_next;"	
+					puts "			end"
 				}	
 			}	
 	}
@@ -208,13 +225,21 @@
 			if {[$it hasAttribute software.global.wo] || [$it hasAttribute software.global.rw]} {
 				puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
 				puts "			begin"
-				puts "				[$register name]_[$it name] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+				if {[$it hasAttribute hardware.global.counter]} {
+					puts "				[$register name]_[$it name]_load_enable <= 1'b1;"
+					puts "				[$register name]_[$it name]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+				} else {
+					puts "				[$register name]_[$it name] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+				}
 				puts "			end"
 				if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
-					puts "			else"
-					puts "			begin"
 					writeRegisterHardwareWrite $register $it
-					puts "			end"
+					if {[$it hasAttribute hardware.global.counter]} {
+						puts "			else"
+						puts "			begin"
+						puts "				[$register name]_[$it name]_load_enable <= 1'b0;"
+						puts "			end"
+					}
 				}
 				if {[$it hasAttribute hardware.global.software_written]} {
 					if {[$it getAttributeValue hardware.global.software_written]==2} {
@@ -340,7 +365,7 @@ module <%puts [$registerFile name]%>(
 );
 
 <% writeRegisternames $registerFile %>
-
+<% writeCounterModule $registerFile %>
 <% writeRegister $registerFile %>
 	`ifdef ASYNC_RES
 	always @(posedge clk or negedge res_n) `else

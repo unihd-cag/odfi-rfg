@@ -15,19 +15,22 @@ info_rf info_rf_I (
 	.node_id(),
 	.node_guid_next(),
 	.r1_r1_1_next(),
-	.r1_r1_1(),
+	.r1_r1_1,
 	.r1_r1_2_next(),
-	.r1_r1_2(),
+	.r1_r1_2,
 	.r1_r1_2_written(),
 	.r1_r1_3_next(),
-	.r1_r1_3(),
+	.r1_r1_3,
 	.r1_r1_3_written(),
 	.r1_r1_4_next(),
+	.r1_r1_4,
 	.r1_r1_4_wen(),
-	.r1_r1_4(),
 	.tsc_cnt_next(),
+	.tsc_cnt,
 	.tsc_cnt_wen(),
-	.tsc_cnt());
+	.tsc_cnt_countup()
+
+);
 */
 module info_rf
 (
@@ -50,25 +53,40 @@ module info_rf
 	input wire[23:0] node_guid_next,
 	input wire[15:0] r1_r1_1_next,
 	output reg[15:0] r1_r1_1,
-	output reg r1_r1_2_written,
 	input wire[15:0] r1_r1_2_next,
 	output reg[15:0] r1_r1_2,
-	output reg r1_r1_3_written,
+	output reg r1_r1_2_written,
 	input wire[15:0] r1_r1_3_next,
 	output reg[15:0] r1_r1_3,
-	input wire r1_r1_4_wen,
+	output reg r1_r1_3_written,
 	input wire[15:0] r1_r1_4_next,
 	output reg[15:0] r1_r1_4,
-	input wire tsc_cnt_wen,
+	input wire r1_r1_4_wen,
 	input wire[47:0] tsc_cnt_next,
-	output reg[47:0] tsc_cnt
+	output wire[47:0] tsc_cnt,
+	input wire tsc_cnt_wen,
+	input wire tsc_cnt_countup
+
+
 );
 
 	reg[31:0] driver_version;
 	reg[23:0] node_guid;
 	reg[15:0] node_vpids;
 	reg r1_r1_3_res_in_last_cycle;
+	reg tsc_cnt_load_enable;
+	reg[47:0] tsc_cnt_load_value;
 
+	counter48 #(
+		.DATASIZE(48)
+	) tsc_I (
+		.clk(clk),
+		.res_n(res_n),
+		.increment(tsc_cnt_countup),
+		.load(tsc_cnt_load_value),
+		.load_enable(tsc_cnt_load_enable),
+		.value(tsc_cnt)
+	);
 
 	/* register driver */
 	`ifdef ASYNC_RES
@@ -103,7 +121,10 @@ module info_rf
 			begin
 				node_id <= write_data[15:0];
 			end
+			else
+			begin
 				node_guid <= node_guid_next;
+			end
 		end
 	end
 
@@ -172,12 +193,9 @@ module info_rf
 			begin
 				r1_r1_4 <= write_data[63:48];
 			end
-			else
+			else if(r1_r1_4_wen)
 			begin
-				if(r1_r1_4_wen)
-				begin
-					r1_r1_4 <= r1_r1_4_next;
-				end
+				r1_r1_4 <= r1_r1_4_next;
 			end
 		end
 	end
@@ -189,21 +207,24 @@ module info_rf
 	begin
 		if (!res_n)
 		begin
-			tsc_cnt <= 0;
+			tsc_cnt_load_enable <= 1'b0;
 		end
 		else
 		begin
 
 			if((address[4:3]== 3) && write_en)
 			begin
-				tsc_cnt <= write_data[47:0];
+				tsc_cnt_load_enable <= 1'b1;
+				tsc_cnt_load_value <= write_data[47:0];
+			end
+			else if(tsc_cnt_wen)
+			begin
+				tsc_cnt_load_enable <= 1'b1;
+				tsc_cnt_load_value <= tsc_cnt_next;
 			end
 			else
 			begin
-				if(tsc_cnt_wen)
-				begin
-					tsc_cnt <= tsc_cnt_next;
-				end
+				tsc_cnt_load_enable <= 1'b0;
 			end
 		end
 	end
