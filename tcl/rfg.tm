@@ -446,8 +446,11 @@ namespace eval osys::rfg {
             
             ## calculate address
             $newRamBlock address $size
-            $newRamBlock size [expr "[$newRamBlock depth] * $register_size/8"] 
+            $newRamBlock size [expr "[$newRamBlock depth] * $register_size/8]"] 
+            ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
+            
             incr size [expr "[$newRamBlock depth] * $register_size/8"]        
+            ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
 
             ## Return 
             $newRamBlock parent $this
@@ -571,6 +574,7 @@ namespace eval osys::rfg {
     itcl::class RamBlock {
         inherit Register
         odfi::common::classField public depth 1
+        odfi::common::classField public width 64
         constructor {cName cClosure} {Register::constructor $cName {}} {
 
             ## Execute closure 
