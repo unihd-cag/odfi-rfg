@@ -9,6 +9,16 @@
 		return $addrBits
 	}
 	
+	proc writeAddressMap {object} {
+		$object onEachComponent {
+			if {[$it isa osys::rfg::Group]} {
+				writeAddressMap $it 
+			} else {
+				puts "[$it name]: 0x[$it getAbsoluteAddressHex]"
+			}
+		}
+	}
+
 	# write the verilog template for an easy implementation in a higher level module 
 	proc writeTemplate {object} {
 
@@ -142,7 +152,17 @@
 			} else {
 				set register $it
 				if {[$register isa osys::rfg::RamBlock]} {
-					puts "writeRegisternames"
+					if {[$register hasAttribute hardware.global.rw]} {
+						puts "	reg\[[expr [ld [$register depth]]-1]:0\] [$register name]_rf_addr;"
+						puts "	reg [$register name]_rf_ren;"
+						puts "	wire\[[expr [$register width]-1]:0\] [$register name]_rf_rdata;"
+						puts "	reg [$register name]_rf_wen;"
+						puts "	reg\[[expr [$register width]-1]:0\] [$register name]_rf_wdata;"
+						set delays 3
+						for {set i 0} {$i < $delays} {incr i} {
+							puts "	reg read_en_dly$i;"
+						}
+					}
 				} else {
 					$it onEachField {
 						if {[$it name] != "Reserved"} {
@@ -191,30 +211,54 @@
 		puts "		end"
 	}
 
-	
+	proc writeCounterModule {register field} {
+		puts "	counter48 #("
+		puts "		.DATASIZE([$field width])"
+		puts "	) [$register name]_I ("
+		puts "		.clk(clk),"
+		puts "		.res_n(res_n),"
+		puts "		.increment([$register name]_[$field name]_countup),"
+		puts "		.load([$register name]_[$field name]_load_value),"
+		puts "		.load_enable([$register name]_[$field name]_load_enable),"
+		puts "		.value([$register name]_[$field name])"
+		puts "	);"
+		puts ""
+	}
+
+	proc writeRamModule {ramBlock} {
+		puts "	ram_2rw_1c #("
+		puts "		.DATASIZE([$ramBlock width]),"
+		puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
+		puts "		.PIPELINED(0)"
+		puts "	) buffer_data_I (" 
+		puts "		.clk(clk),"
+		puts "		.wen_a([$ramBlock name]_rf_wen),"
+		puts "		.ren_a([$ramBlock name]_rf_ren),"
+		puts "		.addr_a([$ramBlock name]_rf_addr),"
+		puts "		.wdata_a([$ramBlock name]_rf_wdata),"
+		puts "		.rdata_a([$ramBlock name]_rf_rdata),"
+		puts "		.wen_b([$ramBlock name]_wen),"
+		puts "		.ren_b([$ramBlock name]_ren),"
+		puts "		.addr_b([$ramBlock name]_addr),"
+		puts "		.wdata_b([$ramBlock name]_wdata),"
+		puts "		.rdata_b([$ramBlock name]_rdata)"
+		puts "	);"
+		puts ""
+	}
 
 	# write counter instance 
-	proc writeCounterModule {object} {
+	proc writeModules {object} {
 			$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
-				writeCounterModule $it
+				writeModules $it
 			} else {
 				set register $it
 				if {[$register isa osys::rfg::RamBlock]} {
-					puts "writeCounterModule"
+					writeRamModule $register
 				} else {
 					$it onEachField {
 						if {[$it hasAttribute hardware.global.counter]} {
-							puts "	counter48 #("
-							puts "		.DATASIZE([$it width])"
-							puts "	) [$register name]_I ("
-							puts "		.clk(clk),"
-							puts "		.res_n(res_n),"
-							puts "		.increment([$register name]_[$it name]_countup),"
-							puts "		.load([$register name]_[$it name]_load_value),"
-							puts "		.load_enable([$register name]_[$it name]_load_enable),"
-							puts "		.value([$register name]_[$it name])"
-							puts "	);"
+							writeCounterModule $register $it
 						}
 					}
 				}
@@ -222,24 +266,35 @@
 		}
 	}
 
-	proc writeRAMModule {args} {
-		puts "	ram_2rw_1c #("
-		puts "		.DATASIZE(16),"
-		puts "		.ADDRSIZE(5),"
-		puts "		.PIPELINED(0)"
-		puts "	) buffer_data_I (" 
-		puts "		.clk(clk),"
-		puts "		.wen_a(buffer_data_rf_wen),"
-		puts "		.ren_a(buffer_data_rf_ren),"
-		puts "		.addr_a(buffer_data_rf_addr),"
-		puts "		.wdata_a(buffer_data_rf_wdata),"
-		puts "		.rdata_a(buffer_data_rf_rdata),"
-		puts "		.wen_b(buffer_data_wen),"
-		puts "		.ren_b(buffer_data_ren),"
-		puts "		.addr_b(buffer_data_addr),"
-		puts "		.wdata_b(buffer_data_wdata),"
-		puts "		.rdata_b(buffer_data_rdata)"
-		puts "	);"
+	proc writeRamBlockRegister {registerFile ramBlock} {
+		if {[$ramBlock hasAttribute hardware.global.rw]} {
+			# Write always block
+			puts "	/* RamBlock [$ramBlock name] */"
+			puts "	`ifdef ASYNC_RES"
+			puts "	always @(posedge clk or negedge res_n) `else"
+			puts "	always @(posedge clk) `endif"
+			puts "	begin"
+			puts "		if (!res_n)"
+			puts "		begin"
+			puts "			`ifdef ASIC"
+			puts "			[$ramBlock name]_rf_addr <= 5'b0;"
+			puts "			[$ramBlock name]_rf_wdata  <= 16'b0;"
+			puts "			`endif"
+			puts "			[$ramBlock name]_rf_wen <= 1'b0;"
+			puts "			[$ramBlock name]_rf_ren <= 1'b0;"
+			puts "		end"
+			puts "		else"
+			puts "		begin"
+			puts "		if (address\[[expr [getAddrBits $registerFile]-1]:[ld [$ramBlock getAbsoluteAddress]]\] == 1)"
+			puts "		begin"
+			puts "			[$ramBlock name]_rf_addr <= address\[[expr [getAddrBits $registerFile]-1]:3\];"
+			puts "			[$ramBlock name]_rf_wdata <= write_data\[15:0\];"
+			puts "			[$ramBlock name]_rf_wen <= write_en;"
+			puts "			[$ramBlock name]_rf_ren <= read_en;"
+			puts "		end"
+			puts "	end"
+			puts ""
+		}
 	}
 
 	# write the hardware register write
@@ -327,7 +382,7 @@
 				writeRegister $it
 			} else {
 				if {[$it isa osys::rfg::RamBlock]} {
-					puts "writeRegister"
+					writeRamBlockRegister $object $it
 				} else {
 					# Write always block
 					puts "	/* register [$it name] */"
@@ -353,6 +408,21 @@
 		}
 	}
 
+	proc writeAddressControlReset {object} {
+		$object onEachComponent {
+			if {[$it isa osys::rfg::Group]} {
+				writeAddressControlReset $it
+			} else {
+				if {[$it isa osys::rfg::RamBlock]} {
+					set delays 3
+					for {set i 0} {$i < $delays} {incr i} {
+						puts "			read_en_dly$i <= 1'b0;"
+					}	
+				}
+			}
+		}
+	}
+
 	#write the address logic for reading and invalid signal 
 	proc writeAddressControl {object} {
 		$object onEachComponent {
@@ -362,6 +432,14 @@
 				set register $it
 				if {[$register isa osys::rfg::RamBlock]} {
 					puts "writeAddressControl"
+					set dontCare ""
+					for {set i 0} {$i < [expr "[ld [$register getAbsoluteAddress]]-3"]} {incr i} {
+						append dontCare "x"
+					}
+					puts "				\{[expr [getAddrBits $object]-[ld [$register getAbsoluteAddress]]]'h1,[expr "[ld [$register getAbsoluteAddress]]-3"]'b$dontCare\}:"
+					puts "				begin"
+					
+					puts "				end"
 				} else {
 					puts "				[expr [getAddrBits $object]-3]'h[format %x [expr [$register getAbsoluteAddress]/8]]:"
 					puts "				begin"
@@ -387,6 +465,9 @@
 %>
 
 /* auto generated by RFG */
+/* address map
+<% writeAddressMap $registerFile %>
+*/
 /* instantiation template
 <%puts -nonewline "[$registerFile name] [$registerFile name]"%>_I (
 	.res_n(),
@@ -420,7 +501,7 @@ module <%puts [$registerFile name]%>(
 );
 
 <% writeRegisternames $registerFile %>
-<% writeCounterModule $registerFile %>
+<% writeModules $registerFile %>
 <% writeRegister $registerFile %>
 	`ifdef ASYNC_RES
 	always @(posedge clk or negedge res_n) `else
@@ -433,7 +514,7 @@ module <%puts [$registerFile name]%>(
 			`ifdef ASIC
 			read_data   <= <%puts -nonewline "[$registerFile register_size]"%>'b0;
 			`endif
-		end
+<% writeAddressControlReset $registerFile %>		end
 		else
 		begin
 			casex(address[<% puts -nonewline "[expr [getAddrBits $registerFile]-1]"%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>])

@@ -90,6 +90,7 @@ osys::rfg::registerFile info_rf {
             
             }
         }
+        
         register tsc {
             field cnt {
                 width 48
@@ -101,12 +102,25 @@ osys::rfg::registerFile info_rf {
                 }
             }
         }
+
         ramBlock TestRAM {
             width 16
             depth 32 
             software rw
             hardware rw
         }
+
+        register r3 {
+            field f3 {
+                width 64
+                software rw
+                hardware {
+                    rw
+                    hardware_wen
+                }
+            }
+        }
+
     }
 }
 

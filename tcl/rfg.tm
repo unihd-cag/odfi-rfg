@@ -445,11 +445,16 @@ namespace eval osys::rfg {
             }
             
             ## calculate address
+            if {[expr "$size%([$newRamBlock depth]*$register_size/8)"] != 0} {
+                set offset [expr "int(floor($size/([$newRamBlock depth]*$register_size/8)))*[$newRamBlock depth]* $register_size/8"]
+                set size [expr "[$newRamBlock depth]* $register_size/8 + $offset"]
+            }
+
             $newRamBlock address $size
-            $newRamBlock size [expr "[$newRamBlock depth] * $register_size/8]"] 
+            $newRamBlock size [expr "[$newRamBlock depth] * $register_size/8"]
             ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
             
-            incr size [expr "[$newRamBlock depth] * $register_size/8"]        
+            incr size [expr "[$newRamBlock depth] * $register_size/8"]       
             ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
 
             ## Return 
