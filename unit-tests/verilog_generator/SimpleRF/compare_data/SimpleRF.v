@@ -5,13 +5,10 @@
 driver: 0x0
 node: 0x8
 r1: 0x10
-tsc: 0x18
-TestRAM: 0x100
-r3: 0x200
 
 */
 /* instantiation template
-info_rf info_rf_I (
+SimpleRF SimpleRF_I (
 	.res_n(),
 	.clk(),
 	.address(),
@@ -33,23 +30,11 @@ info_rf info_rf_I (
 	.r1_r1_3_written(),
 	.r1_r1_4_next(),
 	.r1_r1_4,
-	.r1_r1_4_wen(),
-	.tsc_cnt_next(),
-	.tsc_cnt,
-	.tsc_cnt_wen(),
-	.tsc_cnt_countup(),
-	.TestRAM_addr(),
-	.TestRAM_ren(),
-	.TestRAM_rdata(),
-	.TestRAM_wen(),
-	.TestRAM_wdata(),
-	.r3_f3_next(),
-	.r3_f3,
-	.r3_f3_wen()
+	.r1_r1_4_wen()
 
 );
 */
-module info_rf
+module SimpleRF
 (
 	///\defgroup sys
 	///@{ 
@@ -58,7 +43,7 @@ module info_rf
 	///}@ 
 	///\defgroup rw_if
 	///@{ 
-	input wire[9:3] address,
+	input wire[4:3] address,
 	output reg[63:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
@@ -78,19 +63,7 @@ module info_rf
 	output reg r1_r1_3_written,
 	input wire[15:0] r1_r1_4_next,
 	output reg[15:0] r1_r1_4,
-	input wire r1_r1_4_wen,
-	input wire[47:0] tsc_cnt_next,
-	output wire[47:0] tsc_cnt,
-	input wire tsc_cnt_wen,
-	input wire tsc_cnt_countup,
-	input wire[4:0] TestRAM_addr,
-	input wire TestRAM_ren,
-	output wire[15:0] TestRAM_rdata,
-	input wire TestRAM_wen,
-	input wire[15:0] TestRAM_wdata,
-	input wire[63:0] r3_f3_next,
-	output reg[63:0] r3_f3,
-	input wire r3_f3_wen
+	input wire r1_r1_4_wen
 
 
 );
@@ -99,45 +72,6 @@ module info_rf
 	reg[23:0] node_guid;
 	reg[15:0] node_vpids;
 	reg r1_r1_3_res_in_last_cycle;
-	reg tsc_cnt_load_enable;
-	reg[47:0] tsc_cnt_load_value;
-	reg[4:0] TestRAM_rf_addr;
-	reg TestRAM_rf_ren;
-	wire[15:0] TestRAM_rf_rdata;
-	reg TestRAM_rf_wen;
-	reg[15:0] TestRAM_rf_wdata;
-	reg read_en_dly0;
-	reg read_en_dly1;
-	reg read_en_dly2;
-
-	counter48 #(
-		.DATASIZE(48)
-	) tsc_I (
-		.clk(clk),
-		.res_n(res_n),
-		.increment(tsc_cnt_countup),
-		.load(tsc_cnt_load_value),
-		.load_enable(tsc_cnt_load_enable),
-		.value(tsc_cnt)
-	);
-
-	ram_2rw_1c #(
-		.DATASIZE(16),
-		.ADDRSIZE(5),
-		.PIPELINED(0)
-	) buffer_data_I (
-		.clk(clk),
-		.wen_a(TestRAM_rf_wen),
-		.ren_a(TestRAM_rf_ren),
-		.addr_a(TestRAM_rf_addr),
-		.wdata_a(TestRAM_rf_wdata),
-		.rdata_a(TestRAM_rf_rdata),
-		.wen_b(TestRAM_wen),
-		.ren_b(TestRAM_ren),
-		.addr_b(TestRAM_addr),
-		.wdata_b(TestRAM_wdata),
-		.rdata_b(TestRAM_rdata)
-	);
 
 
 	/* register driver */
@@ -169,7 +103,7 @@ module info_rf
 		else
 		begin
 
-			if((address[9:3]== 1) && write_en)
+			if((address[4:3]== 1) && write_en)
 			begin
 				node_id <= write_data[15:0];
 			end
@@ -198,7 +132,7 @@ module info_rf
 		else
 		begin
 
-			if((address[9:3]== 2) && write_en)
+			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_1 <= write_data[15:0];
 			end
@@ -206,7 +140,7 @@ module info_rf
 			begin
 				r1_r1_1 <= r1_r1_1_next;
 			end
-			if((address[9:3]== 2) && write_en)
+			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_2 <= write_data[31:16];
 			end
@@ -214,7 +148,7 @@ module info_rf
 			begin
 				r1_r1_2 <= r1_r1_2_next;
 			end
-			if((address[9:3]== 2) && write_en)
+			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_2_written <= 1'b1;
 			end
@@ -223,7 +157,7 @@ module info_rf
 				r1_r1_2_written <= 1'b0;
 			end
 
-			if((address[9:3]== 2) && write_en)
+			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_3 <= write_data[47:32];
 			end
@@ -231,7 +165,7 @@ module info_rf
 			begin
 				r1_r1_3 <= r1_r1_3_next;
 			end
-			if(((address[9:3]== 2) && write_en) || r1_r1_3_res_in_last_cycle)
+			if(((address[4:3]== 2) && write_en) || r1_r1_3_res_in_last_cycle)
 			begin
 				r1_r1_3_written <= 1'b1;
 				r1_r1_3_res_in_last_cycle <= 1'b0;
@@ -241,90 +175,13 @@ module info_rf
 				r1_r1_3_written <= 1'b0;
 			end
 
-			if((address[9:3]== 2) && write_en)
+			if((address[4:3]== 2) && write_en)
 			begin
 				r1_r1_4 <= write_data[63:48];
 			end
 			else if(r1_r1_4_wen)
 			begin
 				r1_r1_4 <= r1_r1_4_next;
-			end
-		end
-	end
-
-	/* register tsc */
-	`ifdef ASYNC_RES
-	always @(posedge clk or negedge res_n) `else
-	always @(posedge clk) `endif
-	begin
-		if (!res_n)
-		begin
-			tsc_cnt_load_enable <= 1'b0;
-		end
-		else
-		begin
-
-			if((address[9:3]== 3) && write_en)
-			begin
-				tsc_cnt_load_enable <= 1'b1;
-				tsc_cnt_load_value <= write_data[47:0];
-			end
-			else if(tsc_cnt_wen)
-			begin
-				tsc_cnt_load_enable <= 1'b1;
-				tsc_cnt_load_value <= tsc_cnt_next;
-			end
-			else
-			begin
-				tsc_cnt_load_enable <= 1'b0;
-			end
-		end
-	end
-
-	/* RamBlock TestRAM */
-	`ifdef ASYNC_RES
-	always @(posedge clk or negedge res_n) `else
-	always @(posedge clk) `endif
-	begin
-		if (!res_n)
-		begin
-			`ifdef ASIC
-			TestRAM_rf_addr <= 5'b0;
-			TestRAM_rf_wdata  <= 16'b0;
-			`endif
-			TestRAM_rf_wen <= 1'b0;
-			TestRAM_rf_ren <= 1'b0;
-		end
-		else
-		begin
-		if (address[9:8] == 1)
-		begin
-			TestRAM_rf_addr <= address[9:3];
-			TestRAM_rf_wdata <= write_data[15:0];
-			TestRAM_rf_wen <= write_en;
-			TestRAM_rf_ren <= read_en;
-		end
-	end
-
-	/* register r3 */
-	`ifdef ASYNC_RES
-	always @(posedge clk or negedge res_n) `else
-	always @(posedge clk) `endif
-	begin
-		if (!res_n)
-		begin
-			r3_f3 <= 0;
-		end
-		else
-		begin
-
-			if((address[9:3]== 64) && write_en)
-			begin
-				r3_f3 <= write_data[63:0];
-			end
-			else if(r3_f3_wen)
-			begin
-				r3_f3 <= r3_f3_next;
 			end
 		end
 	end
@@ -341,21 +198,19 @@ module info_rf
 			`ifdef ASIC
 			read_data   <= 64'b0;
 			`endif
-			read_en_dly0 <= 1'b0;
-			read_en_dly1 <= 1'b0;
-			read_en_dly2 <= 1'b0;
 		end
 		else
 		begin
-			casex(address[9:3])
-				7'h0:
+
+			casex(address[4:3])
+				2'h0:
 				begin
 					read_data[31:0] <= driver_version;
 					read_data[63:32] <= 32'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
-				7'h1:
+				2'h1:
 				begin
 					read_data[15:0] <= node_id;
 					read_data[39:16] <= node_guid;
@@ -364,27 +219,12 @@ module info_rf
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
-				7'h2:
+				2'h2:
 				begin
 					read_data[15:0] <= r1_r1_1;
 					read_data[31:16] <= r1_r1_2;
 					read_data[47:32] <= r1_r1_3;
 					read_data[63:48] <= r1_r1_4;
-					invalid_address <= 1'b0;
-					access_complete <= write_en || read_en;
-				end
-				7'h3:
-				begin
-					read_data[47:0] <= tsc_cnt;
-					read_data[63:48] <= 16'b0;
-					invalid_address <= 1'b0;
-					access_complete <= write_en || read_en;
-				end
-writeAddressControl
-				{2'h1,5'bxxxxx}:
-				7'h40:
-				begin
-					read_data[63:0] <= r3_f3;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end

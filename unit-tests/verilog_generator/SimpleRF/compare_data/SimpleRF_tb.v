@@ -1,5 +1,5 @@
 
-module verilog_output_tb();
+module SimpleRF_tb();
 
     parameter PERIOD =10;
     reg res_n;
@@ -26,7 +26,7 @@ module verilog_output_tb();
     wire[15:0] r1_r1_4;
     integer i;
 
-    info_rf info_rf_I (
+    SimpleRF SimpleRF_I (
 	    .res_n(res_n),
 	    .clk(clk),
 	    .address(address),
@@ -38,8 +38,7 @@ module verilog_output_tb();
 	    .write_data(write_data),
 	    .node_id(node_id),
 	    .node_guid_next(node_guid_next),
-        .tsc_cnt_countup(1'b1),
-	    .r1_r1_1_next(r1_r1_1_next),
+        .r1_r1_1_next(r1_r1_1_next),
 	    .r1_r1_1(r1_r1_1),
 	    .r1_r1_2_next(r1_r1_2_next),
 	    .r1_r1_2(r1_r1_2),
@@ -58,8 +57,8 @@ module verilog_output_tb();
 
     initial
     begin
-        $dumpfile("verilog_output.vcd");
-        $dumpvars(0,verilog_output_tb);
+        $dumpfile("SimpleRF.vcd");
+        $dumpvars(0,SimpleRF_tb);
         res_n <= 0;
         address <= 2'b00;
         read_en <= 1'b0;
@@ -120,8 +119,8 @@ module verilog_output_tb();
                 end
             end
             if (i == 3) begin
-                if (invalid_address != 0) begin
-                    $error("\nERROR invalid_address was set at address 3");
+                if (invalid_address == 0) begin
+                    $error("\nERROR invalid_address was not set at address 3");
                     $stop;
                 end
             end
@@ -183,8 +182,8 @@ module verilog_output_tb();
                 $error("\nERROR (Software Read) read_data has the wrong value");
                 $stop;
             end
-            if (i == 3 && invalid_address != 0) begin
-                $error("\nERROR (Software Read) invalid_address was set");
+            if (i == 3 && invalid_address == 0) begin
+                $error("\nERROR (Software Read) invalid_address was not set");
                 $stop;
             end
         end

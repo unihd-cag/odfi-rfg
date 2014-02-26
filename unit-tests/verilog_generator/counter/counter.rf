@@ -1,0 +1,14 @@
+## Create Register File
+osys::rfg::registerFile counter_RF {
+ 	register tsc {
+        field cnt {
+            width 48
+            software rw
+            hardware {
+                rw
+                hardware_wen
+                counter
+            }
+        }
+    }
+}

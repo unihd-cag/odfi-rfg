@@ -326,7 +326,11 @@
 		$register onEachField {
 			set upperBound [expr $lowerBound+[$it width]]
 			if {[$it hasAttribute software.global.wo] || [$it hasAttribute software.global.rw]} {
-				puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+				if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
+					puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+				} else {
+					puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+				}
 				puts "			begin"
 				if {[$it hasAttribute hardware.global.counter]} {
 					puts "				[$register name]_[$it name]_load_enable <= 1'b1;"
@@ -346,7 +350,11 @@
 				}
 				if {[$it hasAttribute hardware.global.software_written]} {
 					if {[$it getAttributeValue hardware.global.software_written]==2} {
-						puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
+						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
+							puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
+						} else {
+							puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
+						}
 						puts "			begin"
 						puts "				[$register name]_[$it name]_written <= 1'b1;"
 						puts "				[$register name]_[$it name]_res_in_last_cycle <= 1'b0;"
@@ -357,7 +365,11 @@
 						puts "			end"
 						puts ""															
 					} else {
-						puts "			if((address\[[expr [getAddrBits $registerFile]-1]:3\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
+							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+						} else {
+							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
+						}
 						puts "			begin"
 						puts "				[$register name]_[$it name]_written <= 1'b1;"
 						puts "			end"
@@ -423,6 +435,25 @@
 		}
 	}
 
+	proc writeRamDelay {object} {
+		$object onEachComponent {
+			if {[$it isa osys::rfg::Group]} {
+				writeRamDelay $it
+			} else {
+				if {[$it isa osys::rfg::RamBlock]} {
+					set delays 3
+					for {set i 0} {$i < $delays} {incr i} {
+						if {$i==0} {
+							puts "			read_en_dly$i <= read_en;"
+						} else {
+							puts "			read_en_dly$i <= read_en_dly[expr $i-1];"
+						}
+					}
+				}
+			}
+		}
+	}
+
 	#write the address logic for reading and invalid signal 
 	proc writeAddressControl {object} {
 		$object onEachComponent {
@@ -431,17 +462,25 @@
 			} else {
 				set register $it
 				if {[$register isa osys::rfg::RamBlock]} {
-					puts "writeAddressControl"
-					set dontCare ""
-					for {set i 0} {$i < [expr "[ld [$register getAbsoluteAddress]]-3"]} {incr i} {
-						append dontCare "x"
-					}
-					puts "				\{[expr [getAddrBits $object]-[ld [$register getAbsoluteAddress]]]'h1,[expr "[ld [$register getAbsoluteAddress]]-3"]'b$dontCare\}:"
-					puts "				begin"
+					# not tested yet...
+					set dontCare [string repeat x [expr "[ld [$register getAbsoluteAddress]]-[ld [expr [$registerFile register_size]/8]]"]] 
 					
+					puts "				\{[expr [getAddrBits $object]-[ld [$register getAbsoluteAddress]]]'h1,[expr "[ld [$register getAbsoluteAddress]]-[ld [expr [$registerFile register_size]/8]]"]'b$dontCare\}:"
+					puts "				begin"
+					puts "					read_data\[[expr "[$register width]-1"]:0\] <= [$register name]_rf_rdata;"
+					if {[$register width] != [$object register_size]} {
+						puts "					read_data\[[expr "[$object register_size]-1"]:[$register width]\] <= [expr "[$object register_size]-[$register width]"]'b0;"
+					}
+					puts "					invalid_address <= 1'b0;"
+					set delays 3
+					puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
 					puts "				end"
 				} else {
-					puts "				[expr [getAddrBits $object]-3]'h[format %x [expr [$register getAbsoluteAddress]/8]]:"
+					if {[getAddrBits $object] == [ld [expr [$registerFile register_size]/8]]} {
+						puts "				[expr [getAddrBits $object]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$register getAbsoluteAddress]/8]]:"
+					} else {
+						puts "				[expr [getAddrBits $object]-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$register getAbsoluteAddress]/8]]:"
+					}
 					puts "				begin"
 					set lowerBound 0
 					$it onEachField {
@@ -489,7 +528,12 @@ module <%puts [$registerFile name]%>(
 	///}@ 
 	///\defgroup rw_if
 	///@{ 
-	input wire[<% puts -nonewline "[expr [getAddrBits $registerFile]-1]"%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>] address,
+	input wire[<%
+	if {[expr [getAddrBits $registerFile]-1] < [ld [expr [$registerFile register_size]/8]]} {
+		puts -nonewline "[expr [getAddrBits $registerFile]]"	
+	} else {
+		puts -nonewline "[expr [getAddrBits $registerFile]-1]"
+	}%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>] address,
 	output reg[<% puts -nonewline "[expr [$registerFile register_size]-1]"%>:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
@@ -517,7 +561,13 @@ module <%puts [$registerFile name]%>(
 <% writeAddressControlReset $registerFile %>		end
 		else
 		begin
-			casex(address[<% puts -nonewline "[expr [getAddrBits $registerFile]-1]"%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>])
+<% writeRamDelay $registerFile %>
+			casex(address[<% 
+				if {[expr [getAddrBits $registerFile]-1] < [ld [expr [$registerFile register_size]/8]]} {
+					puts -nonewline "[expr [getAddrBits $registerFile]]"	
+				} else {
+					puts -nonewline "[expr [getAddrBits $registerFile]-1]"
+				}%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>])
 <% writeAddressControl $registerFile %>				default:
 				begin
 					invalid_address <= read_en || write_en;
