@@ -1,0 +1,11 @@
+## Create Register File
+osys::rfg::registerFile ramRF {
+    group info_rf {
+        ramBlock TestRAM {
+            width 16
+            depth 32 
+            software rw
+            hardware rw
+        }
+    }
+}

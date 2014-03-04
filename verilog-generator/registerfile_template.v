@@ -41,7 +41,7 @@
 						if {[$it name] != "Reserved"} {
 							if {[$it hasAttribute hardware.global.rw]} {
 								lappend signalList "	.[$register name]_[$it name]_next()"
-								lappend signalList "	.[$register name]_[$it name]"
+								lappend signalList "	.[$register name]_[$it name]()"
 								if {[$it hasAttribute hardware.global.hardware_wen]} {
 									lappend signalList "	.[$register name]_[$it name]_wen()"
 								}
@@ -268,6 +268,7 @@
 
 	proc writeRamBlockRegister {registerFile ramBlock} {
 		if {[$ramBlock hasAttribute hardware.global.rw]} {
+
 			# Write always block
 			puts "	/* RamBlock [$ramBlock name] */"
 			puts "	`ifdef ASYNC_RES"
@@ -285,12 +286,13 @@
 			puts "		end"
 			puts "		else"
 			puts "		begin"
-			puts "		if (address\[[expr [getAddrBits $registerFile]-1]:[ld [$ramBlock getAbsoluteAddress]]\] == 1)"
-			puts "		begin"
-			puts "			[$ramBlock name]_rf_addr <= address\[[expr [getAddrBits $registerFile]-1]:3\];"
-			puts "			[$ramBlock name]_rf_wdata <= write_data\[15:0\];"
-			puts "			[$ramBlock name]_rf_wen <= write_en;"
-			puts "			[$ramBlock name]_rf_ren <= read_en;"
+			puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[ld [$ramBlock getAbsoluteAddress]]\] == 1)"
+			puts "			begin"
+			puts "				[$ramBlock name]_rf_addr <= address\[[expr [getAddrBits $registerFile]-1]:3\];"
+			puts "				[$ramBlock name]_rf_wdata <= write_data\[15:0\];"
+			puts "				[$ramBlock name]_rf_wen <= write_en;"
+			puts "				[$ramBlock name]_rf_ren <= read_en;"
+			puts "			end"
 			puts "		end"
 			puts "	end"
 			puts ""
