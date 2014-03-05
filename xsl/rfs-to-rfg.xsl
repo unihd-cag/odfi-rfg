@@ -59,6 +59,87 @@ group <xsl:value-of select="@name"/> {
 <xsl:value-of select="$hier-level-tab"/> }
 
     </xsl:template>
+    <!-- ########################## -->
+    <!-- ramblock --> 
+    <!-- ########################## -->
+    <xsl:template match="ramblock">
+
+    <xsl:variable name="hier-pos"><xsl:number from="regroot" count="regroot|ramblock|hwreg" level="multiple" format="1"></xsl:number></xsl:variable>
+    <xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
+    <xsl:variable name="hier-level-tab-more"><xsl:value-of select="$hier-level-tab"></xsl:value-of><xsl:text>    </xsl:text></xsl:variable>
+
+<xsl:value-of select="$hier-level-tab"/>ramBlock <xsl:value-of select="@name"/> {
+        <!-- Description -->
+<xsl:if test="@desc">
+    <xsl:value-of select="$hier-level-tab-more"/>description "<xsl:value-of select="fn:replace(@desc,'\[','\\[')"/>"
+</xsl:if>
+
+<!-- Absolute Address --> 
+<xsl:if test="@_absoluteAddress">
+<xsl:value-of select="$hier-level-tab"/>    setAbsoluteAddressFromHex <xsl:value-of select="@_absoluteAddress"/>
+<xsl:text>
+    
+</xsl:text>   
+</xsl:if>
+
+<!-- width --> 
+<xsl:if test="@ramwidth">
+<xsl:value-of select="$hier-level-tab"/>    width <xsl:value-of select="@ramwidth"/>
+<xsl:text>
+    
+</xsl:text>   
+</xsl:if>
+
+<!-- depth --> 
+<xsl:if test="@addrsize">
+<xsl:value-of select="$hier-level-tab"/>    depth [expr pow(2,<xsl:value-of select="@addrsize"/>)]
+<xsl:text>
+    
+</xsl:text>   
+</xsl:if>
+
+    <!-- Rights and attributes--> 
+    <xsl:value-of select="$hier-level-tab-more"/>attributes software {
+    <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}    
+
+<xsl:text>  
+</xsl:text>
+
+    <xsl:value-of select="$hier-level-tab-more"/>attributes hardware {
+
+    <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
+    <xsl:text>
+</xsl:text>
+    
+    <!-- Special Attributes -->
+    <!-- ################### -->
+    <xsl:if test="@counter">
+        <xsl:value-of select="$hier-level-tab-more"/>    counter
+    </xsl:if>
+    <xsl:if test="@rreinit">
+        <xsl:value-of select="$hier-level-tab-more"/>    rreinit
+    </xsl:if>
+    <xsl:if test="@sw_written">
+        <xsl:value-of select="$hier-level-tab-more"/>    software_written <xsl:value-of select="@sw_written"></xsl:value-of>
+        <xsl:text>
+        </xsl:text>
+    </xsl:if>
+    <xsl:if test="@hw_wen">
+        <xsl:value-of select="$hier-level-tab-more"/>hardware_wen  
+    </xsl:if>    
+    <xsl:text>
+</xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}
+
+<xsl:text>
+</xsl:text>
+    }
+
+<xsl:apply-templates />
+</xsl:template>
 
     <!-- ########################## -->
     <!-- Reg64 --> 
@@ -104,6 +185,8 @@ group <xsl:value-of select="@name"/> {
 
 }
 </xsl:if>
+
+
 
 <xsl:apply-templates />
 
@@ -249,7 +332,6 @@ group <xsl:value-of select="@name"/> {
         <!-- Search variable name-->
         <xsl:variable name="var"><xsl:value-of select="fn:replace(fn:normalize-space(),'#ifdef ','')"/></xsl:variable>
         if {[info exists <xsl:value-of select="$var"/>]} {
-
 </xsl:template>
     
     <!-- #else -->
@@ -257,14 +339,12 @@ group <xsl:value-of select="@name"/> {
 
        } else {
 
-
 </xsl:template>
 
     <!-- #endif -->
     <xsl:template match="text()[fn:starts-with(fn:normalize-space(),'#endif')]">
 
        }
-
 </xsl:template>
 
 
@@ -272,5 +352,4 @@ group <xsl:value-of select="@name"/> {
     <!-- Ignores --> 
     <!-- ######## -->
     <xsl:template match="node()"></xsl:template>
-
  </xsl:stylesheet>

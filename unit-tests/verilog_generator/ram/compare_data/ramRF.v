@@ -27,12 +27,12 @@ ramRF ramRF_I (
 module ramRF
 (
 	///\defgroup sys
-	///@{
+	///@{ 
 	input wire res_n,
 	input wire clk,
-	///}@
+	///}@ 
 	///\defgroup rw_if
-	///@{
+	///@{ 
 	input wire[8:3] address,
 	output reg[63:0] read_data,
 	output reg invalid_address,
@@ -40,12 +40,14 @@ module ramRF
 	input wire read_en,
 	input wire write_en,
 	input wire[63:0] write_data,
-	///}@
+	///}@ 
 	input wire[4:0] TestRAM_addr,
 	input wire TestRAM_ren,
 	output wire[15:0] TestRAM_rdata,
 	input wire TestRAM_wen,
 	input wire[15:0] TestRAM_wdata
+
+
 );
 
 	reg[4:0] TestRAM_rf_addr;
@@ -136,7 +138,7 @@ module ramRF
 				begin
 					invalid_address <= read_en || write_en;
 					access_complete <= read_en || write_en;
-				end
+				end		
 			endcase
 		end
 	end

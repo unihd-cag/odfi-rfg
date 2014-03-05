@@ -1,3 +1,4 @@
+// Author: Tobias Markus
 module ramRF_tb();
 
     parameter PERIOD =10;

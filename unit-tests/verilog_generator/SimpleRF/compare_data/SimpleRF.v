@@ -21,15 +21,15 @@ SimpleRF SimpleRF_I (
 	.node_id(),
 	.node_guid_next(),
 	.r1_r1_1_next(),
-	.r1_r1_1,
+	.r1_r1_1(),
 	.r1_r1_2_next(),
-	.r1_r1_2,
+	.r1_r1_2(),
 	.r1_r1_2_written(),
 	.r1_r1_3_next(),
-	.r1_r1_3,
+	.r1_r1_3(),
 	.r1_r1_3_written(),
 	.r1_r1_4_next(),
-	.r1_r1_4,
+	.r1_r1_4(),
 	.r1_r1_4_wen()
 
 );
