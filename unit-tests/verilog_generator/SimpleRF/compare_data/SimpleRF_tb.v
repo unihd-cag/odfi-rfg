@@ -1,4 +1,4 @@
-
+// Author: Tobias Markus
 module SimpleRF_tb();
 
     parameter PERIOD =10;

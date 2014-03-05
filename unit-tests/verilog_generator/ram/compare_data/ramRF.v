@@ -46,8 +46,6 @@ module ramRF
 	output wire[15:0] TestRAM_rdata,
 	input wire TestRAM_wen,
 	input wire[15:0] TestRAM_wdata
-
-
 );
 
 	reg[4:0] TestRAM_rf_addr;

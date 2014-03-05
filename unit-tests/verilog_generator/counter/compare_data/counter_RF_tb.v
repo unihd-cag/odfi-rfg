@@ -1,6 +1,8 @@
+// Author: Tobias Markus
 module counter_RF_tb();
 
     parameter PERIOD =10;
+    integer i;
     reg res_n;
     reg clk=0;
     reg address;
@@ -47,7 +49,31 @@ module counter_RF_tb();
         #10
         res_n <= 1'b1;
         tsc_cnt_countup <= 1'b1;
-        #200
+        for(i=0;i<200;i=i+1)
+        begin
+            @(negedge(clk));
+            if (tsc_cnt != i) begin
+                $error("tsc_cnt does not match counting value i...");
+                $stop;
+            end
+        end
+        tsc_cnt_countup <= 1'b0;
+        tsc_cnt_wen <= 1'b1;
+        tsc_cnt_next <= 400;
+        @(negedge(clk));
+        @(negedge(clk));
+        tsc_cnt_countup <= 1'b1;
+        tsc_cnt_wen <= 1'b0;
+        @(negedge(clk));
+        for(i=401;i<600;i=i+1)
+        begin
+            @(negedge(clk));
+            if (tsc_cnt != i) 
+            begin
+                $error("tsc_cnt does not macht conting value after load");
+                $stop;
+            end
+        end
         $stop;
     end
 
