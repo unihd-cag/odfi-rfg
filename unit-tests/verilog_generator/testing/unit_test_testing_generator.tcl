@@ -8,5 +8,4 @@ puts $result
 set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
 
 set destinationFile "compare_data/testing.v"
-
 $veriloggenerator produce $destinationFile

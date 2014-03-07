@@ -327,24 +327,27 @@ group <xsl:value-of select="@name"/> {
     <!-- ################## -->
 
     <!-- #ifdef -->
-    <xsl:template match="text()[fn:starts-with(fn:normalize-space(),'#ifdef ')]">
-
+    <xsl:template name="ifdef" match="*/text()[fn:starts-with(fn:normalize-space(),'#ifdef ')]">
         <!-- Search variable name-->
+    <xsl:if test="fn:matches(fn:normalize-space(),'#ifdef ')">
         <xsl:variable name="var"><xsl:value-of select="fn:replace(fn:normalize-space(),'#ifdef ','')"/></xsl:variable>
         if {[info exists <xsl:value-of select="$var"/>]} {
+    </xsl:if>
 </xsl:template>
     
     <!-- #else -->
-    <xsl:template match="text()[fn:starts-with(fn:normalize-space(),'#else')]">
+    <xsl:template match="*/text()[fn:starts-with(fn:normalize-space(),'#else')]">
 
        } else {
 
 </xsl:template>
 
     <!-- #endif -->
-    <xsl:template match="text()[fn:starts-with(fn:normalize-space(),'#endif')]">
+    <xsl:template match="*/text()[fn:starts-with(fn:normalize-space(),'#endif')]">
 
        }
+
+       <xsl:call-template name="ifdef"/>
 </xsl:template>
 
 

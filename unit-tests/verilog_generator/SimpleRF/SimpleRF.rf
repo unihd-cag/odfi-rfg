@@ -90,37 +90,6 @@ osys::rfg::registerFile SimpleRF {
             
             }
         }
-        
-        # register tsc {
-        #     field cnt {
-        #         width 48
-        #         software rw
-        #         hardware {
-        #             rw
-        #             hardware_wen
-        #             counter
-        #         }
-        #     }
-        # }
-
-        # ramBlock TestRAM {
-        #     width 16
-        #     depth 32 
-        #     software rw
-        #     hardware rw
-        # }
-
-        # register r3 {
-        #     field f3 {
-        #         width 64
-        #         software rw
-        #         hardware {
-        #             rw
-        #             hardware_wen
-        #         }
-        #     }
-        # }
-
     }
 }
 
