@@ -27,11 +27,11 @@ module ramRF_tb();
         .read_en(read_en),
         .write_en(write_en),
         .write_data(write_data),
-        .TestRAM_addr(TestRAM_addr),
-        .TestRAM_ren(TestRAM_ren),
-        .TestRAM_rdata(TestRAM_rdata),
-        .TestRAM_wen(TestRAM_wen),
-        .TestRAM_wdata(TestRAM_wdata)
+        .info_rf_TestRAM_addr(TestRAM_addr),
+        .info_rf_TestRAM_ren(TestRAM_ren),
+        .info_rf_TestRAM_rdata(TestRAM_rdata),
+        .info_rf_TestRAM_wen(TestRAM_wen),
+        .info_rf_TestRAM_wdata(TestRAM_wdata)
     );
 
     always
@@ -68,7 +68,7 @@ module ramRF_tb();
         begin
         	TestRAM_addr <= i;
         	@(negedge(clk));
-            if (TestRAM_rdata != i+32) 
+            if (TestRAM_rdata != i+32)
             begin
                 $error("TestRAM_rdata does not match the written data...");
                 $stop;

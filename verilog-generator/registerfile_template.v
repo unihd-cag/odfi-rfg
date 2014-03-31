@@ -10,13 +10,24 @@
 		incr addrBits [ld [expr [$registerfile register_size]/8]]
 		return $addrBits
 	}
-	
+
+	# function which returns the Name with all parents
+	proc getName {object} {
+		set name {}
+		set list [lreplace [$object parents] 0 0]
+		foreach element $list {
+			lappend	name [$element name]		
+		}
+		return [join $name "_"]	
+	}
+
 	proc writeAddressMap {object} {
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
 				writeAddressMap $it 
 			} else {
-				puts "[$it name]: base: 0x[$it getAbsoluteAddressHex] size: [$it size]"
+				set name [getName $it]
+				puts "$name: base: 0x[$it getAbsoluteAddressHex] size: [$it size]"
 			}
 		}
 	}
@@ -32,39 +43,39 @@
 				set register $it
 				if {[$register isa osys::rfg::RamBlock]} {
 					if {[$register hasAttribute hardware.global.rw]} {
-						lappend signalList "	.[$register name]_addr()"
-						lappend signalList "	.[$register name]_ren()"
-						lappend signalList "	.[$register name]_rdata()"
-						lappend signalList "	.[$register name]_wen()"
-						lappend signalList "	.[$register name]_wdata()"
+						lappend signalList "	.[getName $register]_addr()"
+						lappend signalList "	.[getName $register]_ren()"
+						lappend signalList "	.[getName $register]_rdata()"
+						lappend signalList "	.[getName $register]_wen()"
+						lappend signalList "	.[getName $register]_wdata()"
 					}
 				} else {
 					$it onEachField {
 						if {[$it name] != "Reserved"} {
 							if {[$it hasAttribute hardware.global.rw]} {
-								lappend signalList "	.[$register name]_[$it name]_next()"
-								lappend signalList "	.[$register name]_[$it name]()"
+								lappend signalList "	.[getName $it]_next()"
+								lappend signalList "	.[getName $it]()"
 								if {[$it hasAttribute hardware.global.hardware_wen]} {
-									lappend signalList "	.[$register name]_[$it name]_wen()"
+									lappend signalList "	.[getName $it]_wen()"
 								}
 								if {[$it hasAttribute hardware.global.software_written]} {
-									lappend signalList "	.[$register name]_[$it name]_written()"								
+									lappend signalList "	.[getName $it]_written()"								
 								}
 							}
 							if {[$it hasAttribute hardware.global.wo]} {
-								lappend signalList "	.[$register name]_[$it name]_next()"
+								lappend signalList "	.[getName $it]_next()"
 								if {[$it hasAttribute hardware.global.hardware_wen]} {
-									lappend signalLilst "	.[$register name]_[$it name]_wen()"
+									lappend signalLilst "	.[getName $it]_wen()"
 								}
 							}
 							if {[$it hasAttribute hardware.global.ro]} {
-								lappend signalList "	.[$register name]_[$it name]()"
+								lappend signalList "	.[getName $it]()"
 								if {[$it hasAttribute hardware.global.software_written]} {
-									lappend signalList "	.[$register name]_[$it name]_written()"								
+									lappend signalList "	.[getName $it]_written()"								
 								}
 							}
 							if {[$it hasAttribute hardware.global.counter]} {
-								lappend signalList "	.[$register name]_[$it name]_countup()"
+								lappend signalList "	.[getName $it]_countup()"
 							}
 						}
 					}
@@ -85,59 +96,59 @@
 				set register $it 
 				if {[$register isa osys::rfg::RamBlock]} {
 					if {[$register hasAttribute hardware.global.rw]} {
-						lappend signalList "	input wire\[[expr [ld [$register depth]]-1]:0\] [$register name]_addr"
-						lappend signalList "	input wire [$register name]_ren"
-						lappend signalList "	output wire\[[expr [$register width]-1]:0\] [$register name]_rdata"
-						lappend signalList "	input wire [$register name]_wen"
-						lappend signalList "	input wire\[[expr [$register width]-1]:0\] [$register name]_wdata"
+						lappend signalList "	input wire\[[expr [ld [$register depth]]-1]:0\] [getName $register]_addr"
+						lappend signalList "	input wire [getName $register]_ren"
+						lappend signalList "	output wire\[[expr [$register width]-1]:0\] [getName $register]_rdata"
+						lappend signalList "	input wire [getName $register]_wen"
+						lappend signalList "	input wire\[[expr [$register width]-1]:0\] [getName $register]_wdata"
 					}
 				} else {
 					$it onEachField {
 						if {[$it hasAttribute hardware.global.rw]} {
 							if {[$it width] == 1} {
-								lappend signalList "	input wire [$register name]_[$it name]_next"
+								lappend signalList "	input wire [getName $it]_next"
 								if {[$it hasAttribute hardware.global.counter]} {
-									lappend signalList "	output wire [$register name]_[$it name]"
+									lappend signalList "	output wire [getName $it]"
 								} else {
-									lappend signalList "	output reg [$register name]_[$it name]"
+									lappend signalList "	output reg [getName $it]"
 								}
 							} else {
-								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next"
+								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [getName $it]_next"
 								if {[$it hasAttribute hardware.global.counter]} {
-									lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+									lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [getName $it]"
 								} else {
-									lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+									lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [getName $it]"
 								}
 							}
 						} elseif {[$it hasAttribute hardware.global.wo]} {
 							if {[$it width] == 1} {
-								lappend signalList "	input wire [$register name]_[$it name]_next"
+								lappend signalList "	input wire [getName $it]_next"
 							} else {
-								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_next"
+								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [getName $it]_next"
 							}	
 						} elseif {[$it hasAttribute hardware.global.ro]} {
 							if {[$it width] == 1} {
 								if {[$it hasAttribute hardware.global.counter]} {
-									lappend signalList "	output wire [$register name]_[$it name]"
+									lappend signalList "	output wire [getName $it]"
 								} else {
-									lappend signalList "	output reg [$register name]_[$it name]"
+									lappend signalList "	output reg [getName $it]"
 								}	
 							} else {
 								if {[$it hasAttribute hardware.global.counter]} {
-									lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+									lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [getName $it]"
 								} else {
-									lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]"
+									lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [getName $it]"
 								}
 							}
 						}
 						if {[$it hasAttribute hardware.global.hardware_wen]} {
-							lappend signalList "	input wire [$register name]_[$it name]_wen"
+							lappend signalList "	input wire [getName $it]_wen"
 						}
 						if {[$it hasAttribute hardware.global.software_written]} {
-							lappend signalList "	output reg [$register name]_[$it name]_written"
+							lappend signalList "	output reg [getName $it]_written"
 						}	
 						if {[$it hasAttribute hardware.global.counter]} {
-							lappend signalList "	input wire [$register name]_[$it name]_countup"
+							lappend signalList "	input wire [getName $it]_countup"
 						}
 					}
 				}
@@ -155,11 +166,11 @@
 				set register $it
 				if {[$register isa osys::rfg::RamBlock]} {
 					if {[$register hasAttribute hardware.global.rw]} {
-						puts "	reg\[[expr [ld [$register depth]]-1]:0\] [$register name]_rf_addr;"
-						puts "	reg [$register name]_rf_ren;"
-						puts "	wire\[[expr [$register width]-1]:0\] [$register name]_rf_rdata;"
-						puts "	reg [$register name]_rf_wen;"
-						puts "	reg\[[expr [$register width]-1]:0\] [$register name]_rf_wdata;"
+						puts "	reg\[[expr [ld [$register depth]]-1]:0\] [getName $register]_rf_addr;"
+						puts "	reg [getName $register]_rf_ren;"
+						puts "	wire\[[expr [$register width]-1]:0\] [getName $register]_rf_rdata;"
+						puts "	reg [getName $register]_rf_wen;"
+						puts "	reg\[[expr [$register width]-1]:0\] [getName $register]_rf_wdata;"
 						set delays 3
 						for {set i 0} {$i < $delays} {incr i} {
 							puts "	reg read_en_dly$i;"
@@ -170,19 +181,19 @@
 						if {[$it name] != "Reserved"} {
 							if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
 								if {[$it width] == 1} {
-									puts "	reg [$register name]_[$it name];"
+									puts "	reg [getName $it];"
 								} else {
-									puts "	reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name];"
+									puts "	reg\[[expr {[$it width]-1}]:0\] [getName $it];"
 								}
 							}
 							if {[$it hasAttribute hardware.global.software_written]} {
 								if {[$it getAttributeValue hardware.global.software_written]==2} {
-									puts "	reg [$register name]_[$it name]_res_in_last_cycle;"
+									puts "	reg [getName $it]_res_in_last_cycle;"
 								}
 							}
 							if {[$it hasAttribute hardware.global.counter]} {
-								puts "	reg [$register name]_[$it name]_load_enable;"
-								puts "	reg\[[expr {[$it width]-1}]:0\] [$register name]_[$it name]_load_value;"
+								puts "	reg [getName $it]_load_enable;"
+								puts "	reg\[[expr {[$it width]-1}]:0\] [getName $it]_load_value;"
 							}
 						}
 					}
@@ -198,13 +209,13 @@
 		$register onEachField {
 			if {[$it name] != "Reserved"} {
 				if {[$it hasAttribute hardware.global.counter]} {
-					puts "			[$register name]_[$it name]_load_enable <= 1'b0;"	
+					puts "			[getName $it]_load_enable <= 1'b0;"	
 				} else {
-					puts "			[$register name]_[$it name] <= [$it reset];"
+					puts "			[getName $it] <= [$it reset];"
 					if {[$it hasAttribute hardware.global.software_written]} {
-						puts "			[$register name]_[$it name]_written <= 1'b0;"
+						puts "			[getName $it]_written <= 1'b0;"
 						if {[$it getAttributeValue hardware.global.software_written]==2} {
-							puts "			[$register name]_[$it name]_res_in_last_cycle <= 1'b1;"
+							puts "			[getName $it]_res_in_last_cycle <= 1'b1;"
 						}
 					}
 				}
@@ -216,13 +227,13 @@
 	proc writeCounterModule {register field} {
 		puts "	counter48 #("
 		puts "		.DATASIZE([$field width])"
-		puts "	) [$register name]_I ("
+		puts "	) [getName $register]_I ("
 		puts "		.clk(clk),"
 		puts "		.res_n(res_n),"
-		puts "		.increment([$register name]_[$field name]_countup),"
-		puts "		.load([$register name]_[$field name]_load_value),"
-		puts "		.load_enable([$register name]_[$field name]_load_enable),"
-		puts "		.value([$register name]_[$field name])"
+		puts "		.increment([getName $field]_countup),"
+		puts "		.load([getName $field]_load_value),"
+		puts "		.load_enable([getName $field]_load_enable),"
+		puts "		.value([getName $field])"
 		puts "	);"
 		puts ""
 	}
@@ -232,18 +243,18 @@
 		puts "		.DATASIZE([$ramBlock width]),"
 		puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
 		puts "		.PIPELINED(0)"
-		puts "	) buffer_data_I (" 
+		puts "	) [getName $ramBlock] (" 
 		puts "		.clk(clk),"
-		puts "		.wen_a([$ramBlock name]_rf_wen),"
-		puts "		.ren_a([$ramBlock name]_rf_ren),"
-		puts "		.addr_a([$ramBlock name]_rf_addr),"
-		puts "		.wdata_a([$ramBlock name]_rf_wdata),"
-		puts "		.rdata_a([$ramBlock name]_rf_rdata),"
-		puts "		.wen_b([$ramBlock name]_wen),"
-		puts "		.ren_b([$ramBlock name]_ren),"
-		puts "		.addr_b([$ramBlock name]_addr),"
-		puts "		.wdata_b([$ramBlock name]_wdata),"
-		puts "		.rdata_b([$ramBlock name]_rdata)"
+		puts "		.wen_a([getName $ramBlock]_rf_wen),"
+		puts "		.ren_a([getName $ramBlock]_rf_ren),"
+		puts "		.addr_a([getName $ramBlock]_rf_addr),"
+		puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
+		puts "		.rdata_a([getName $ramBlock]_rf_rdata),"
+		puts "		.wen_b([getName $ramBlock]_wen),"
+		puts "		.ren_b([getName $ramBlock]_ren),"
+		puts "		.addr_b([getName $ramBlock]_addr),"
+		puts "		.wdata_b([getName $ramBlock]_wdata),"
+		puts "		.rdata_b([getName $ramBlock]_rdata)"
 		puts "	);"
 		puts ""
 	}
@@ -271,7 +282,7 @@
 	proc writeRamBlockRegister {registerFile ramBlock} {
 		if {[$ramBlock hasAttribute hardware.global.rw]} {
 			# Write always block
-			puts "	/* RamBlock [$ramBlock name] */"
+			puts "	/* RamBlock [getName $ramBlock] */"
 			puts "	`ifdef ASYNC_RES"
 			puts "	always @(posedge clk or negedge res_n) `else"
 			puts "	always @(posedge clk) `endif"
@@ -279,21 +290,21 @@
 			puts "		if (!res_n)"
 			puts "		begin"
 			puts "			`ifdef ASIC"
-			puts "			[$ramBlock name]_rf_addr <= [ld [$ramBlock depth]]'b0;"
-			puts "			[$ramBlock name]_rf_wdata  <= [$ramBlock width]'b0;"
+			puts "			[getName $ramBlock]_rf_addr <= [ld [$ramBlock depth]]'b0;"
+			puts "			[getName $ramBlock]_rf_wdata  <= [$ramBlock width]'b0;"
 			puts "			`endif"
-			puts "			[$ramBlock name]_rf_wen <= 1'b0;"
-			puts "			[$ramBlock name]_rf_ren <= 1'b0;"
+			puts "			[getName $ramBlock]_rf_wen <= 1'b0;"
+			puts "			[getName $ramBlock]_rf_ren <= 1'b0;"
 			puts "		end"
 			puts "		else"
 			puts "		begin"
 			set equal [expr [$ramBlock getAbsoluteAddress]/([$ramBlock depth]*[$registerFile register_size]/8)]
 			puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
 			puts "			begin"
-			puts "				[$ramBlock name]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
-			puts "				[$ramBlock name]_rf_wdata <= write_data\[15:0\];"
-			puts "				[$ramBlock name]_rf_wen <= write_en;"
-			puts "				[$ramBlock name]_rf_ren <= read_en;"
+			puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
+			puts "				[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+			puts "				[getName $ramBlock]_rf_wen <= write_en;"
+			puts "				[getName $ramBlock]_rf_ren <= read_en;"
 			puts "			end"
 			puts "		end"
 			puts "	end"
@@ -305,19 +316,19 @@
 	proc writeRegisterHardwareWrite {register field} {
 			if {[$field hasAttribute hardware.global.wo] || [$field hasAttribute hardware.global.rw]} {
 				if {[$field hasAttribute hardware.global.hardware_wen]} {
-					puts "			else if([$register name]_[$field name]_wen)"
+					puts "			else if([getName $field]_wen)"
 					puts "			begin"
 					if {[$field hasAttribute hardware.global.counter]} {
-						puts "				[$register name]_[$field name]_load_enable <= 1'b1;"
-						puts "				[$register name]_[$field name]_load_value <= [$register name]_[$field name]_next;"
+						puts "				[getName $field]_load_value <= [getName $field]_next;"
+						puts "				[getName $field]_load_enable <= 1'b1;"
 					} else {
-						puts "				[$register name]_[$field name] <= [$register name]_[$field name]_next;"
+						puts "				[getName $field] <= [getName $field]_next;"
 					}
 					puts "			end"
 				} else {
 					puts "			else"
 					puts "			begin"
-					puts "				[$register name]_[$field name] <= [$register name]_[$field name]_next;"	
+					puts "				[getName $field] <= [getName $field]_next;"	
 					puts "			end"
 				}	
 			}	
@@ -337,10 +348,10 @@
 				}
 				puts "			begin"
 				if {[$it hasAttribute hardware.global.counter]} {
-					puts "				[$register name]_[$it name]_load_enable <= 1'b1;"
-					puts "				[$register name]_[$it name]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+					puts "				[getName $it]_load_enable <= 1'b1;"
+					puts "				[getName $it]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 				} else {
-					puts "				[$register name]_[$it name] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+					puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 				}
 				puts "			end"
 				if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
@@ -348,24 +359,24 @@
 					if {[$it hasAttribute hardware.global.counter]} {
 						puts "			else"
 						puts "			begin"
-						puts "				[$register name]_[$it name]_load_enable <= 1'b0;"
+						puts "				[getName $it]_load_enable <= 1'b0;"
 						puts "			end"
 					}
 				}
 				if {[$it hasAttribute hardware.global.software_written]} {
 					if {[$it getAttributeValue hardware.global.software_written]==2} {
 						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-							puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
+							puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 						} else {
-							puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [$register name]_[$it name]_res_in_last_cycle)"
+							puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 						}
 						puts "			begin"
-						puts "				[$register name]_[$it name]_written <= 1'b1;"
-						puts "				[$register name]_[$it name]_res_in_last_cycle <= 1'b0;"
+						puts "				[getName $it]_written <= 1'b1;"
+						puts "				[getName $it]_res_in_last_cycle <= 1'b0;"
 						puts "			end"
 						puts "			else"
 						puts "			begin"
-						puts "				[$register name]_[$it name]_written <= 1'b0;"
+						puts "				[getName $it]_written <= 1'b0;"
 						puts "			end"
 						puts ""															
 					} else {
@@ -375,11 +386,11 @@
 							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress]/8]) && write_en)"
 						}
 						puts "			begin"
-						puts "				[$register name]_[$it name]_written <= 1'b1;"
+						puts "				[getName $it]_written <= 1'b1;"
 						puts "			end"
 						puts "			else"
 						puts "			begin"
-						puts "				[$register name]_[$it name]_written <= 1'b0;"
+						puts "				[getName $it]_written <= 1'b0;"
 						puts "			end"
 						puts ""
 					}						
@@ -472,7 +483,7 @@
 					set care [format %x $care]
 					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$register depth]]+3]]'h$care,[expr "[ld [$register getAbsoluteAddress]]-[ld [expr [$registerFile register_size]/8]]"]'b$dontCare\}:"
 					puts "				begin"
-					puts "					read_data\[[expr "[$register width]-1"]:0\] <= [$register name]_rf_rdata;"
+					puts "					read_data\[[expr "[$register width]-1"]:0\] <= [getName $register]_rf_rdata;"
 					if {[$register width] != [$registerFile register_size]} {
 						puts "					read_data\[[expr "[$registerFile register_size]-1"]:[$register width]\] <= [expr "[$registerFile register_size]-[$register width]"]'b0;"
 					}
@@ -492,7 +503,7 @@
 						set upperBound [expr $lowerBound+[$it width]]
 						if {[$it hasAttribute software.global.ro] || [$it hasAttribute software.global.rw]} {
 							
-							puts "					read_data\[[expr $upperBound-1]:$lowerBound\] <= [$register name]_[$it name];"
+							puts "					read_data\[[expr $upperBound-1]:$lowerBound\] <= [getName $it];"
 						}
 						incr lowerBound [$it width]
 					}

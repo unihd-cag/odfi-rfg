@@ -27,28 +27,29 @@ module SimpleRF_tb();
     integer i;
 
     SimpleRF SimpleRF_I (
-	    .res_n(res_n),
-	    .clk(clk),
-	    .address(address),
-	    .read_data(read_data),
-	    .invalid_address(invalid_address),
-	    .access_complete(access_complete),
-	    .read_en(read_en),
-	    .write_en(write_en),
-	    .write_data(write_data),
-	    .node_id(node_id),
-	    .node_guid_next(node_guid_next),
-        .r1_r1_1_next(r1_r1_1_next),
-	    .r1_r1_1(r1_r1_1),
-	    .r1_r1_2_next(r1_r1_2_next),
-	    .r1_r1_2(r1_r1_2),
-	    .r1_r1_2_written(r1_r1_2_written),
-	    .r1_r1_3_next(r1_r1_3_next),
-	    .r1_r1_3(r1_r1_3),
-	    .r1_r1_3_written(r1_r1_3_written),
-	    .r1_r1_4_next(r1_r1_4_next),
-	    .r1_r1_4_wen(r1_r1_4_wen),
-	    .r1_r1_4(r1_r1_4));
+        .res_n(res_n),
+        .clk(clk),
+        .address(address),
+        .read_data(read_data),
+        .invalid_address(invalid_address),
+        .access_complete(access_complete),
+        .read_en(read_en),
+        .write_en(write_en),
+        .write_data(write_data),
+        .info_rf_node_id(node_id),
+        .info_rf_node_guid_next(node_guid_next),
+        .info_rf_r1_r1_1_next(r1_r1_1_next),
+        .info_rf_r1_r1_1(r1_r1_1),
+        .info_rf_r1_r1_2_next(r1_r1_2_next),
+        .info_rf_r1_r1_2(r1_r1_2),
+        .info_rf_r1_r1_2_written(r1_r1_2_written),
+        .info_rf_r1_r1_3_next(r1_r1_2_next),
+        .info_rf_r1_r1_3(r1_r1_3),
+        .info_rf_r1_r1_3_written(r1_r1_3_written),
+        .info_rf_r1_r1_4_next(r1_r1_4_next),
+        .info_rf_r1_r1_4(r1_r1_4),
+        .info_rf_r1_r1_4_wen(r1_r1_4_wen)
+    );
 
     always
     begin
