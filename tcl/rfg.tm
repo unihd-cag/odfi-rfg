@@ -143,7 +143,8 @@ namespace eval osys::rfg {
 
         public method attributes {fName closure} {
             ## Create 
-            set newAttribute [::new [namespace parent]::Attributes $name.$fName $fName $closure]
+            ## puts "[namespace parent]::Attributes [lindex [split $this ::] end].$fName"
+            set newAttribute [::new [namespace parent]::Attributes [lindex [split $this ::] end].$fName $fName $closure]
 
 
             ##puts "Created field: $newField"
@@ -202,9 +203,9 @@ namespace eval osys::rfg {
 
             #puts "Looking for : $name"
             foreach {pair} $attr_list {
-
-                #puts "Available $pair"
-
+                
+                ##puts "Available $pair"    
+                
                 if {[lindex $pair 0]==$name} {
                     return true
                 }

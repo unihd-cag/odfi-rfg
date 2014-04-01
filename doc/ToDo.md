@@ -1,8 +1,10 @@
 ## ToDo:
 
-- diffirent RAMs
-- XOR function
+- different RAMs
 - RAM read/write rights
 - Counter read/write rights
 - Trigger
-
+- reinit
+- hierarchical registerfiles
+- Sticky
+- XOR function

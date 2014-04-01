@@ -1,68 +1,33 @@
 #A register for testing some corner cases
 osys::rfg::registerFile testing {
+    group g1 {
+        
+        register r1 {
+    		field f1 {
+    			width 63
+    			software rw
+    			hardware {
+                    rw
+                    hardware_wen
+                    counter
+                }
+    		}
+            field f2 { 
+                width 1
+                software rw
+                hardware {
+                    rw
+                    software_write_xor
+                }
+            }
+    	}
 
-    # group g1 {
-    # 	group g1_1 {
-    # 		register r1 {
-    # 			field f1 {
-    # 				width 64
-    # 				software rw
-    # 				hardware rw
-    # 			}
-    # 		}
-    # 		register r2 {
-    # 			field f1 {
-    # 				width 64
-    # 				software rw
-    # 				hardware rw
-    # 			}
-    # 		}
-    # 		ramBlock buffer {
-    # 			width 64
-    # 			depth 32
-    # 			software rw
-    # 			hardware rw
-    # 		}
-    # 	}
-    # }
-    group g2 {
-    	
-        register r3 {
+    	register r2 {
     		field f1 {
     			width 64
     			software rw
     			hardware rw
     		}
     	}
-
-    	register r4 {
-    		field f1 {
-    			width 64
-    			software rw
-    			hardware rw
-    		}
-    	}
-    	
-        ramBlock buffer1 {
-    		width 64
-    		depth 32
-    		software rw
-    		hardware rw
-    	}
-    	
-        ramBlock buffer2 {
-    		width 64
-    		depth 32
-    		software rw
-    		hardware rw
-    	}
-
-        ramBlock buffer3 {
-            width 64
-            depth 32
-            software rw
-            hardware rw
-        }
-
     }
 }

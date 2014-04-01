@@ -351,7 +351,11 @@
 					puts "				[getName $it]_load_enable <= 1'b1;"
 					puts "				[getName $it]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 				} else {
-					puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+					if {[$it hasAttribute hardware.global.software_write_xor]} {
+						puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\]^[getName $it]);"
+					} else {
+						puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+					}
 				}
 				puts "			end"
 				if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
@@ -501,6 +505,10 @@
 					set lowerBound 0
 					$it onEachField {
 						set upperBound [expr $lowerBound+[$it width]]
+					##	$it onAttribute {software.global.rw software.global.ro} {
+					##		puts "					read_data\[[expr $upperBound-1]:$lowerBound\] <= [getName $it];"
+					##	}
+
 						if {[$it hasAttribute software.global.ro] || [$it hasAttribute software.global.rw]} {
 							
 							puts "					read_data\[[expr $upperBound-1]:$lowerBound\] <= [getName $it];"

@@ -7,8 +7,15 @@
 A registerFile can be seen as the main entity.
 
 	osys::rfg::registerFile test_rf {
-
  	    description "Test registerfile"
+
+	}
+
+Real example:
+
+	osys::rfg::registerFile test_rf {
+	    description "Test registerfile"
+
 	}
 
 ### group
@@ -16,8 +23,18 @@ A registerFile can be seen as the main entity.
 A group can be used in a registerfile to group elements inside a registerFile
 
 	group test_group {
-
 	    description "Test group"
+
+	}
+
+Real example:
+
+	osys::rfg::registerFile test_rf {
+	    description "Test registerfile"
+	    group test_group {
+	        description "Test group"
+
+	    }
 	}
 
 ### register
@@ -25,20 +42,49 @@ A group can be used in a registerfile to group elements inside a registerFile
 A register can be used in registerfile or group. The register describes a physical unit  with a defined with (default 64 bit) inside the registerfile.
 
 	register test_register {
-
 	    description "Test register"
 	}
+
+Real example:
+
+	osys::rfg::registerFile test_rf {
+	    description "Test registerfile"
+	    group test_group {
+	        description "Test group"
+	        register test_register {
+	            description "Test register"
+	            
+	        }
+	    }
+	}	
 
 ### field
 
 A field is used inside a register and describes a part of the physical unit of the register.
 
 	field test_field {
-
 	    description "Test field"
 	    width 16
 	    hardware rw
 	    software rw
+	}
+
+Real example:
+
+	osys::rfg::registerFile test_rf {
+	    description "Test registerfile"
+	    group test_group {
+	        description "Test group"
+	        register test_register {
+	            description "Test register"
+	            field test_field {
+	                description "Test field"
+	                width 16
+	                hardware rw
+	                software rw
+	            }
+	        }
+	    }
 	}
 
 ### ramBlock
@@ -51,6 +97,19 @@ A ramBlock can be used in a registerfile or a group. The ramBlock will be implem
 	    depth 32
 	    hardware rw
 	    software rw	
+	}
+
+Real example:
+
+	osys::rfg::registerFile test_rf {
+	    group test_group {
+	        ramBlock test_ram {
+	            width 16
+	            depth 32 
+	            software rw
+	            hardware rw
+	        }
+	    }
 	}
 
 ### aligner
@@ -203,3 +262,6 @@ This are properties of the hardware interface to the register.
 		<td> adds counter function to field </td>
 	</tr>
 </table>
+
+## Examples
+
