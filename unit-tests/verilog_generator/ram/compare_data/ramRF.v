@@ -21,8 +21,7 @@ ramRF ramRF_I (
 	.info_rf_TestRAM_rdata(),
 	.info_rf_TestRAM_wen(),
 	.info_rf_TestRAM_wdata()
-
-);
+ );
 */
 module ramRF
 (
@@ -41,12 +40,11 @@ module ramRF
 	input wire write_en,
 	input wire[63:0] write_data,
 	///}@ 
-	input wire[4:0] info_rf_TestRAM_addr,
+ 	input wire[4:0] info_rf_TestRAM_addr,
 	input wire info_rf_TestRAM_ren,
 	output wire[15:0] info_rf_TestRAM_rdata,
 	input wire info_rf_TestRAM_wen,
 	input wire[15:0] info_rf_TestRAM_wdata
-
 
 );
 

@@ -34,8 +34,7 @@
 
 	# write the verilog template for an easy implementation in a higher level module 
 	proc writeTemplate {object} {
-
-		set signalList {}
+	 	global signalList
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
 				writeTemplate $it
@@ -65,7 +64,7 @@
 							if {[$it hasAttribute hardware.global.wo]} {
 								lappend signalList "	.[getName $it]_next()"
 								if {[$it hasAttribute hardware.global.hardware_wen]} {
-									lappend signalLilst "	.[getName $it]_wen()"
+									lappend signalList "	.[getName $it]_wen()"
 								}
 							}
 							if {[$it hasAttribute hardware.global.ro]} {
@@ -82,13 +81,14 @@
 				}
 			}
 		}
-		puts [join $signalList ",\n"]
+		
+		##puts [join $signalList ",\n"]
 	}
 	
 	# write Inputs and Outputs
 	proc writeBlackbox {object} {
 
-		set signalList {}
+		global signalList
 		$object onEachComponent {
 			if {[$it isa osys::rfg::Group]} {
 				writeBlackbox $it 
@@ -154,7 +154,7 @@
 				}
 			}
 		}
-		puts [join $signalList ",\n"]
+		##puts [join $signalList ",\n"]
 	}
 
 	# write needed internal wires and regs
@@ -328,7 +328,11 @@
 				} else {
 					puts "			else"
 					puts "			begin"
-					puts "				[getName $field] <= [getName $field]_next;"	
+					if {[$field hasAttribute hardware.global.sticky]} {
+						puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
+					} else {
+						puts "				[getName $field] <= [getName $field]_next;"
+					}
 					puts "			end"
 				}	
 			}	
@@ -352,7 +356,7 @@
 					puts "				[getName $it]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 				} else {
 					if {[$it hasAttribute hardware.global.software_write_xor]} {
-						puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\]^[getName $it]);"
+						puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\] ^ [getName $it]);"
 					} else {
 						puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 					}
@@ -542,7 +546,7 @@
 	.read_en(),
 	.write_en(),
 	.write_data(),
-<% writeTemplate $registerFile %>);
+<% writeTemplate $registerFile %><%puts [join $signalList ",\n"] %> <% set signalList {}%>);
 */
 module <%puts [$registerFile name]%>(
 	///\defgroup sys
@@ -565,7 +569,7 @@ module <%puts [$registerFile name]%>(
 	input wire write_en,
 	input wire[<% puts -nonewline "[expr [$registerFile register_size]-1]"%>:0] write_data,
 	///}@ 
-<% writeBlackbox $registerFile %>
+<% writeBlackbox $registerFile %> <%puts [join $signalList ",\n"] %>
 );
 
 <% writeRegisternames $registerFile %>

@@ -120,14 +120,81 @@ Aligners can be used inside registerfiles to allign the next element to a new ad
 
 This examples alignes the next object to the next 2**12 address
 
+Real example:
+
+	osys::rfg::registerFile test_rf {
+
+	    group test_group1 {
+	        register test_register {
+	            description "Test register"
+	            field test_field {
+	                description "Test field"
+	                width 32
+	                hardware rw
+	                software rw
+	            }
+	        }
+	    }
+
+	    aligner 12
+
+	    group test_group2 {
+	        register test_register {
+	            description "Test register"
+	            field test_field {
+	                description "Test field"
+	                width 64
+	                hardware rw
+	                software rw
+	            }
+	        }
+	    }
+
+	}
+
+
+
 ### checker
 
 A checker can be used to check the addresses in the address space, should be used when aligners are used.
 
-	checker {
+	checker 12 {
 
 	}
 
+Real example:
+
+	osys::rfg::registerFile test_rf {
+
+	    checker 12 {
+	        group test_group1 {
+	            register test_register {
+	                description "Test register"
+	                field test_field {
+	                    description "Test field"
+	                    width 32
+	                    hardware rw
+	                    software rw
+	                }
+	            }
+	        }
+	    }
+
+	    aligner 12
+
+	    group test_group2 {
+	        register test_register {
+	            description "Test register"
+	            field test_field {
+	                description "Test field"
+	                width 64
+	                hardware rw
+	                software rw
+	            }
+	        }
+	    }
+
+	}
 
 ## Attributes
 
@@ -250,18 +317,84 @@ This are properties of the hardware interface to the register.
 		<td> read and write permission </td>
 	</tr>
 	<tr>
-		<td> software_written</td>
-		<td> adds a software written signal to the field (1 written, 2 written and reset)</td>
+		<td> software_written </td>
+		<td> adds a software written signal to the field (1 written, 2 written and reset) </td>
 	</tr>
 	<tr>
-		<td> hardware_wen</td>
-		<td> adds a hardware write enable signal to the field</td>
+		<td> hardware_wen </td>
+		<td> adds a hardware write enable signal to the field </td>
 	</tr>
 	<tr>
 		<td> counter </td>
 		<td> adds counter function to field </td>
 	</tr>
+	<tr>
+		<td> sticky </td>
+		<td> if the value is set to high the hardware interface is not able to reset it to zero. </td>
+	</tr>
+	<tr>
+		<td> software_write_xor </td>
+		<td> does an xor on the software interface with the old value in the register. </td>
+	</tr>
 </table>
 
-## Examples
+## A bigger Example
 
+	osys::rfg::registerFile RF {
+    
+	    checker 8 {
+
+	        group info_Group {
+            
+	            register info_register {
+                
+	                field ID {
+	                    description "unique ID"
+	                    width 32
+	                    reset 32'h12abcd
+	                    software ro
+	                }
+
+	                field GUID {
+	                    description "generic user ID"
+	                    width 32
+	                    reset 32'h0
+	                    software ro
+	                    hardware wo
+	                }
+
+	            }
+
+	        }
+
+	    }
+
+	    aligner 8
+
+	    group GPR_Group {
+	        ::repeat 16 {
+	            register GPR_$i {
+	                field GPF {
+	                    description "General purpose field"
+	                    width 64
+	                    reset 64'h0
+	                    software rw
+	                    hardware {
+	                        rw
+	                        software_written 1
+	                        hardware_wen
+	                    } 
+	                }
+	            }
+	        }
+	    }
+
+	    group RAM_Group {
+	        ramBlock RAM {
+	            width 16
+	            depth 256 
+	            software rw
+	            hardware rw
+	        }
+	    }
+	}

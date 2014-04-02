@@ -6,5 +6,3 @@
 - Trigger
 - reinit
 - hierarchical registerfiles
-- Sticky
-- XOR function
