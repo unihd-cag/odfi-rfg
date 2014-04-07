@@ -21,7 +21,7 @@ ramRF ramRF_I (
 	.info_rf_TestRAM_rdata(),
 	.info_rf_TestRAM_wen(),
 	.info_rf_TestRAM_wdata()
- );
+);
 */
 module ramRF
 (
@@ -40,7 +40,7 @@ module ramRF
 	input wire write_en,
 	input wire[63:0] write_data,
 	///}@ 
- 	input wire[4:0] info_rf_TestRAM_addr,
+	input wire[4:0] info_rf_TestRAM_addr,
 	input wire info_rf_TestRAM_ren,
 	output wire[15:0] info_rf_TestRAM_rdata,
 	input wire info_rf_TestRAM_wen,
@@ -102,6 +102,20 @@ module ramRF
 		end
 	end
 
+	/* register TestRAM */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+		end
+		else
+		begin
+
+		end
+	end
+
 
 	`ifdef ASYNC_RES
 	always @(posedge clk or negedge res_n) `else
@@ -132,6 +146,12 @@ module ramRF
 					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en_dly2;
+				end
+				6'h20:
+				begin
+					read_data[63:0] <= 64'b0;
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
 				end
 				default:
 				begin

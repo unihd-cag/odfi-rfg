@@ -20,7 +20,7 @@ counter_RF counter_RF_I (
 	.tsc_cnt(),
 	.tsc_cnt_wen(),
 	.tsc_cnt_countup()
- );
+);
 */
 module counter_RF
 (
@@ -39,7 +39,7 @@ module counter_RF
 	input wire write_en,
 	input wire[63:0] write_data,
 	///}@ 
- 	input wire[47:0] tsc_cnt_next,
+	input wire[47:0] tsc_cnt_next,
 	output wire[47:0] tsc_cnt,
 	input wire tsc_cnt_wen,
 	input wire tsc_cnt_countup

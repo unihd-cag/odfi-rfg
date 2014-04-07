@@ -278,14 +278,12 @@ namespace eval osys::rfg {
 
         ## Resolve Absolute address by parent calling, return result if already defined
         public method getAbsoluteAddress args {     
-
             if {$absoluteAddress!=-1} {
                 ## Already defined 
                 return $absoluteAddress
             } else {
                 ## Not Defined
                 if {[$this parent] != ""} {
-
                     ## Resolve using parent
                     return [expr [[$this parent] getAbsoluteAddress]+$address]
 
@@ -294,6 +292,27 @@ namespace eval osys::rfg {
                     ## No parent -> 0
                     return 0
                 }
+            }
+        }
+
+        public method getAbsoluteAddress2 args {
+            if {$absoluteAddress != -1} {
+                return $absoluteAddress
+            } else {
+                [lindex [$this parents] 0] walk {
+                    if {![$item isa osys::rfg::RegisterFile] && ![$item isa osys::rfg::Field]} {
+                        if {[$item isa osys::rfg::RamBlock]} {
+                            if {[$item address] > [[$item parent] address]} {
+                                $item absoluteAddress [$item address]    
+                            } else {
+                                $item absoluteAddress [expr "[$item address] * int([[$item parent] address]/[$item address]+1) "]
+                            }
+                        } else {
+                            $item absoluteAddress [expr [[$item parent] address] + [$item address]]
+                        }
+                    }
+                }
+                return $absoluteAddress
             }
         }
 
@@ -309,6 +328,11 @@ namespace eval osys::rfg {
         ## Returns the absolute Adress as HEX string
         public method getAbsoluteAddressHex args {
             format "%X" [getAbsoluteAddress]
+        }
+
+        ## Returns the absolute Adress as HEX string
+        public method getAbsoluteAddressHex2 args {
+            format "%X" [getAbsoluteAddress2]
         }
     } 
    
@@ -358,7 +382,7 @@ namespace eval osys::rfg {
                 
             $newGroup address $size
             incr size [$newGroup size]
-            $newGroup parent $this                            
+            $newGroup parent $this                           
             ## Return
             return $newGroup 
 

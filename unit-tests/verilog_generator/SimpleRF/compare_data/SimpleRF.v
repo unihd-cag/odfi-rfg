@@ -31,7 +31,7 @@ SimpleRF SimpleRF_I (
 	.info_rf_r1_r1_4_next(),
 	.info_rf_r1_r1_4(),
 	.info_rf_r1_r1_4_wen()
- );
+);
 */
 module SimpleRF
 (
@@ -50,7 +50,7 @@ module SimpleRF
 	input wire write_en,
 	input wire[63:0] write_data,
 	///}@ 
- 	output reg[15:0] info_rf_node_id,
+	output reg[15:0] info_rf_node_id,
 	input wire[23:0] info_rf_node_guid_next,
 	input wire[15:0] info_rf_r1_r1_1_next,
 	output reg[15:0] info_rf_r1_r1_1,
@@ -105,10 +105,7 @@ module SimpleRF
 			begin
 				info_rf_node_id <= write_data[15:0];
 			end
-			else
-			begin
 				info_rf_node_guid <= info_rf_node_guid_next;
-			end
 		end
 	end
 
