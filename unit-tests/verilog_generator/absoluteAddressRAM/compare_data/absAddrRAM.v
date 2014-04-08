@@ -4,6 +4,7 @@
 /* address map
 GPR_Group_GPR: base: 0x0 size: 8
 RAM_Group_RAM: base: 0x800 size: 2048
+RAM_Group0_RAM: base: 0x1800 size: 2048
 
 */
 /* instantiation template
@@ -25,7 +26,12 @@ absAddrRAM absAddrRAM_I (
 	.RAM_Group_RAM_ren(),
 	.RAM_Group_RAM_rdata(),
 	.RAM_Group_RAM_wen(),
-	.RAM_Group_RAM_wdata()
+	.RAM_Group_RAM_wdata(),
+	.RAM_Group0_RAM_addr(),
+	.RAM_Group0_RAM_ren(),
+	.RAM_Group0_RAM_rdata(),
+	.RAM_Group0_RAM_wen(),
+	.RAM_Group0_RAM_wdata()
 );
 */
 module absAddrRAM
@@ -37,7 +43,7 @@ module absAddrRAM
 	///}@ 
 	///\defgroup rw_if
 	///@{ 
-	input wire[12:3] address,
+	input wire[13:3] address,
 	output reg[63:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
@@ -53,7 +59,12 @@ module absAddrRAM
 	input wire RAM_Group_RAM_ren,
 	output wire[15:0] RAM_Group_RAM_rdata,
 	input wire RAM_Group_RAM_wen,
-	input wire[15:0] RAM_Group_RAM_wdata
+	input wire[15:0] RAM_Group_RAM_wdata,
+	input wire[7:0] RAM_Group0_RAM_addr,
+	input wire RAM_Group0_RAM_ren,
+	output wire[15:0] RAM_Group0_RAM_rdata,
+	input wire RAM_Group0_RAM_wen,
+	input wire[15:0] RAM_Group0_RAM_wdata
 
 );
 
@@ -62,6 +73,14 @@ module absAddrRAM
 	wire[15:0] RAM_Group_RAM_rf_rdata;
 	reg RAM_Group_RAM_rf_wen;
 	reg[15:0] RAM_Group_RAM_rf_wdata;
+	reg read_en_dly0;
+	reg read_en_dly1;
+	reg read_en_dly2;
+	reg[7:0] RAM_Group0_RAM_rf_addr;
+	reg RAM_Group0_RAM_rf_ren;
+	wire[15:0] RAM_Group0_RAM_rf_rdata;
+	reg RAM_Group0_RAM_rf_wen;
+	reg[15:0] RAM_Group0_RAM_rf_wdata;
 	reg read_en_dly0;
 	reg read_en_dly1;
 	reg read_en_dly2;
@@ -84,6 +103,24 @@ module absAddrRAM
 		.rdata_b(RAM_Group_RAM_rdata)
 	);
 
+	ram_2rw_1c #(
+		.DATASIZE(16),
+		.ADDRSIZE(8),
+		.PIPELINED(0)
+	) RAM_Group0_RAM (
+		.clk(clk),
+		.wen_a(RAM_Group0_RAM_rf_wen),
+		.ren_a(RAM_Group0_RAM_rf_ren),
+		.addr_a(RAM_Group0_RAM_rf_addr),
+		.wdata_a(RAM_Group0_RAM_rf_wdata),
+		.rdata_a(RAM_Group0_RAM_rf_rdata),
+		.wen_b(RAM_Group0_RAM_wen),
+		.ren_b(RAM_Group0_RAM_ren),
+		.addr_b(RAM_Group0_RAM_addr),
+		.wdata_b(RAM_Group0_RAM_wdata),
+		.rdata_b(RAM_Group0_RAM_rdata)
+	);
+
 
 	/* register GPR */
 	`ifdef ASYNC_RES
@@ -98,7 +135,7 @@ module absAddrRAM
 		else
 		begin
 
-			if((address[12:3]== 0) && write_en)
+			if((address[13:3]== 0) && write_en)
 			begin
 				GPR_Group_GPR_GPF <= write_data[63:0];
 			end
@@ -106,7 +143,7 @@ module absAddrRAM
 			begin
 				GPR_Group_GPR_GPF <= GPR_Group_GPR_GPF_next;
 			end
-			if((address[12:3]== 0) && write_en)
+			if((address[13:3]== 0) && write_en)
 			begin
 				GPR_Group_GPR_GPF_written <= 1'b1;
 			end
@@ -134,12 +171,52 @@ module absAddrRAM
 		end
 		else
 		begin
-			if (address[12:11] == 1)
+			if (address[13:11] == 1)
 			begin
 				RAM_Group_RAM_rf_addr <= address[10:3];
 				RAM_Group_RAM_rf_wdata <= write_data[15:0];
 				RAM_Group_RAM_rf_wen <= write_en;
 				RAM_Group_RAM_rf_ren <= read_en;
+			end
+		end
+	end
+
+	/* register RAM */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+		end
+		else
+		begin
+
+		end
+	end
+
+	/* RamBlock RAM_Group0_RAM */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+			`ifdef ASIC
+			RAM_Group0_RAM_rf_addr <= 8'b0;
+			RAM_Group0_RAM_rf_wdata  <= 16'b0;
+			`endif
+			RAM_Group0_RAM_rf_wen <= 1'b0;
+			RAM_Group0_RAM_rf_ren <= 1'b0;
+		end
+		else
+		begin
+			if (address[13:11] == 3)
+			begin
+				RAM_Group0_RAM_rf_addr <= address[10:3];
+				RAM_Group0_RAM_rf_wdata <= write_data[15:0];
+				RAM_Group0_RAM_rf_wen <= write_en;
+				RAM_Group0_RAM_rf_ren <= read_en;
 			end
 		end
 	end
@@ -181,25 +258,26 @@ module absAddrRAM
 			read_en_dly1 <= read_en_dly0;
 			read_en_dly2 <= read_en_dly1;
 
-			casex(address[12:3])
-				10'h0:
+			casex(address[13:3])
+				11'h0:
 				begin
 					read_data[63:0] <= GPR_Group_GPR_GPF;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
-				{2'h1,8'bxxxxxxxx}:
+				{3'h1,8'bxxxxxxxx}:
 				begin
 					read_data[15:0] <= RAM_Group_RAM_rf_rdata;
 					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en_dly2;
 				end
-				10'h100:
+				{3'h3,10'bxxxxxxxx}:
 				begin
-					read_data[63:0] <= 64'b0;
+					read_data[15:0] <= RAM_Group0_RAM_rf_rdata;
+					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
-					access_complete <= write_en || read_en;
+					access_complete <= write_en || read_en_dly2;
 				end
 				default:
 				begin

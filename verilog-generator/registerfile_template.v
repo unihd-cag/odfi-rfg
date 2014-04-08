@@ -43,8 +43,7 @@
 					lappend signalList "	.[getName $item]_wdata()"
 				}
 
-			}
-			if {[$item isa osys::rfg::Register]} {
+			} elseif {[$item isa osys::rfg::Register]} {
 				$item onEachField {
 					if {[$it name] != "Reserved"} {
 						
@@ -100,8 +99,7 @@
 					lappend signalList "	input wire\[[expr [$item width]-1]:0\] [getName $item]_wdata"
 				}
 
-			}
-			if {[$item isa osys::rfg::Register]} {
+			} elseif {[$item isa osys::rfg::Register]} {
 				$item onEachField {
 
 					$it OnAttributes {hardware.global.rw} {
@@ -196,8 +194,7 @@
 					}
 				}
 
-			}
-			if {[$item isa osys::rfg::Register]} {
+			} elseif {[$item isa osys::rfg::Register]} {
 				$item onEachField {
 					if {[$it name] != "Reserved"} {
 						
@@ -375,7 +372,7 @@
 						} otherwise {
 							puts "				[getName $field] <= [getName $field]_next;"
 						}
-						
+
 					}
 
 				}	
@@ -459,8 +456,7 @@
 		$object walk {
 			if {[$item isa osys::rfg::RamBlock]} {
 				writeRamBlockRegister $registerFile $item
-			}
-			if {[$item isa osys::rfg::Register]} {
+			} elseif {[$item isa osys::rfg::Register]} {
 				# Write always block
 				puts "	/* register [$item name] */"
 				puts "	`ifdef ASYNC_RES"
@@ -537,8 +533,7 @@
 					set delays 3
 					puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
 					puts "				end"
-			}
-			if {[$item isa osys::rfg::Register]} {
+			} elseif {[$item isa osys::rfg::Register]} {
 				if {[getAddrBits $registerFile] == [ld [expr [$registerFile register_size]/8]]} {
 					puts "				[expr [getAddrBits $registerFile]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$item getAbsoluteAddress2]/8]]:"
 				} else {

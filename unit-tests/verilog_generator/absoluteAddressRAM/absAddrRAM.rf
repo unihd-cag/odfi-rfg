@@ -30,4 +30,13 @@ osys::rfg::registerFile absAddrRAM {
         }
     }
 
+    group RAM_Group0 {
+        ramBlock RAM {
+            description "a 16 bit wide RAM with 256 entries"
+            width 16
+            depth 256 
+            software rw
+            hardware rw
+        }
+    }
 }
