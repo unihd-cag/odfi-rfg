@@ -144,6 +144,20 @@ module absAddrRAM
 		end
 	end
 
+	/* register RAM */
+	`ifdef ASYNC_RES
+	always @(posedge clk or negedge res_n) `else
+	always @(posedge clk) `endif
+	begin
+		if (!res_n)
+		begin
+		end
+		else
+		begin
+
+		end
+	end
+
 
 	`ifdef ASYNC_RES
 	always @(posedge clk or negedge res_n) `else
@@ -180,6 +194,12 @@ module absAddrRAM
 					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en_dly2;
+				end
+				10'h100:
+				begin
+					read_data[63:0] <= 64'b0;
+					invalid_address <= 1'b0;
+					access_complete <= write_en || read_en;
 				end
 				default:
 				begin

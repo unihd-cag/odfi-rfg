@@ -126,6 +126,25 @@ namespace eval osys::rfg {
 
         }
 
+        public method OnAttributes {attributeList closure1 {keyword ""} {closure2 ""}} {
+            set scoreList {}
+            #puts "OnAttributes"
+            foreach element $attributeList {
+                if {[hasAttribute $element]} {
+                    lappend scoreList "true"
+                } else {
+                    lappend scoreList "false"
+                } 
+            }
+            if {[lsearch -exact $scoreList "false"] == -1} {
+                odfi::closures::doClosure $closure1 1
+            } else {
+                if {$keyword == "otherwise"} {
+                    odfi::closures::doClosure $closure2 1
+                }
+            }
+        }
+
         ## name format: attributeGroupName.attributeQualified name 
         ## Example: hardaware.software_written
         public method getAttributeValue qname {
