@@ -201,6 +201,11 @@ Real example:
 ### ramBlock Attributes
 
 A ramBlock has diffirent attributes which describe some properties of the generated RAM.
+
+|Attribute|Description|
+|---------|-----------|
+|description|short description of the element|
+
 <br>
 <br>
 

@@ -296,6 +296,7 @@
 					$it OnAttributes {hardware.global.counter} {
 						writeCounterModule $item $it
 					}
+
 				}
 			}
 		}
@@ -392,27 +393,34 @@
 					puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
 				}
 				puts "			begin"
-				if {[$it hasAttribute hardware.global.counter]} {
+
+				$it OnAttributes {hardware.global.counter} {
 					puts "				[getName $it]_load_enable <= 1'b1;"
 					puts "				[getName $it]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
-				} else {
-					if {[$it hasAttribute hardware.global.software_write_xor]} {
+				} otherwise {
+				
+					$it OnAttributes {hardware.global.software_write_xor} {
 						puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\] ^ [getName $it]);"
-					} else {
+					} otherwise {
 						puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 					}
+				
 				}
+				
 				puts "			end"
 				if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
 					writeRegisterHardwareWrite $register $it
-					if {[$it hasAttribute hardware.global.counter]} {
+					
+					$it OnAttributes {hardware.global.counter} {
 						puts "			else"
 						puts "			begin"
 						puts "				[getName $it]_load_enable <= 1'b0;"
 						puts "			end"
 					}
+				
 				}
-				if {[$it hasAttribute hardware.global.software_written]} {
+				
+				$it OnAttributes {hardware.global.software_written} {
 					if {[$it getAttributeValue hardware.global.software_written]==2} {
 						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
 							puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
@@ -444,8 +452,11 @@
 						puts ""
 					}						
 				}
+
 			} else {
+				
 				writeRegisterHardwareWrite $register $it
+			
 			}
 			incr lowerBound [$it width]
 		}
@@ -471,7 +482,9 @@
 				puts "		else"
 				puts "		begin"
 				puts ""
+
 				writeRegisterSoftwareWrite $object $item
+				
 				puts "		end"
 
 				puts "	end"
