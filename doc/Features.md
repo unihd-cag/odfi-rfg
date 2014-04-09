@@ -253,6 +253,14 @@ This are properties of the hardware interface to the register.
 
 ### Register file description
 
+In our example we generate a Registerfile with one info_register which is located in the info_Group.
+This register has to fields (ID and GUID) with diffirent read and write permissions for software and hardware.
+
+After this first group we have a group of general purpose registers in the GPR_Group these registers are aligned to 2**8.
+We generate with the repeat statement 16 general purpose registers with a field which is 64 bit wide, has sotware and hardware read and write permission, a software_written and hardware_wen signal. 
+
+Our last group contains a ramBlock which has 256 entries and is 16 bit wide.
+
 	osys::rfg::registerFile RF {
     
 	    checker 8 {
@@ -314,6 +322,10 @@ This are properties of the hardware interface to the register.
 
 ### Resulting address map 
 
+Our register size is the default size of 64 bit so each register has a size of 8 Bytes. The info register can be found at base address 0x000 and has a size of 8 Byte. The next register starts with an offset of 2**8 Byte addresses. This is because of the aligner. Now we have a linear addresspace for the next 16 general purpose registers. 
+
+At the end we have our ramBlock with the size of 2048 Byte. The size is this big because of the register size of 8 Bytes. So the size is our 256 entries multiplied by 8. But implemented is a 16 Bit x 256 RAM.  
+
 |Base Address|Element|Size|
 |------------|-------|----|
 |0x000|info_Group_info_register|8|
@@ -332,6 +344,6 @@ This are properties of the hardware interface to the register.
 |0x168|GPR_Group_GPR_13|8|
 |0x170|GPR_Group_GPR_14|8|
 |0x178|GPR_Group_GPR_15|8|
-|0x180|RAM_Group_RAM|2048|
+|0x800|RAM_Group_RAM|2048|
 
 
