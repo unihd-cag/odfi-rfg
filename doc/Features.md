@@ -205,145 +205,53 @@ A ramBlock has diffirent attributes which describe some properties of the genera
 |Attribute|Description|
 |---------|-----------|
 |description|short description of the element|
-
-<br>
-<br>
-
-<table border="1">
-	<tr>
-		<th> Attribute </th>
-		<th> Description </th>
-	</tr>
-	<tr>
-		<td> description </td>
-		<td> short description of the element </td>
-	</tr>
-	<tr>
-		<td> width </td>
-		<td> data width of the RAM </td>
-	</tr>
-	<tr>
-		<td> depth </td>
-		<td> number of entries </td>
-	</tr>
-	<tr>
-		<td> hardware </td>
-		<td> hardware properties </td>
-	</tr>
-	<tr>
-		<td> software </td>
-		<td> software properties </td>
-	</tr>
-
-</table>
+|width|data width of the RAM|
+|depth|number of entries|
+|hardware|hardware properties|
+|software|software properties|
 
 ### field Attributes
 
 A field can also have some Attributes which are listed here.
-<br>
-<br>
 
-<table border="1">
-	<tr>
-		<th> Attribute </th>
-		<th> Description </th>
-	</tr>
-	<tr>
-		<td> description </td>
-		<td> short description of the element </td>
-	</tr>
-	<tr>
-		<td> width </td>
-		<td> data widht of the RAM </td>
-	</tr>
-	<tr>
-		<td> reset </td>
-		<td> reset value of the register </td>
-	</tr>
-	<tr>
-		<td> hardware </td>
-		<td> hardware properties </td>
-	</tr>
-	<tr>
-		<td> software </td>
-		<td> software properties </td>
-	</tr>
-
-</table>
+|Attribute|Description|
+|---------|-----------|
+|description|short description of the element|
+|width|data width of the RAM|
+|reset|reset value of the field|
+|hardware|hardware properties|
+|software|software properties|
 
 ## Attribute properties
 
 ### software
 
 This are the properties of the software interface to the register.
-<br>
-<br>
 
-<table border="1">
-	<tr>
-		<th> Attribute property </th>
-		<th> Description </th>
-	</tr>
-	<tr>
-		<td> ro </td>
-		<td> read only permission </td>
-	</tr>
-	<tr>
-		<td> wo </td>
-		<td> write only permission </td>
-	</tr>
-	<tr>
-		<td> rw </td>
-		<td> read and write permission </td>
-	</tr>
-</table>
+|Attribute property|Description|
+|---------|-----------|
+|ro|read only permission|
+|wo|write only permission|
+|rw|read and write permission|
 
 ### hardware
 
 This are properties of the hardware interface to the register.
-<br>
-<br>
 
-<table border="1">
-	<tr>
-		<th> Attribute property </th>
-		<th> Description </th>
-	</tr>
-	<tr>
-		<td> ro </td>
-		<td> read only permission </td>
-	</tr>
-	<tr>
-		<td> wo </td>
-		<td> write only permission </td>
-	</tr>
-	<tr>
-		<td> rw </td>
-		<td> read and write permission </td>
-	</tr>
-	<tr>
-		<td> software_written </td>
-		<td> adds a software written signal to the field (1 written, 2 written and reset) </td>
-	</tr>
-	<tr>
-		<td> hardware_wen </td>
-		<td> adds a hardware write enable signal to the field </td>
-	</tr>
-	<tr>
-		<td> counter </td>
-		<td> adds counter function to field </td>
-	</tr>
-	<tr>
-		<td> sticky </td>
-		<td> if the value is set to high the hardware interface is not able to reset it to zero. </td>
-	</tr>
-	<tr>
-		<td> software_write_xor </td>
-		<td> does an xor on the software interface with the old value in the register. </td>
-	</tr>
-</table>
+|Attribute property|Description|
+|---------|-----------|
+|ro|read only permission|
+|wo|write only permission|
+|rw|read write permission|
+|software_written| adds software written signal to the field (1 written, 2 written and reset)|
+|hardware_wen|adds hardware write enable signal to the field|
+|counter|adds counter function to the field|
+|sticky|if the value is set to high the hardware interface will not be able to reset it to zero|
+|software_write_xor|does an xor on the software interface with the old value in the register|
 
 ## A bigger Example
+
+### Register file description
 
 	osys::rfg::registerFile RF {
     
@@ -403,5 +311,27 @@ This are properties of the hardware interface to the register.
 	        }
 	    }
 	}
+
+### Resulting address map 
+
+|Base Address|Element|Size|
+|------------|-------|----|
+|0x000|info_Group_info_register|8|
+|0x100|GPR_Group_GPR_0|8|
+|0x108|GPR_Group_GPR_1|8|
+|0x110|GPR_Group_GPR_2|8|
+|0x118|GPR_Group_GPR_3|8|
+|0x120|GPR_Group_GPR_4|8|
+|0x128|GPR_Group_GPR_5|8|
+|0x130|GPR_Group_GPR_6|8|
+|0x138|GPR_Group_GPR_7|8|
+|0x140|GPR_Group_GPR_8|8|
+|0x148|GPR_Group_GPR_10|8|
+|0x150|GPR_Group_GPR_11|8|
+|0x160|GPR_Group_GPR_12|8|
+|0x168|GPR_Group_GPR_13|8|
+|0x170|GPR_Group_GPR_14|8|
+|0x178|GPR_Group_GPR_15|8|
+|0x180|RAM_Group_RAM|2048|
 
 
