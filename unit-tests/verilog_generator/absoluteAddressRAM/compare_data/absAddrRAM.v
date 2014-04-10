@@ -181,20 +181,6 @@ module absAddrRAM
 		end
 	end
 
-	/* register RAM */
-	`ifdef ASYNC_RES
-	always @(posedge clk or negedge res_n) `else
-	always @(posedge clk) `endif
-	begin
-		if (!res_n)
-		begin
-		end
-		else
-		begin
-
-		end
-	end
-
 	/* RamBlock RAM_Group0_RAM */
 	`ifdef ASYNC_RES
 	always @(posedge clk or negedge res_n) `else
@@ -218,20 +204,6 @@ module absAddrRAM
 				RAM_Group0_RAM_rf_wen <= write_en;
 				RAM_Group0_RAM_rf_ren <= read_en;
 			end
-		end
-	end
-
-	/* register RAM */
-	`ifdef ASYNC_RES
-	always @(posedge clk or negedge res_n) `else
-	always @(posedge clk) `endif
-	begin
-		if (!res_n)
-		begin
-		end
-		else
-		begin
-
 		end
 	end
 
