@@ -3,7 +3,7 @@
 osys::rfg::registerFile info_rf {
     
     register driver {
-        
+
         field ver {
             width        32
             reset        32'd18311
@@ -37,6 +37,7 @@ osys::rfg::registerFile info_rf {
             }    
             attributes hardware {
                 ro
+                software_written 2
             }
         }
 
@@ -87,6 +88,8 @@ osys::rfg::registerFile info_rf {
             }
         }
 
+        reserved 15
+
         field backend {
             description "This bit is set on nodes that currently have a backend enumeration or configuration attempt running"
             width        1
@@ -113,6 +116,7 @@ osys::rfg::registerFile info_rf {
             }    
             attributes hardware {
             }
+
         }
 
         field extoll_ip_address {
@@ -127,6 +131,7 @@ osys::rfg::registerFile info_rf {
         }
 
     }
+
 
     register mgt_ip_addresses {
         description "This register should be set by system software and give directions to find the primary management entity in the system."
@@ -160,7 +165,7 @@ osys::rfg::registerFile info_rf {
         description "This register implements the EXTOLL time stamp counter (TSC). The counter is incremented at every clock cycle. A software write to the register loads the counter with the given value. In addition, the counter can be set from the global interrupt hardware to implement a globally sychronized time source."
 
         if {[info exists ASIC]} {
-
+            
             field tsc {
                 width        64
                 reset        
@@ -170,6 +175,7 @@ osys::rfg::registerFile info_rf {
                 attributes hardware {
                     rw
                     counter
+                    hardware_wen  
                 }
             }
 
@@ -180,22 +186,24 @@ osys::rfg::registerFile info_rf {
                 reset        
                 attributes software {
                     rw
-                }
+                }    
                 attributes hardware {
                     rw
                     counter
+                    hardware_wen  
                 }
             }
 
         }
 
     }
+
 
     register tsc_global_load_value {
         description "This register specifies the value the TSC register will be loaded with, in case of an global interrupt."
 
         if {[info exists ASIC]} {
-
+            
             field tsc_data {
                 width        64
                 reset        
@@ -206,8 +214,9 @@ osys::rfg::registerFile info_rf {
                     ro
                 }
             }
+
         } else {
-            
+
             field tsc_data {
                 width        48
                 reset        
@@ -223,9 +232,12 @@ osys::rfg::registerFile info_rf {
 
     }
 
+
+
+
     ::repeat 8 {
-        
-            register scratchpad_$i {
+    
+        register scratchpad_$i {
             description "This register is one entry of the 64 byte scratchpad space offered by EXTOLL."
             
             field data {
@@ -234,7 +246,7 @@ osys::rfg::registerFile info_rf {
                 reset        64'h0
                 attributes software {
                     rw
-                }
+                }    
                 attributes hardware {
                 }
             }
@@ -244,8 +256,8 @@ osys::rfg::registerFile info_rf {
     }
 
     register tsc_global_load_enable {
-        description "Enable/Disable TSC loading from the 4 global interrupt sources and control re-init of the timer interrupt logic from global interrupts"
-
+    description "Enable/Disable TSC loading from the 4 global interrupt sources and control re-init of the timer interrupt logic from global interrupts"
+        
         field tsc_load_en_irq0 {
             description "Enable global interrupt 0 to load the tsc with the value from the tsc_global_load_value register"
             width        1
@@ -288,19 +300,21 @@ osys::rfg::registerFile info_rf {
             reset        
             attributes software {
                 rw
-            }
+            }    
             attributes hardware {
                 ro
             }
         }
 
+        reserved 4
+        
         field global_irq_reinit_en0 {
             description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
             width        1
             reset        
             attributes software {
                 rw
-            }    
+            }   
             attributes hardware {
                 ro
             }
@@ -344,7 +358,6 @@ osys::rfg::registerFile info_rf {
 
     }
 
-
     register timer_interrupt {
         description "Control the integrated timer."
         
@@ -369,6 +382,8 @@ osys::rfg::registerFile info_rf {
             }    
             attributes hardware {
                 rw
+                software_written 1
+                hardware_wen  
             }
         }
 
@@ -384,6 +399,8 @@ osys::rfg::registerFile info_rf {
             }
         }
 
+        reserved 6
+        
         field timer_interrupt_toggle {
             description "Toggles everytime an interrupt is fired."
             width        1

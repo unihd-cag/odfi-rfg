@@ -34,6 +34,7 @@ info_rf info_rf_I (
 	.write_data(),
 	.node_guid_next(),
 	.node_id(),
+	.node_id_written(),
 	.tsc_tsc_next(),
 	.tsc_tsc(),
 	.tsc_tsc_wen(),
@@ -50,6 +51,8 @@ info_rf info_rf_I (
 	.timer_interrupt_timer_interrupt_period(),
 	.timer_interrupt_timer_interrupt_enable_next(),
 	.timer_interrupt_timer_interrupt_enable(),
+	.timer_interrupt_timer_interrupt_enable_wen(),
+	.timer_interrupt_timer_interrupt_enable_written(),
 	.timer_interrupt_timer_interrupt_one_shot(),
 	.timer_interrupt_timer_interrupt_toggle_next()
 );
@@ -73,6 +76,7 @@ module info_rf
 	///}@ 
 	input wire[23:0] node_guid_next,
 	output reg[15:0] node_id,
+	output reg node_id_written,
 	input wire[47:0] tsc_tsc_next,
 	output wire[47:0] tsc_tsc,
 	input wire tsc_tsc_wen,
@@ -89,6 +93,8 @@ module info_rf
 	output reg[47:0] timer_interrupt_timer_interrupt_period,
 	input wire timer_interrupt_timer_interrupt_enable_next,
 	output reg timer_interrupt_timer_interrupt_enable,
+	input wire timer_interrupt_timer_interrupt_enable_wen,
+	output reg timer_interrupt_timer_interrupt_enable_written,
 	output reg timer_interrupt_timer_interrupt_one_shot,
 	input wire timer_interrupt_timer_interrupt_toggle_next
 
@@ -96,6 +102,7 @@ module info_rf
 
 	reg[31:0] driver_ver;
 	reg[23:0] node_guid;
+	reg node_id_res_in_last_cycle;
 	reg[15:0] node_vpids;
 	reg[31:0] management_sw_cfg_ip;
 	reg[7:0] management_sw_enum_cnt;
@@ -153,6 +160,8 @@ module info_rf
 		begin
 			node_guid <= 24'h0;
 			node_id <= 16'h0;
+			node_id_written <= 1'b0;
+			node_id_res_in_last_cycle <= 1'b1;
 			node_vpids <= 42;
 		end
 		else
@@ -163,6 +172,16 @@ module info_rf
 			begin
 				node_id <= write_data[39:24];
 			end
+			if(((address[7:3]== 1) && write_en) || node_id_res_in_last_cycle)
+			begin
+				node_id_written <= 1'b1;
+				node_id_res_in_last_cycle <= 1'b0;
+			end
+			else
+			begin
+				node_id_written <= 1'b0;
+			end
+
 		end
 	end
 
@@ -195,7 +214,7 @@ module info_rf
 			end
 			if((address[7:3]== 2) && write_en)
 			begin
-				management_sw_backend <= write_data[48:48];
+				management_sw_backend <= write_data[63:63];
 			end
 		end
 	end
@@ -485,19 +504,19 @@ module info_rf
 			end
 			if((address[7:3]== 15) && write_en)
 			begin
-				tsc_global_load_enable_global_irq_reinit_en0 <= write_data[4:4];
+				tsc_global_load_enable_global_irq_reinit_en0 <= write_data[8:8];
 			end
 			if((address[7:3]== 15) && write_en)
 			begin
-				tsc_global_load_enable_global_irq_reinit_en1 <= write_data[5:5];
+				tsc_global_load_enable_global_irq_reinit_en1 <= write_data[9:9];
 			end
 			if((address[7:3]== 15) && write_en)
 			begin
-				tsc_global_load_enable_global_irq_reinit_en2 <= write_data[6:6];
+				tsc_global_load_enable_global_irq_reinit_en2 <= write_data[10:10];
 			end
 			if((address[7:3]== 15) && write_en)
 			begin
-				tsc_global_load_enable_global_irq_reinit_en3 <= write_data[7:7];
+				tsc_global_load_enable_global_irq_reinit_en3 <= write_data[11:11];
 			end
 		end
 	end
@@ -511,6 +530,7 @@ module info_rf
 		begin
 			timer_interrupt_timer_interrupt_period <= 0;
 			timer_interrupt_timer_interrupt_enable <= 0;
+			timer_interrupt_timer_interrupt_enable_written <= 1'b0;
 			timer_interrupt_timer_interrupt_one_shot <= 0;
 			timer_interrupt_timer_interrupt_toggle <= 0;
 		end
@@ -525,10 +545,19 @@ module info_rf
 			begin
 				timer_interrupt_timer_interrupt_enable <= write_data[48:48];
 			end
-			else
+			else if(timer_interrupt_timer_interrupt_enable_wen)
 			begin
 				timer_interrupt_timer_interrupt_enable <= timer_interrupt_timer_interrupt_enable_next;
 			end
+			if((address[7:3]== 16) && write_en)
+			begin
+				timer_interrupt_timer_interrupt_enable_written <= 1'b1;
+			end
+			else
+			begin
+				timer_interrupt_timer_interrupt_enable_written <= 1'b0;
+			end
+
 			if((address[7:3]== 16) && write_en)
 			begin
 				timer_interrupt_timer_interrupt_one_shot <= write_data[49:49];
@@ -576,8 +605,7 @@ module info_rf
 					read_data[31:0] <= management_sw_cfg_ip;
 					read_data[39:32] <= management_sw_enum_cnt;
 					read_data[47:40] <= management_sw_cfg_count;
-					read_data[48:48] <= management_sw_backend;
-					read_data[63:49] <= 15'b0;
+					read_data[63:63] <= management_sw_backend;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
@@ -663,11 +691,11 @@ module info_rf
 					read_data[1:1] <= tsc_global_load_enable_tsc_load_en_irq1;
 					read_data[2:2] <= tsc_global_load_enable_tsc_load_en_irq2;
 					read_data[3:3] <= tsc_global_load_enable_tsc_load_en_irq3;
-					read_data[4:4] <= tsc_global_load_enable_global_irq_reinit_en0;
-					read_data[5:5] <= tsc_global_load_enable_global_irq_reinit_en1;
-					read_data[6:6] <= tsc_global_load_enable_global_irq_reinit_en2;
-					read_data[7:7] <= tsc_global_load_enable_global_irq_reinit_en3;
-					read_data[63:8] <= 56'b0;
+					read_data[8:8] <= tsc_global_load_enable_global_irq_reinit_en0;
+					read_data[9:9] <= tsc_global_load_enable_global_irq_reinit_en1;
+					read_data[10:10] <= tsc_global_load_enable_global_irq_reinit_en2;
+					read_data[11:11] <= tsc_global_load_enable_global_irq_reinit_en3;
+					read_data[63:12] <= 52'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
@@ -676,8 +704,8 @@ module info_rf
 					read_data[47:0] <= timer_interrupt_timer_interrupt_period;
 					read_data[48:48] <= timer_interrupt_timer_interrupt_enable;
 					read_data[49:49] <= timer_interrupt_timer_interrupt_one_shot;
-					read_data[50:50] <= timer_interrupt_timer_interrupt_toggle;
-					read_data[63:51] <= 13'b0;
+					read_data[56:56] <= timer_interrupt_timer_interrupt_toggle;
+					read_data[63:57] <= 7'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end

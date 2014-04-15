@@ -610,7 +610,7 @@
 	.read_en(),
 	.write_en(),
 	.write_data(),
-<% writeTemplate $registerFile %>);
+<% writeTemplate $registerFile  %>);
 */
 module <%puts [$registerFile name]%>(
 	///\defgroup sys

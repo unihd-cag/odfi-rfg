@@ -20,10 +20,17 @@ namespace eval osys::rfg::veriloggenerator {
             set registerFile $cRegisterFile
         }
 
-        public method produce destinationFile {
+        public method produce_RegisterFile destinationFile {
 
         	## Read and parse Verilog Template
             set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::veriloggenerator::location/registerfile_template.v]
+            odfi::files::writeToFile $destinationFile $verilog
+        }
+
+        public method produce_RF_Wrapper destinationFile {
+
+            ## Read and parse Verilog Template
+            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::veriloggenerator::location/RF_wrapper_template.v]
             odfi::files::writeToFile $destinationFile $verilog
         }
 	}

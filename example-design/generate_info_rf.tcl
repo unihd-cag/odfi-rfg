@@ -9,6 +9,8 @@ puts $result
 
 set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
 
-set destinationFile "design_files/info_rf.v"
+set destinationRF "design_files/info_rf.v"
+set destinationWrapper "design_files/RF_wrapper.v"
 
-$veriloggenerator produce $destinationFile
+$veriloggenerator produce_RegisterFile $destinationRF
+$veriloggenerator produce_RF_Wrapper $destinationWrapper
