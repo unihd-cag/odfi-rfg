@@ -1,0 +1,5 @@
+name: <% $module name %>
+markdown: redcarpet
+pygments: true
+odfi:
+    id: <% $module id %>
