@@ -43,7 +43,7 @@
               </button>
 
                 <!-- Site name and ODFI module name -->
-                <a class="navbar-brand" href="#">{{ site.name }} (Module id: {{ site.odfi.id }})</a> <br/>
+                <a class="navbar-brand" href="#">{{ site.name }}</a> <br/>
                 
               
             </div>
@@ -82,6 +82,9 @@
         <!-- ###### -->
         <div id="footer">
         <div class="container">
+          <p>
+            Module id: {{ site.odfi.id }}
+          </p>  
           <p class="text-muted">
            This module is part of ODFI, a project of the <a href="http://ra.ziti.uni-heidelberg.de">Computer Architecture Group - Univeristy of Heidelberg</a> --
             <a href="https://github.com/unihd-cag">https://github.com/unihd-cag</a>
