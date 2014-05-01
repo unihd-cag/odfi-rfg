@@ -1,3 +1,4 @@
 target/
 *~
 unit-tests/verilog_generator/testing/
+example-design/

@@ -53,7 +53,11 @@
 						
 							$it OnAttributes {hardware.global.hardware_wen} {
 								lappend signalList "	.[getName $it]_wen()"
-							}						
+							} otherwise {
+								$it OnAttributes {hardware.global.counter} {
+									lappend signalList "	.[getName $it]_wen()"
+								}
+							}					
 
 						}
 
@@ -62,6 +66,10 @@
 						
 							$it OnAttributes {hardware.global.hardware_wen} {
 								lappend signalList "	.[getName $it]_wen()"
+							} otherwise {
+								$it OnAttributes {hardware.global.counter} {
+									lappend signalList "	.[getName $it]_wen()"
+								}
 							}
 						
 						}
@@ -125,6 +133,10 @@
 
 						$it OnAttributes {hardware.global.hardware_wen} {
 							lappend signalList "	input wire [getName $it]_wen"
+						} otherwise {
+							$it OnAttributes {hardware.global.counter} {
+								lappend signalList "	input wire [getName $it]_wen"
+							}
 						}
 
 					}
@@ -138,6 +150,10 @@
 						
 						$it OnAttributes {hardware.global.hardware_wen} {
 							lappend signalList "	input wire [getName $it]_wen"
+						} otherwise {
+							$it OnAttributes {hardware.global.counter} {
+								lappend signalList "	input wire [getName $it]_wen" 
+							}
 						}
 
 					}
@@ -354,26 +370,33 @@
 
 					puts "			end"
 				} otherwise {
-					
-					if {[$field hasAttribute software.global.wo] || [$field hasAttribute software.global.rw]} {
-						puts "			else"
+					$field OnAttributes {hardware.global.counter} {
+						puts "			else if([getName $field]_wen)"
 						puts "			begin"
-					
-						$field OnAttributes {hardware.global.sticky} {
-							puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
-						} otherwise {
-							puts "				[getName $field] <= [getName $field]_next;"
-						}
-					
+						puts "				[getName $field]_load_value <= [getName $field]_next;"
+						puts "				[getName $field]_load_enable <= 1'b1;"
 						puts "			end"
-					} else {
+					} otherwise  {				
+						if {[$field hasAttribute software.global.wo] || [$field hasAttribute software.global.rw]} {
+							puts "			else"
+							puts "			begin"
+						
+							$field OnAttributes {hardware.global.sticky} {
+								puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
+							} otherwise {
+								puts "				[getName $field] <= [getName $field]_next;"
+							}
+						
+							puts "			end"
+						} else {
 
-						$field OnAttributes {hardware.global.sticky} {
-							puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
-						} otherwise {
-							puts "				[getName $field] <= [getName $field]_next;"
+							$field OnAttributes {hardware.global.sticky} {
+								puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
+							} otherwise {
+								puts "				[getName $field] <= [getName $field]_next;"
+							}
+
 						}
-
 					}
 
 				}	
@@ -587,7 +610,7 @@
 	.read_en(),
 	.write_en(),
 	.write_data(),
-<% writeTemplate $registerFile %>);
+<% writeTemplate $registerFile  %>);
 */
 module <%puts [$registerFile name]%>(
 	///\defgroup sys

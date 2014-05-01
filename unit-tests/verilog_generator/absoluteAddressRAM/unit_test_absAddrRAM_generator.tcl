@@ -9,4 +9,4 @@ set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto 
 
 set destinationFile "compare_data/absAddrRAM.v"
 
-$veriloggenerator produce $destinationFile
+$veriloggenerator produce_RegisterFile $destinationFile
