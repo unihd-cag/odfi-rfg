@@ -249,6 +249,39 @@ This are properties of the hardware interface to the register.
 |sticky|if the value is set to high the hardware interface will not be able to reset it to zero|
 |software_write_xor|does an xor on the software interface with the old value in the register|
 
+## Other Features
+
+### Loops
+
+	::repeat 8 {
+
+	}
+
+Real Example:
+
+	osys::rfg::registerFile test_rf {
+	    description "Test registerfile"
+	    group test_group {
+	        description "Test group"
+		
+	        ::repeat 8 {
+	            register test_register_$i {
+	                description "Test register"
+	                field test_field {
+	                    description "Test field"
+	                    width 16
+	                    hardware rw
+	                    software rw
+	                }
+	            }
+	        }
+
+	    }
+	} 
+
+### Variables/Defines
+
+
 ## A bigger Example
 
 ### Register file description
