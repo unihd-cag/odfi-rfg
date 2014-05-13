@@ -236,12 +236,29 @@
 				} otherwise {
 					$item onEachField {
 						if {[$it name] != "Reserved"} {
+
+							$it OnAttributes {hardware.global.counter} {
+								if {[$it hasAttribute hardware.global.rw] || [$it hasAttribute hardware.global.wo] || [$it hasAttribute software.global.rw] || [$it hasAttribute software.global.wo]} {
+									puts "	reg [getName $it]_load_enable;"
+									puts "	reg\[[expr {[$it width]-1}]:0\] [getName $it]_load_value;"
+								}
+
+								if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
+									if {[$it width] == 1} {
+										puts "	wire [getName $it];"
+									} else {
+										puts "	wire\[[expr {[$it width]-1}]:0\] [getName $it];"
+									}
+								}
+								
+							} otherwise {
 							
-							if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
-								if {[$it width] == 1} {
-									puts "	reg [getName $it];"
-								} else {
-									puts "	reg\[[expr {[$it width]-1}]:0\] [getName $it];"
+								if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
+									if {[$it width] == 1} {
+										puts "	reg [getName $it];"
+									} else {
+										puts "	reg\[[expr {[$it width]-1}]:0\] [getName $it];"
+									}
 								}
 							}
 
@@ -251,12 +268,6 @@
 								}
 							}
 
-							$it OnAttributes {hardware.global.counter} {
-								if {[$it hasAttribute hardware.global.rw] || [$it hasAttribute hardware.global.wo] || [$it hasAttribute software.global.rw] || [$it hasAttribute software.global.wo]} {
-									puts "	reg [getName $it]_load_enable;"
-									puts "	reg\[[expr {[$it width]-1}]:0\] [getName $it]_load_value;"
-								}
-							}
 						}
 					}
 				}
