@@ -11,4 +11,43 @@ osys::rfg::registerFile counter_RF {
             }
         }
     }
+
+    # register cnt_rreinit {
+    #     hardware rreinit_source
+    # }
+
+    # register tsc2 {
+    #     field cnt {
+    #         width 48
+    #         software ro
+    #         hardware {
+    #             counter
+    #             rreinit
+    #         }
+    #     }
+    # }
+
+    # register tsc3 {
+    #     field cnt {
+    #         width 48
+    #         software rw
+    #         hardware {
+    #             counter
+    #             rreinit
+    #         }
+    #     }
+    # }
+
+    # register tsc4 {
+    #     field cnt {
+    #         width 48
+    #         software rw
+    #         hardware {
+    #             rw
+    #             counter
+    #             rreinit
+    #         }
+    #     }
+    # }    
+
 }

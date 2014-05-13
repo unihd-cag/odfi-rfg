@@ -2,7 +2,7 @@
 
 - different RAMs
 - RAM read/write rights
-- Counter read/write rights and reinit
+- Counter read/write rights and rreinit
 - Trigger
 - reinit
 - hierarchical registerfiles
@@ -13,3 +13,6 @@
 - add automatic unit-testing
 - add unit-test for RF.rf
 - registerfile_template Registerfunction function divide by counter register and "normal" register
+- update counter unit-test
+- finish function to calculate absoluteAddress
+- add rreinit source register function 

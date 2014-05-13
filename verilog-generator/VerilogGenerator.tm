@@ -2,7 +2,7 @@ package provide osys::rfg::veriloggenerator 1.0.0
 package require osys::rfg
 package require Itcl 3.4
 package require odfi::common
-package require odfi::files
+package require odfi::files 1.0.0
 package require odfi::list 2.0.0
 
 namespace eval osys::rfg::veriloggenerator {

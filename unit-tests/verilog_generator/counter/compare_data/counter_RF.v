@@ -86,6 +86,7 @@ module counter_RF
 			else
 			begin
 				tsc_cnt_load_enable <= 1'b0;
+				tsc_cnt_load_value <= 48'b0;
 			end
 		end
 	end
