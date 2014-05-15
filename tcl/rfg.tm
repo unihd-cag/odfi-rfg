@@ -373,6 +373,16 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
 
+
+        ## external Method
+        ####################
+        ## Sources an external RegisterFile 
+        public method external {rf_filename} {
+            puts itcl::find objects
+            source $rf_filename
+            puts itcl::find objects
+        }
+
         public method registerFile {gName closure} {
             set newregisterFile [::new [namespace parent]::RegisterFile $name.$gName.#auto $gName $closure]
             lappend components $newregisterFile
