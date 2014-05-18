@@ -1,6 +1,6 @@
 ## Provides the base API interface for OSYS Register File Generator
 package provide osys::rfg 1.0.0
-package require Itcl 3.4
+package require Itcl  3.4
 package require odfi::common
 package require odfi::list 2.0.0
 
@@ -76,6 +76,15 @@ namespace eval osys::rfg {
         odfi::common::classField public parent ""
 
         constructor {cName} {
+
+            ## Set location 
+            #puts "----------------- LOC of $cName --------------------"
+            attributes rfg {
+
+                set location  [odfi::common::findUserCodeLocation]
+               osys::rfg::file [lindex $location 0]
+                osys::rfg::line [lindex $location 1]
+            }
 
             set name $cName
         }
@@ -231,12 +240,19 @@ namespace eval osys::rfg {
     ## Attribute
     #####################
     itcl::class Attributes {
-        inherit Common 
+
+        odfi::common::classField public name ""
+
+        odfi::common::classField public description ""
+        
+        odfi::common::classField public parent ""
 
         ## List format: { {name value?}}
         odfi::common::classField public attr_list {}
 
-        constructor {cName cClosure} {Common::constructor $cName} {
+        constructor {cName cClosure} {
+
+            set name $cName
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
@@ -269,12 +285,36 @@ namespace eval osys::rfg {
             return false
         }
 
-        public method addAttribute {fname args} {
-            if { [llength $args] == 0} {
-                lappend attr_list $fname
+        public method addAttribute {attributeName args} {
+
+            set attributeHasValue [expr [llength $args] == 0 ? false : true ]
+
+            ## If attribute is present:
+            ##   - Replace if value is provided 
+            ##   - Leave untouched if no value 
+            ## If attribute is not present, add 
+            set attributeIndex [lsearch -index 0 -exact  $attr_list  $attributeName]
+
+            if {$attributeIndex==-1} {
+
+                ## Not present, add 
+                if {$attributeHasValue} {
+                   lappend attr_list [list $attributeName [lindex $args 0]]
+                } else {
+                    lappend attr_list [list $attributeName]
+                }
+
             } else {
-                lappend attr_list [list $fname [lindex $args 0]]
-            }                
+
+                ## Present, update only if value 
+                if {$attributeHasValue} {
+                    set attr_list [lreplace $attr_list $attributeIndex $attributeIndex [list $attributeName [lindex $args 0]]]
+                }
+
+
+            }
+
+                          
         }
 
         ## Execute closure on each Attribute value, with variable names: $attr $value
@@ -412,6 +452,12 @@ namespace eval osys::rfg {
             return $newregisterFile 
         }
 
+        ## Content 
+        ################
+        public method add ct {
+            lappend components $ct
+        }
+
         ## Groups 
         #################
 
@@ -470,9 +516,16 @@ namespace eval osys::rfg {
         ## @return the register instance
         public method register {rName closure} {
 
+        
+
+           # puts "$rName loc:  [odfi::common::findUserCodeLocation]"
+
             ## Create 
-            set newRegister [::new [namespace parent]::Register $name.$rName.#auto $rName $closure]
+            #set newRegister [::new [namespace parent]::Register $name.$rName $rName $closure]
+            set newRegister [::new [namespace parent]::Register $this.$rName $rName $closure]
             
+            
+
             ## Add to list
             lappend components $newRegister 
  
@@ -672,7 +725,7 @@ namespace eval osys::rfg {
 
                 ## If Decision is true and we have a group -> Go down the tree 
                 #################
-                if {$res && [$it isa [namespace current]]} {
+                if {([string is boolean $res] && $res) && [$it isa [namespace current]]} {
                     set componentsFifo [concat [$it components] $componentsFifo]
                 }
 
@@ -708,7 +761,7 @@ namespace eval osys::rfg {
         public method field {fName closure} {
 
             ## Create 
-            set newField [::new [namespace parent]::Field $this.$fName.#auto $fName $closure]
+            set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
 
 
             ##puts "Created field: $newField"
@@ -765,7 +818,7 @@ namespace eval osys::rfg {
     ## RamBlock 
     ############################
     itcl::class RamBlock {
-        inherit FieldsSupport Address Region
+        inherit FieldsSupport Address Region 
         odfi::common::classField public depth 1
         odfi::common::classField public width 64
 
@@ -776,14 +829,19 @@ namespace eval osys::rfg {
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
+
+        public method apply closure {
+            odfi::closures::doClosure $closure
+        }
+
     }
     ## Update Size upon depth change 
     itcl::configbody RamBlock::depth {
 
-        puts "CONFIGURING SIZE for $depth in [namespace current]"
+        #puts "CONFIGURING SIZE for $depth in [namespace current]"
         size [expr $osys::rfg::registerSize*$depth]
 
-        puts "SIZE is now [size]"
+        #puts "SIZE is now [size]"
     }
 
     ###########################
@@ -843,10 +901,18 @@ namespace eval osys::rfg {
   
         set attributeName [string trimleft $fname ::]
 
+        ## Category 
+        ##  1. Namespace of attributeFunction call location without leading ::
+        ##  2. Add :: to name
+        #################
+        set category [string trimleft [uplevel namespace current] ::]
+
+        set attributeName ${category}::$attributeName
+
         ## If name is not categorized using xx.xxx.attributeName, set it to global.attributeName
-        if {![string match *.* $attributeName]} {
-            set attributeName "global.$attributeName"
-        }
+       # if {![string match *.* $attributeName]} {
+        #    set attributeName "global.$attributeName"
+       # }
 
         set res "proc $fname args {
             uplevel 1 addAttribute $attributeName \$args 
@@ -870,6 +936,10 @@ namespace eval osys::rfg {
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
+        }
+
+        public method apply closure {
+            odfi::closures::doClosure $closure
         }
     }
 

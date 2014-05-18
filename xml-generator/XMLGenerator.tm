@@ -1,9 +1,9 @@
-package provide osys::rfg::xmlgenerator 1.0.0
-package require Itcl 3.4
+package provide osys::rfg::generator::xmlgenerator 1.0.0
+package require Itcl
 package require odfi::common
 package require odfi::list 2.0.0
 
-namespace eval osys::rfg::xmlgenerator {
+namespace eval osys::rfg::generator::xmlgenerator {
 
 
     itcl::class XMLGenerator {
@@ -33,8 +33,7 @@ namespace eval osys::rfg::xmlgenerator {
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
 
-            odfi::common::println "<RegisterFile name=\"[$registerFile name]\" relative_address=\"0x[format %X [$registerFile address]]\" \
-                                    absolute_address=\"0x[format %X [$registerFile getAbsoluteAddress]]\" size=\"[$registerFile size]\">"  $out 
+            odfi::common::println "<RegisterFile name=\"[$registerFile name]\">"  $out 
             odfi::common::printlnIndent
             writeDescription $out $registerFile
 
@@ -43,6 +42,7 @@ namespace eval osys::rfg::xmlgenerator {
                 if {[$it isa osys::rfg::Group]} {
                     writeGroup $out $it                
                 } else {
+
                     writeRegister $out $it
                 }
             }
@@ -64,11 +64,9 @@ namespace eval osys::rfg::xmlgenerator {
 
         public method writeGroup {out group} {
             if {[$group isa osys::rfg::RegisterFile]} {
-                odfi::common::println "<RegisterFile name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
-                                        absolute_address=\"0x[format %X [$group getAbsoluteAddress]]\" size=\"[$group size]\">"  $out
+                odfi::common::println "<RegisterFile name=\"[$group name]\" >"  $out
             } else {
-                odfi::common::println "<Group name=\"[$group name]\" relative_address=\"0x[format %X [$group address]]\" \
-                                        absolute_address=\"0x[format %X [$group getAbsoluteAddress]]\" size=\"[$group size]\">"  $out
+                odfi::common::println "<Group name=\"[$group name]\" >"  $out
             } 
             odfi::common::printlnIndent
             writeDescription $out $group
@@ -91,15 +89,20 @@ namespace eval osys::rfg::xmlgenerator {
         }
 
         public method writeRegister {out register} {
+
             if {[$register isa osys::rfg::RamBlock]} {
-                odfi::common::println "<RamBlock name=\"[$register name]\" depth=\"[$register depth]\" relative_address=\"0x[format %X [$register address]]\" \
-                                        absolute_address=\"0x[format %X [$register getAbsoluteAddress]]\" size=\"[$register size]\">"  $out                         
+                odfi::common::println "<RamBlock name=\"[$register name]\" depth=\"[$register depth]\" >"  $out                         
             } else {
-                odfi::common::println "<Register name=\"[$register name]\" relative_address=\"0x[format %X [$register address]]\" \
-                                        absolute_address=\"0x[format %X [$register getAbsoluteAddress]]\" size=\"[$register size]\">"  $out 
+                odfi::common::println "<Register name=\"[$register name]\">"  $out 
             }
             odfi::common::printlnIndent
             writeDescription $out $register
+
+            ## Write attributes 
+            $register onEachAttributes {
+                    writeAttributes $out $attrs        
+            }
+
             ## Write Fields
             $register onEachField {
                 writeField $out $it
