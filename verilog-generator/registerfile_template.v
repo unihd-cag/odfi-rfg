@@ -6,10 +6,7 @@
 	
 	# function to get the address Bits for the register file 
 	proc getAddrBits {registerfile} {
-		::puts "Size"
-		::puts [$registerfile getAttributeValue software.osys::rfg::size]
-		::puts [$registerfile getAttributeValue software.osys::rfg::absolute_address]
-		set addrBits [ld [expr [$registerfile size]/8]]
+		set addrBits [ld [expr [$registerfile getAttributeValue software.osys::rfg::absolute_end_address]/8]]
 		incr addrBits [ld [expr [$registerfile register_size]/8]]
 		return $addrBits
 	}
@@ -26,13 +23,10 @@
 
 	proc writeAddressMap {object} {
 		$object walk {
-			if {[$item isa osys::rfg::Register]} {
-				set size 8
+			if {[$item isa osys::rfg::Register] || [$item isa osys::rfg::RamBlock]} {
+				set size [$item getAttributeValue software.osys::rfg::size]
 				puts "[getName $item]: base: 0x[$item getAttributeValue software.osys::rfg::absolute_address] size: $size"
-			} elseif {[$item isa osys::rfg::RamBlock]} {
-				set size [expr "[$item getAttributeValue software.osys::rfg::absolute_start_address] - [$item getAttributeValue software.osys::rfg::absolute_stop_address]"]
-				puts "[getName $item]: base: 0x[$item getAttributeValue software.osys::rfg::absolute_address] size: $size"
-			}
+			} 
 		}
 	}
 
@@ -406,7 +400,7 @@
 			puts "		end"
 			puts "		else"
 			puts "		begin"
-			set equal [expr [$ramBlock getAbsoluteAddress2]/([$ramBlock depth]*[$registerFile register_size]/8)]
+			set equal [expr [$ramBlock getAttributeValue software.osys::rfg::absolute_address]/([$ramBlock depth]*[$registerFile register_size]/8)]
 			puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
 			puts "			begin"
 			puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
@@ -479,14 +473,14 @@
 
 	# write Software register write calls hardware register write
 	proc writeRegisterSoftwareWrite {object register} {
-		set reg_size [expr [$object size]/8]
+		##set reg_size [expr [$object size]/8]
 		set lowerBound 0
 		
 		$register onAttributes {hardware.osys::rfg::rreinit_source} {
 			if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-				puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+				puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 			} else {
-				puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+				puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 			}
 			puts "			begin"
 			puts "				rreinit <= 1'b1;"
@@ -503,9 +497,9 @@
 				$it onAttributes {hardware.osys::rfg::counter} {
 					if {[$it hasAttribute software.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw]} {
 						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-							puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+							puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 						} else {
-							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 						}
 						puts "			begin"
 						puts "				[getName $it]_load_enable <= 1'b1;"
@@ -527,9 +521,9 @@
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-									puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
+									puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 								} else {
-									puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
+									puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 								}
 								puts "			begin"
 								puts "				[getName $it]_written <= 1'b1;"
@@ -542,9 +536,9 @@
 								puts ""															
 							} else {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 								} else {
-									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 								}
 								puts "			begin"
 								puts "				[getName $it]_written <= 1'b1;"
@@ -561,9 +555,9 @@
 				} otherwise {
 					if {[$it hasAttribute software.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw]} {
 						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-							puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+							puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 						} else {
-							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 						}
 						puts "			begin"
 						
@@ -581,9 +575,9 @@
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-									puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
+									puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 								} else {
-									puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
+									puts "			if(((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 								}
 								puts "			begin"
 								puts "				[getName $it]_written <= 1'b1;"
@@ -596,9 +590,9 @@
 								puts ""															
 							} else {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
-									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 								} else {
-									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
+									puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 								}
 								puts "			begin"
 								puts "				[getName $it]_written <= 1'b1;"
@@ -694,9 +688,11 @@
 		$object walk {
 			if {[$item isa osys::rfg::RamBlock]} {
 					set dontCare [string repeat x [ld [$item depth]]]
-					set care [expr [$item getAbsoluteAddress2]/([$item depth]*[$registerFile register_size]/8)] 
+					set care [expr [$item getAttributeValue software.osys::rfg::absolute_address]/([$item depth]*[$registerFile register_size]/8)] 
 					set care [format %x $care]
-					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$item depth]]+3]]'h$care,[expr "[ld [$item getAbsoluteAddress2]]-[ld [expr [$registerFile register_size]/8]]"]'b$dontCare\}:"
+					::puts [getAddrBits $registerFile]
+					::puts [expr [ld [$item depth]]+3]
+					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$item depth]]+3]]'h$care,[expr "[ld [$item getAttributeValue software.osys::rfg::absolute_address]]-[ld [expr [$registerFile register_size]/8]]"]'b$dontCare\}:"
 					puts "				begin"
 					puts "					read_data\[[expr "[$item width]-1"]:0\] <= [getName $item]_rf_rdata;"
 					if {[$item width] != [$registerFile register_size]} {
@@ -708,9 +704,9 @@
 					puts "				end"
 			} elseif {[$item isa osys::rfg::Register]} {
 				if {[getAddrBits $registerFile] == [ld [expr [$registerFile register_size]/8]]} {
-					puts "				[expr [getAddrBits $registerFile]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$item getAbsoluteAddress2]/8]]:"
+					puts "				[expr [getAddrBits $registerFile]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$item getAttributeValue software.osys::rfg::absolute_address]/8]]:"
 				} else {
-					puts "				[expr [getAddrBits $registerFile]-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$item getAbsoluteAddress2]/8]]:"
+					puts "				[expr [getAddrBits $registerFile]-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$item getAttributeValue software.osys::rfg::absolute_address]/8]]:"
 				}
 				puts "				begin"
 				set lowerBound 0
@@ -774,8 +770,8 @@ module <%puts [$registerFile name]%>(
 );
 
 <% writeRegisternames $registerFile %>
-<% ##writeModules $registerFile %>
-<% ##writeRegister $registerFile %>
+<% writeModules $registerFile %>
+<% writeRegister $registerFile %>
 	`ifdef ASYNC_RES
 	always @(posedge clk or negedge res_n) `else
 	always @(posedge clk) `endif
@@ -787,18 +783,18 @@ module <%puts [$registerFile name]%>(
 			`ifdef ASIC
 			read_data   <= <%puts -nonewline "[$registerFile register_size]"%>'b0;
 			`endif
-<% ##RamBlockCheck $registerFile %>
-<% ##writeAddressControlReset $ramBlockCount $registerFile %>		end
+<% RamBlockCheck $registerFile %>
+<% writeAddressControlReset $ramBlockCount $registerFile %>		end
 		else
 		begin
-<% ##writeRamDelay $ramBlockCount $registerFile %>
+<% writeRamDelay $ramBlockCount $registerFile %>
 			casex(address[<% 
 				if {[expr [getAddrBits $registerFile]-1] < [ld [expr [$registerFile register_size]/8]]} {
 					puts -nonewline "[expr [getAddrBits $registerFile]]"	
 				} else {
 					puts -nonewline "[expr [getAddrBits $registerFile]-1]"
 				}%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>])
-<% ##writeAddressControl $registerFile %>				default:
+<% writeAddressControl $registerFile %>				default:
 				begin
 					invalid_address <= read_en || write_en;
 					access_complete <= read_en || write_en;

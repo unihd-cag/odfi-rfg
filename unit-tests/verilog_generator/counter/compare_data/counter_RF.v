@@ -4,9 +4,9 @@
 /* address map
 tsc: base: 0x0 size: 8
 cnt_rreinit: base: 0x8 size: 8
-tsc2: base: 0x10 size: 8
-tsc3: base: 0x18 size: 8
-tsc4: base: 0x20 size: 8
+tsc2: base: 0x16 size: 8
+tsc3: base: 0x24 size: 8
+tsc4: base: 0x32 size: 8
 
 */
 /* instantiation template

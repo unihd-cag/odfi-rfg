@@ -4,7 +4,7 @@
 /* address map
 info_rf_driver: base: 0x0 size: 8
 info_rf_node: base: 0x8 size: 8
-info_rf_r1: base: 0x10 size: 8
+info_rf_r1: base: 0x16 size: 8
 
 */
 /* instantiation template
