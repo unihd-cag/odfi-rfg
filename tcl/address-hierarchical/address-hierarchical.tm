@@ -4,10 +4,6 @@ package require odfi::files 1.0.0
 
 namespace eval osys::rfg::address::hierarchical {
 
-
-    osys::rfg::attributeFunction absolute_address
-    osys::rfg::attributeFunction aligner
-
     proc calculate rf {
 
         ##################################################
@@ -220,18 +216,18 @@ namespace eval osys::rfg::address::hierarchical {
             }
 
             ## Aligner 
-            if {[$it hasAttribute hw.osys::rfg::address::hierarchical::aligner]} {
+            if {[$it hasAttribute hardware.osys::rfg::aligner]} {
 
                 set cumulated 0
-                set ad [expr 1 << [$it getAttributeValue hw.osys::rfg::address::hierarchical::aligner]]
+                set ad [expr 1 << [$it getAttributeValue hardware.osys::rfg::aligner]]
 
             }
 
             ## Address assign 
             set bla $it
-            $it attributes sw {
+            $it attributes software {
 
-                    osys::rfg::address::hierarchical::absolute_address $ad 
+                    ::absolute_address $ad 
                     puts "Setting attributes $this for $it -> $attr_list, c addr $ad"
             }
 
@@ -285,7 +281,7 @@ namespace eval osys::rfg::address::hierarchical {
 
         $rf walkDepthFirst {
 
-        puts "| [$it fullName]\t    |  [format %#0-20b [$it getAttributeValue sw.osys::rfg::address::hierarchical::absolute_address]]"
+        puts "| [$it fullName]\t    |  [format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]"
 
 
             return true
@@ -303,7 +299,7 @@ puts "Name,Address"
 <%
     $rf walkDepthFirst {
 
-        puts "[$it fullName],[format %#0-20b [$it getAttributeValue sw.osys::rfg::address::hierarchical::absolute_address]]"
+        puts "[$it fullName],[format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]"
 
 
             return true
@@ -326,7 +322,7 @@ puts "Name,Address"
     <%
     $rf walkDepthFirst {
 
-        puts "<tr><td>[$it fullName]</td><td>[format %#0-20b [$it getAttributeValue sw.osys::rfg::address::hierarchical::absolute_address]]</td>"
+        puts "<tr><td>[$it fullName]</td><td>[format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
 
 
             return true

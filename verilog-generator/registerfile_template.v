@@ -6,6 +6,8 @@
 	
 	# function to get the address Bits for the register file 
 	proc getAddrBits {registerfile} {
+		::puts [$registerfile size]
+		::puts [$registerfile getAttributeValue software.osys::rfg::absolute_stop_address]
 		set addrBits [ld [expr [$registerfile size]/8]]
 		incr addrBits [ld [expr [$registerfile register_size]/8]]
 		return $addrBits
@@ -23,8 +25,12 @@
 
 	proc writeAddressMap {object} {
 		$object walk {
-			if {[$item isa osys::rfg::Register] || [$item isa osys::rfg::RamBlock]} {
-				puts "[getName $item]: base: 0x[$item getAbsoluteAddressHex2] size: [$item size]"
+			if {[$item isa osys::rfg::Register]} {
+				set size 8
+				puts "[getName $item]: base: 0x[$item getAttributeValue software.osys::rfg::absolute_address] size: $size"
+			} elseif {[$item isa osys::rfg::RamBlock]} {
+				set size [expr "[$item getAttributeValue software.osys::rfg::absolute_start_address] - [$item getAttributeValue software.osys::rfg::absolute_stop_address]"]
+				puts "[getName $item]: base: 0x[$item getAttributeValue software.osys::rfg::absolute_address] size: $size"
 			}
 		}
 	}
@@ -35,7 +41,7 @@
 		$object walk {
 			if {[$item isa osys::rfg::RamBlock]} {
 				
-				$item OnAttributes {hardware.global.rw} { 
+				$item onAttributes {hardware.osys::rfg::rw} { 
 					lappend signalList "	.[getName $item]_addr()"
 					lappend signalList "	.[getName $item]_ren()"
 					lappend signalList "	.[getName $item]_rdata()"
@@ -48,24 +54,24 @@
 				$item onEachField {
 					if {[$it name] != "Reserved"} {
 						
-						$it OnAttributes {hardware.global.counter} {
+						$it onAttributes {hardware.osys::rfg::counter} {
 							
-							$it OnAttributes {hardware.global.rw} {
+							$it onAttributes {hardware.osys::rfg::rw} {
 								lappend signalList "	.[getName $it]_next()"
 								lappend signalList "	.[getName $it]()"
 								lappend signalList "	.[getName $it]_wen()"
 							}
 							
-							$it OnAttributes {hardware.global.wo} {
+							$it onAttributes {hardware.osys::rfg::wo} {
 								lappend signalList "	.[getName $it]_next()"
 								lappend signalList "	.[getName $it]_wen()"
 							}
 
-							$it OnAttributes {hardware.global.ro} {
+							$it onAttributes {hardware.osys::rfg::ro} {
 								lappend signalList "	.[getName $it]()"
 							}
 
-							$it OnAttributes {hardware.global.software_written} {
+							$it onAttributes {hardware.osys::rfg::software_written} {
 								lappend signalList "	.[getName $it]_written()"
 							}
 
@@ -73,28 +79,28 @@
 
 						} otherwise {
 
-							$it OnAttributes {hardware.global.rw} {
+							$it onAttributes {hardware.osys::rfg::rw} {
 								lappend signalList "	.[getName $it]_next()"
 								lappend signalList "	.[getName $it]()"
 								
-								$it OnAttributes {hardware.global.hardware_wen} {
+								$it onAttributes {hardware.osys::rfg::hardware_wen} {
 									lappend signalList "	.[getName $it]_wen()"
 								}
 							}
 							
-							$it OnAttributes {hardware.global.wo} {
+							$it onAttributes {hardware.osys::rfg::wo} {
 								lappend signalList "	.[getName $it]_next()"
 								
-								$it OnAttributes {hardware.global.hardware_wen} {
+								$it onAttributes {hardware.osys::rfg::hardware_wen} {
 									lappend signalList "	.[getName $it]_wen()"
 								}
 							}
 
-							$it OnAttributes {hardware.global.ro} {
+							$it onAttributes {hardware.osys::rfg::ro} {
 								lappend signalList "	.[getName $it]()"
 							}
 
-							$it OnAttributes {hardware.global.software_written} {
+							$it onAttributes {hardware.osys::rfg::software_written} {
 								lappend signalList "	.[getName $it]_written()"
 							}
 
@@ -113,7 +119,7 @@
 		$object walk {
 			if {[$item isa osys::rfg::RamBlock]} {
 
-				$item OnAttributes {hardware.global.rw} { 
+				$item onAttributes {hardware.osys::rfg::rw} { 
 					lappend signalList "	input wire\[[expr [ld [$item depth]]-1]:0\] [getName $item]_addr"
 					lappend signalList "	input wire [getName $item]_ren"
 					lappend signalList "	output wire\[[expr [$item width]-1]:0\] [getName $item]_rdata"
@@ -124,9 +130,9 @@
 			} elseif {[$item isa osys::rfg::Register]} {
 				$item onEachField {
 
-					$it OnAttributes {hardware.global.counter} {
+					$it onAttributes {hardware.osys::rfg::counter} {
 							
-						$it OnAttributes {hardware.global.rw} {
+						$it onAttributes {hardware.osys::rfg::rw} {
 							if {[$it width] == 1} {
 								lappend signalList "	input wire [getName $it]_next"
 								lappend signalList "	output wire [getName $it]"			
@@ -138,7 +144,7 @@
 							lappend signalList "	input wire [getName $it]_wen"
 						}
 							
-						$it OnAttributes {hardware.global.wo} {
+						$it onAttributes {hardware.osys::rfg::wo} {
 							if {[$it width] == 1} {
 								lappend signalList "	input wire [getName $it]_next"	
 							} else {
@@ -148,7 +154,7 @@
 							lappend signalList "	input wire [getName $it]_wen"	
 						}
 
-						$it OnAttributes {hardware.global.ro} {
+						$it onAttributes {hardware.osys::rfg::ro} {
 							if {[$it width] == 1} {
 								lappend signalList "	output wire [getName $it]"		
 							} else {
@@ -157,7 +163,7 @@
 
 						}
 
-						$it OnAttributes {hardware.global.software_written} {
+						$it onAttributes {hardware.osys::rfg::software_written} {
 							lappend signalList "	output reg [getName $it]_written"
 						}
 
@@ -165,7 +171,7 @@
 
 					} otherwise {
 
-						$it OnAttributes {hardware.global.rw} {
+						$it onAttributes {hardware.osys::rfg::rw} {
 							if {[$it width] == 1} {
 								lappend signalList "	input wire [getName $it]_next"
 								lappend signalList "	output reg [getName $it]"	
@@ -174,24 +180,24 @@
 								lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [getName $it]"
 							}	
 
-							$it OnAttributes {hardware.global.hardware_wen} {
+							$it onAttributes {hardware.osys::rfg::hardware_wen} {
 								lappend signalList "	input wire [getName $it]_wen"
 							}
 						}
 							
-						$it OnAttributes {hardware.global.wo} {
+						$it onAttributes {hardware.osys::rfg::wo} {
 							if {[$it width] == 1} {
 								lappend signalList "	input wire [getName $it]_next"		
 							} else {
 								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [getName $it]_next"
 							}	
 
-							$it OnAttributes {hardware.global.hardware_wen} {
+							$it onAttributes {hardware.osys::rfg::hardware_wen} {
 								lappend signalList "	input wire [getName $it]_wen"	
 							}
 						}
 
-						$it OnAttributes {hardware.global.ro} {
+						$it onAttributes {hardware.osys::rfg::ro} {
 							if {[$it width] == 1} {
 								lappend signalList "	output reg [getName $it]"
 							} else {
@@ -200,7 +206,7 @@
 							
 						}
 
-						$it OnAttributes {hardware.global.software_written} {
+						$it onAttributes {hardware.osys::rfg::software_written} {
 							lappend signalList "	output reg [getName $it]_written"	
 						}
 
@@ -217,7 +223,7 @@
 		$object walk {
 			if {[$item isa osys::rfg::RamBlock]} {
 
-				$item OnAttributes {hardware.global.rw} {
+				$item onAttributes {hardware.osys::rfg::rw} {
 					puts "	reg\[[expr [ld [$item depth]]-1]:0\] [getName $item]_rf_addr;"
 					puts "	reg [getName $item]_rf_ren;"
 					puts "	wire\[[expr [$item width]-1]:0\] [getName $item]_rf_rdata;"
@@ -231,19 +237,19 @@
 				}
 
 			} elseif {[$item isa osys::rfg::Register]} {
-				$item OnAttributes {hardware.global.rreinit_source} {
+				$item onAttributes {hardware.osys::rfg::rreinit_source} {
 					puts "	reg rreinit;"
 				} otherwise {
 					$item onEachField {
 						if {[$it name] != "Reserved"} {
 
-							$it OnAttributes {hardware.global.counter} {
-								if {[$it hasAttribute hardware.global.rw] || [$it hasAttribute hardware.global.wo] || [$it hasAttribute software.global.rw] || [$it hasAttribute software.global.wo]} {
+							$it onAttributes {hardware.osys::rfg::counter} {
+								if {[$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::wo]} {
 									puts "	reg [getName $it]_load_enable;"
 									puts "	reg\[[expr {[$it width]-1}]:0\] [getName $it]_load_value;"
 								}
 
-								if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
+								if {![$it hasAttribute hardware.osys::rfg::ro] && ![$it hasAttribute hardware.osys::rfg::rw]} {
 									if {[$it width] == 1} {
 										puts "	wire [getName $it];"
 									} else {
@@ -253,7 +259,7 @@
 								
 							} otherwise {
 							
-								if {![$it hasAttribute hardware.global.ro] && ![$it hasAttribute hardware.global.rw]} {
+								if {![$it hasAttribute hardware.osys::rfg::ro] && ![$it hasAttribute hardware.osys::rfg::rw]} {
 									if {[$it width] == 1} {
 										puts "	reg [getName $it];"
 									} else {
@@ -262,8 +268,8 @@
 								}
 							}
 
-							$it OnAttributes {hardware.global.software_written} {
-								if {[$it getAttributeValue hardware.global.software_written]==2} {
+							$it onAttributes {hardware.osys::rfg::software_written} {
+								if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 									puts "	reg [getName $it]_res_in_last_cycle;"
 								}
 							}
@@ -280,23 +286,23 @@
 		puts "		if (!res_n)"
 		puts "		begin"
 		
-		$register OnAttributes {hardware.global.rreinit_source} {
+		$register onAttributes {hardware.osys::rfg::rreinit_source} {
 			puts "			rreinit <= 1'b0;"
 		} otherwise {
 
 			$register onEachField {
 				if {[$it name] != "Reserved"} {
 
-					$it OnAttributes {hardware.global.counter} {
-						if {[$it hasAttribute hardware.global.rw] || [$it hasAttribute hardware.global.wo] || [$it hasAttribute software.global.rw] || [$it hasAttribute software.global.wo]} { 
+					$it onAttributes {hardware.osys::rfg::counter} {
+						if {[$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::wo]} { 
 							puts "			[getName $it]_load_enable <= 1'b0;"
 						}	
 					} otherwise {
 						puts "			[getName $it] <= [$it reset];"
 						
-						$it OnAttributes {hardware.global.software_written} {
+						$it onAttributes {hardware.osys::rfg::software_written} {
 							puts "			[getName $it]_written <= 1'b0;"
-							if {[$it getAttributeValue hardware.global.software_written]==2} {
+							if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 								puts "			[getName $it]_res_in_last_cycle <= 1'b1;"
 							}
 						}
@@ -316,19 +322,19 @@
 		puts "		.clk(clk),"
 		puts "		.res_n(res_n),"
 		puts "		.increment([getName $field]_countup),"
-		if {[$field hasAttribute hardware.global.rw] || [$field hasAttribute hardware.global.wo] || [$field hasAttribute software.global.rw] || [$field hasAttribute software.global.wo]} {
+		if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
 			puts "		.load([getName $field]_load_value),"	
 		} else {
 			puts " 		.load([$field width]'b0),"
 		}
-		$field OnAttributes {hardware.global.rreinit} {
-			if {[$field hasAttribute hardware.global.rw] || [$field hasAttribute hardware.global.wo] || [$field hasAttribute software.global.rw] || [$field hasAttribute software.global.wo]} {
+		$field onAttributes {hardware.osys::rfg::rreinit} {
+			if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
 				puts "		.load_enable(rreinit || [getName $field]_load_enable),"
 			} else {
 				puts "		.load_enable(rreinit),"
 			}				
 		} otherwise {
-			if {[$field hasAttribute hardware.global.rw] || [$field hasAttribute hardware.global.wo] || [$field hasAttribute software.global.rw] || [$field hasAttribute software.global.wo]} {
+			if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
 				puts "		.load_enable([getName $field]_load_enable),"
 			} else {
 				puts "		.load_enable(1'b0),"
@@ -370,7 +376,7 @@
 			if {[$item isa osys::rfg::Register]} {
 				$item onEachField {
 					
-					$it OnAttributes {hardware.global.counter} {
+					$it onAttributes {hardware.osys::rfg::counter} {
 						writeCounterModule $item $it
 					}
 
@@ -381,7 +387,7 @@
 
 	proc writeRamBlockRegister {registerFile ramBlock} {
 		
-		$ramBlock OnAttributes {hardware.global.rw} {
+		$ramBlock onAttributes {hardware.osys::rfg::rw} {
 			# Write always block
 			puts "	/* RamBlock [getName $ramBlock] */"
 			puts "	`ifdef ASYNC_RES"
@@ -416,8 +422,8 @@
 
 	# write the hardware register write
 	proc writeRegisterHardwareWrite {register field} {
-		$field OnAttributes {hardware.global.counter} {
-			if {[$field hasAttribute hardware.global.wo] || [$field hasAttribute hardware.global.rw]} {
+		$field onAttributes {hardware.osys::rfg::counter} {
+			if {[$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute hardware.osys::rfg::rw]} {
 				puts "			else if([getName $field]_wen)"
 				puts "			begin"
 				puts "				[getName $field]_load_value <= [getName $field]_next;"
@@ -426,28 +432,28 @@
 			}
 
 		} otherwise	{
-			$register OnAttributes {hardware.global.rreinit_source} {
+			$register onAttributes {hardware.osys::rfg::rreinit_source} {
 					puts "			else"
 					puts "			begin"
 					puts "				rreinit <= 1'b0"
 					puts "			end"
 			} otherwise {
-				if {[$field hasAttribute hardware.global.wo] || [$field hasAttribute hardware.global.rw]} {
-					$field OnAttributes {hardware.global.hardware_wen} {
+				if {[$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute hardware.osys::rfg::rw]} {
+					$field onAttributes {hardware.osys::rfg::hardware_wen} {
 						puts "			else if([getName $field]_wen)"
 						puts "			begin"
-						$field OnAttributes {hardware.global.sticky} {
+						$field onAttributes {hardware.osys::rfg::sticky} {
 							puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
 						} otherwise {
 							puts "				[getName $field] <= [getName $field]_next;"
 						}
 						puts "			end"
 					} otherwise {
-						if {[$field hasAttribute software.global.wo] || [$field hasAttribute software.global.rw]} {
+						if {[$field hasAttribute software.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw]} {
 							puts "			else"
 							puts "			begin"
 						
-							$field OnAttributes {hardware.global.sticky} {
+							$field onAttributes {hardware.osys::rfg::sticky} {
 								puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
 							} otherwise {
 								puts "				[getName $field] <= [getName $field]_next;"
@@ -456,7 +462,7 @@
 							puts "			end"
 						} else {
 
-							$field OnAttributes {hardware.global.sticky} {
+							$field onAttributes {hardware.osys::rfg::sticky} {
 								puts "				[getName $field] <= [getName $field]_next | [getName $field];"	
 							} otherwise {
 								puts "				[getName $field] <= [getName $field]_next;"
@@ -475,7 +481,7 @@
 		set reg_size [expr [$object size]/8]
 		set lowerBound 0
 		
-		$register OnAttributes {hardware.global.rreinit_source} {
+		$register onAttributes {hardware.osys::rfg::rreinit_source} {
 			if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
 				puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
 			} else {
@@ -493,8 +499,8 @@
 		
 			$register onEachField {
 				set upperBound [expr $lowerBound+[$it width]]
-				$it OnAttributes {hardware.global.counter} {
-					if {[$it hasAttribute software.global.wo] || [$it hasAttribute software.global.rw]} {
+				$it onAttributes {hardware.osys::rfg::counter} {
+					if {[$it hasAttribute software.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw]} {
 						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
 							puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
 						} else {
@@ -505,11 +511,11 @@
 						puts "				[getName $it]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 						puts "			end"
 						
-						if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
+						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
 							writeRegisterHardwareWrite $register $it
 						}
 
-						if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw] || [$it hasAttribute software.global.wo] || [$it hasAttribute software.global.rw]} {
+						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw]} {
 							puts "			else"
 							puts "			begin"
 							puts "				[getName $it]_load_enable <= 1'b0;"
@@ -517,8 +523,8 @@
 							puts "			end"
 						}
 
-						$it OnAttributes {hardware.global.software_written} {
-							if {[$it getAttributeValue hardware.global.software_written]==2} {
+						$it onAttributes {hardware.osys::rfg::software_written} {
+							if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
 									puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 								} else {
@@ -552,7 +558,7 @@
 					}
 		
 				} otherwise {
-					if {[$it hasAttribute software.global.wo] || [$it hasAttribute software.global.rw]} {
+					if {[$it hasAttribute software.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw]} {
 						if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
 							puts "			if((address\[[expr [getAddrBits $registerFile]]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en)"
 						} else {
@@ -560,7 +566,7 @@
 						}
 						puts "			begin"
 						
-						$it OnAttributes {hardware.global.software_write_xor} {
+						$it onAttributes {hardware.osys::rfg::software_write_xor} {
 							puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\] ^ [getName $it]);"
 						} otherwise {
 							puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
@@ -568,11 +574,11 @@
 						
 						puts "			end"
 						
-						if {[$it hasAttribute hardware.global.wo] || [$it hasAttribute hardware.global.rw]} {
+						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
 							writeRegisterHardwareWrite $register $it
 						}
-						$it OnAttributes {hardware.global.software_written} {
-							if {[$it getAttributeValue hardware.global.software_written]==2} {
+						$it onAttributes {hardware.osys::rfg::software_written} {
+							if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
 									puts "			if(((address\[[getAddrBits $registerFile]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAbsoluteAddress2]/8]) && write_en) || [getName $it]_res_in_last_cycle)"
 								} else {
@@ -709,7 +715,7 @@
 				set lowerBound 0
 				$item onEachField {
 					set upperBound [expr $lowerBound+[$it width]]
-					if {[$it hasAttribute software.global.ro] || [$it hasAttribute software.global.rw]} {		
+					if {[$it hasAttribute software.osys::rfg::ro] || [$it hasAttribute software.osys::rfg::rw]} {		
 						puts "					read_data\[[expr $upperBound-1]:$lowerBound\] <= [getName $it];"
 					}
 					incr lowerBound [$it width]
@@ -767,8 +773,8 @@ module <%puts [$registerFile name]%>(
 );
 
 <% writeRegisternames $registerFile %>
-<% writeModules $registerFile %>
-<% writeRegister $registerFile %>
+<% ##writeModules $registerFile %>
+<% ##writeRegister $registerFile %>
 	`ifdef ASYNC_RES
 	always @(posedge clk or negedge res_n) `else
 	always @(posedge clk) `endif
@@ -780,18 +786,18 @@ module <%puts [$registerFile name]%>(
 			`ifdef ASIC
 			read_data   <= <%puts -nonewline "[$registerFile register_size]"%>'b0;
 			`endif
-<% RamBlockCheck $registerFile %>
-<% writeAddressControlReset $ramBlockCount $registerFile %>		end
+<% ##RamBlockCheck $registerFile %>
+<% ##writeAddressControlReset $ramBlockCount $registerFile %>		end
 		else
 		begin
-<% writeRamDelay $ramBlockCount $registerFile %>
+<% ##writeRamDelay $ramBlockCount $registerFile %>
 			casex(address[<% 
 				if {[expr [getAddrBits $registerFile]-1] < [ld [expr [$registerFile register_size]/8]]} {
 					puts -nonewline "[expr [getAddrBits $registerFile]]"	
 				} else {
 					puts -nonewline "[expr [getAddrBits $registerFile]-1]"
 				}%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>])
-<% writeAddressControl $registerFile %>				default:
+<% ##writeAddressControl $registerFile %>				default:
 				begin
 					invalid_address <= read_en || write_en;
 					access_complete <= read_en || write_en;

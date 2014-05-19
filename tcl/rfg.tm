@@ -82,7 +82,7 @@ namespace eval osys::rfg {
             attributes rfg {
 
                 set location  [odfi::common::findUserCodeLocation]
-               osys::rfg::file [lindex $location 0]
+                osys::rfg::file [lindex $location 0]
                 osys::rfg::line [lindex $location 1]
             }
 
@@ -352,90 +352,18 @@ namespace eval osys::rfg {
 
     }
 
-    #####################
-    ## Address
-    #####################
-    itcl::class Address {
-        inherit Common
-
-        odfi::common::classField public address 0
-        odfi::common::classField public absoluteAddress -1
-        odfi::common::classField public size 0
-
-
-        ## Resolve Absolute address by parent calling, return result if already defined
-        public method getAbsoluteAddress args {     
-            if {$absoluteAddress!=-1} {
-                ## Already defined 
-                return $absoluteAddress
-            } else {
-                ## Not Defined
-                if {[$this parent] != ""} {
-                    ## Resolve using parent
-                    return [expr [[$this parent] getAbsoluteAddress]+$address]
-
-                } else {
-
-                    ## No parent -> 0
-                    return 0
-                }
-            }
-        }
-
-        public method getAbsoluteAddress2 args {
-            if {$absoluteAddress != -1} {
-                return $absoluteAddress
-            } else {
-                [lindex [$this parents] 0] walk {
-                    if {![$item isa osys::rfg::RegisterFile] && ![$item isa osys::rfg::Field]} {
-                        if {[$item isa osys::rfg::RamBlock]} {
-                            if {[$item address] > [[$item parent] address]} {
-                                $item absoluteAddress [$item address]    
-                            } else {
-                                $item absoluteAddress [expr "[$item address] * int(ceil(double([[$item parent] address])/double([$item address]))) "]
-                            }
-                        } else {
-                            $item absoluteAddress [expr [[$item parent] address] + [$item address]]
-                        }
-                    }
-                }
-                return $absoluteAddress
-            }
-        }
-
-        public method setAbsoluteAddressFromHex args {
-
-            if {$args !=""} {
-                set absoluteAddress [scan $args 0x%x]
-
-            }
-            
-        }
-
-        ## Returns the absolute Adress as HEX string
-        public method getAbsoluteAddressHex args {
-            format "%X" [getAbsoluteAddress]
-        }
-
-        ## Returns the absolute Adress as HEX string
-        public method getAbsoluteAddressHex2 args {
-            format "%X" [getAbsoluteAddress2]
-        }
-    } 
-   
     ######################
     ## Group 
     ######################
     itcl::class Group {       
-        inherit Address
+        inherit Common
         
         ## maximal allowed register size                 
         odfi::common::classField public register_size 64
         
         ## Components
-         odfi::common::classField public components {}        
-        
-        public variable address_counter 0
+        odfi::common::classField public components {}        
+
         constructor {cName cClosure} {Common::constructor $cName} {
             ## Execute closure 
             odfi::closures::doClosure $cClosure
@@ -464,9 +392,6 @@ namespace eval osys::rfg {
         public method registerFile {gName closure} {
             set newregisterFile [::new [namespace parent]::RegisterFile $name.$gName.#auto $gName $closure]
             lappend components $newregisterFile
-
-            $newregisterFile address $size
-            incr size [$newregisterFile size]
             $newregisterFile parent $this                            
             ## Return
             return $newregisterFile 
@@ -492,9 +417,6 @@ namespace eval osys::rfg {
             lappend components $newGroup
             ## calculate size
             set size_int 0
-                
-            $newGroup address $size
-            incr size [$newGroup size]
             $newGroup parent $this                           
             ## Return
             return $newGroup 
@@ -558,11 +480,6 @@ namespace eval osys::rfg {
             if {$register_width > $register_size} {
                 error "The register $newRegister is $register_width wide and exceeds the allowed $register_size bits!"
             }
-            
-            ## calculate address
-            $newRegister address $size
-            $newRegister size [expr "$register_size/8"]            
-            incr size [expr "$register_size/8"]
 
             ## Return 
             $newRegister parent $this
@@ -820,7 +737,7 @@ namespace eval osys::rfg {
     ## Register 
     ############################
     itcl::class Register {
-        inherit FieldsSupport Address
+        inherit FieldsSupport Common
         
        
 
@@ -838,7 +755,7 @@ namespace eval osys::rfg {
     ## RamBlock 
     ############################
     itcl::class RamBlock {
-        inherit FieldsSupport Address Region 
+        inherit FieldsSupport Common Region 
         odfi::common::classField public depth 1
         odfi::common::classField public width 64
 
