@@ -6,8 +6,9 @@
 	
 	# function to get the address Bits for the register file 
 	proc getAddrBits {registerfile} {
-		::puts [$registerfile size]
-		::puts [$registerfile getAttributeValue software.osys::rfg::absolute_stop_address]
+		::puts "Size"
+		::puts [$registerfile getAttributeValue software.osys::rfg::size]
+		::puts [$registerfile getAttributeValue software.osys::rfg::absolute_address]
 		set addrBits [ld [expr [$registerfile size]/8]]
 		incr addrBits [ld [expr [$registerfile register_size]/8]]
 		return $addrBits
