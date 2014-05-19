@@ -28,6 +28,7 @@ attributeFunction ::absolute_address
 attributeFunction ::absolute_start_address
 attributeFunction ::absolute_end_address
 attributeFunction ::aligner
+attributeFunction ::size
 
 ## RFG 
 ############
