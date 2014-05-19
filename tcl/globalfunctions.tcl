@@ -27,6 +27,7 @@ attributeFunction ::software_write_xor
 attributeFunction ::absolute_address
 attributeFunction ::absolute_start_address
 attributeFunction ::absolute_end_address
+attributeFunction ::size
 
 ## RFG 
 ############

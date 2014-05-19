@@ -89,6 +89,8 @@ namespace eval osys::rfg::address::hierarchical {
                 return $operator
             } elseif {[$operator isa ::osys::rfg::Register]} {
 
+
+
                 return [expr $::osys::rfg::registerSize/8]
 
             } elseif {[$operator isa ::osys::rfg::Region] && ![$operator isa ::osys::rfg::Group]} {
@@ -129,16 +131,34 @@ namespace eval osys::rfg::address::hierarchical {
 
             set size [odfi::list::reduce $value {
 
-                puts "----- $left ([sizeOf $left ]) + $right ([sizeOf $right])"
+                puts "------ Left: $left Right: $right"
+                #puts "----- $left ([sizeOf $left ]) + $right ([sizeOf $right])"
 
                 switch -exact -- $right {
+                    "{}" -
                     "" {
-                      return [sizeOf $left ]
+
+                      set ls [sizeOf $left]
+                      $left attributes software {
+                        ::size  $ls
+                      }
+                      return $ls
                     }
                     default {
 
                         ## Right Element size 
                         set rightSize [sizeOf $right]
+                        $right attributes software {
+                            ::size  $rightSize
+                        }
+                        
+                        ## Left size 
+                        set ls [sizeOf $left]
+                        if {![string is integer $left]} {
+                            $left attributes software {
+                                ::size  $ls
+                            }
+                        }
                         
 
                         return [expr [sizeOf $left] + $rightSize ]
