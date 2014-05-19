@@ -21,3 +21,14 @@ attributeFunction ::software_written
 attributeFunction ::hardware_wen
 attributeFunction ::sticky
 attributeFunction ::software_write_xor
+
+
+## Addressing
+attributeFunction ::absolute_address
+attributeFunction ::absolute_start_address
+attributeFunction ::absolute_end_address
+
+## RFG 
+############
+attributeFunction file 
+attributeFunction line
