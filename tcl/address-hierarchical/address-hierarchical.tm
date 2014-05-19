@@ -301,6 +301,10 @@ namespace eval osys::rfg::address::hierarchical {
             return true
         }
 
+        ## Set the last address on top so that we have the address bits used
+        $rf attributes software {
+            ::absolute_end_address $ad 
+        }
      
 
         return [list  $map $sizeMap]
