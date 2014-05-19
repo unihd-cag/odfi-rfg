@@ -166,6 +166,11 @@ namespace eval osys::rfg::address::hierarchical {
                 }
 
             }]
+
+            ## Save size to map and set on key 
+            $key attributes software {
+                ::size   $size
+            }
             #$key size $size 
             set sizeMap  [odfi::list::arrayConcat $sizeMap $key $size]
 
@@ -187,6 +192,12 @@ namespace eval osys::rfg::address::hierarchical {
 
         set ad 0 
         set cumulated 0 
+
+        ## Set the address to 0 for the top
+        $rf attributes software {
+            ::absolute_address 0 
+        }
+
         $rf walkDepthFirst {
 
             ## Update Current address For address shifting and so on 
