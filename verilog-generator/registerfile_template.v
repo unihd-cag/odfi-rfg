@@ -690,8 +690,6 @@
 					set dontCare [string repeat x [ld [$item depth]]]
 					set care [expr [$item getAttributeValue software.osys::rfg::absolute_address]/([$item depth]*[$registerFile register_size]/8)] 
 					set care [format %x $care]
-					::puts [getAddrBits $registerFile]
-					::puts [expr [ld [$item depth]]+3]
 					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$item depth]]+3]]'h$care,[expr "[ld [$item getAttributeValue software.osys::rfg::absolute_address]]-[ld [expr [$registerFile register_size]/8]]"]'b$dontCare\}:"
 					puts "				begin"
 					puts "					read_data\[[expr "[$item width]-1"]:0\] <= [getName $item]_rf_rdata;"
