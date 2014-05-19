@@ -379,7 +379,17 @@ namespace eval osys::rfg {
         ## Sources an external RegisterFile 
         public method external {rf_filename} {
             puts itcl::find objects
+            set RF_list_old {}
+            set RF_list_new {}
+            foreach object [itcl::find objects] {
+                if {[$object isa osys::rfg::RegisterFile]} {
+                    lappend RF_list_old $object   
+                }
+            }
             source $rf_filename
+            foreach object [itcl::find objects] {
+                
+            }
             puts itcl::find objects
         }
 
