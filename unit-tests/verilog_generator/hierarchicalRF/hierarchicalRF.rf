@@ -1,0 +1,20 @@
+## Create Register File
+registerFile hierarchicalRF {
+    
+    group G1 {
+        external subRF.rf
+    }
+
+    group G2 {
+        register r1 {
+        
+        }
+    }
+ 
+    group G3 {
+        register r2 {
+
+        }
+    }
+}
+

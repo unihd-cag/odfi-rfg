@@ -21,7 +21,7 @@ attributeFunction ::software_written
 attributeFunction ::hardware_wen
 attributeFunction ::sticky
 attributeFunction ::software_write_xor
-
+attributeFunction ::external
 
 ## Addressing
 attributeFunction ::absolute_address

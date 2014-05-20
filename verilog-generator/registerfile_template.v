@@ -5,10 +5,28 @@
 	proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
 	
 	# function to get the address Bits for the register file 
+	
+	proc getRFsize {registerfile} {
+		set size 0
+		$registerfile walk {
+			##::puts $item
+			if {![$item isa osys::rfg::Group]} {
+			 	if {[string is integer [$item getAttributeValue software.osys::rfg::absolute_address]]} {
+			 		if {$size <= [$item getAttributeValue software.osys::rfg::absolute_address]} {
+			 			##::puts [$item getAttributeValue software.osys::rfg::absolute_address]
+			 			##::puts [$item getAttributeValue software.osys::rfg::size]
+			 			set size [expr [$item getAttributeValue software.osys::rfg::absolute_address]+[$item getAttributeValue software.osys::rfg::size]]
+			 		}
+			 	}
+			}
+		}
+		return $size
+	}
+
 	proc getAddrBits {registerfile} {
-		set addrBits [ld [expr [$registerfile getAttributeValue software.osys::rfg::absolute_end_address]/8]]
-		incr addrBits [ld [expr [$registerfile register_size]/8]]
-		return $addrBits
+		##set addrBits [ld [expr [$registerfile getAttributeValue software.osys::rfg::absolute_end_address]/8]]
+		##incr addrBits [ld [expr [$registerfile register_size]/8]]
+		return [ld [getRFsize $registerfile]]
 	}
 
 	# function which returns the Name with all parents
@@ -22,6 +40,8 @@
 	}
 
 	proc writeAddressMap {object} {
+		::puts [ld [getRFsize $object]]
+		::puts [getAddrBits $object]
 		$object walk {
 			if {[$item isa osys::rfg::Register] || [$item isa osys::rfg::RamBlock]} {
 				set size [$item getAttributeValue software.osys::rfg::size]
@@ -690,7 +710,7 @@
 					set dontCare [string repeat x [ld [$item depth]]]
 					set care [expr [$item getAttributeValue software.osys::rfg::absolute_address]/([$item depth]*[$registerFile register_size]/8)] 
 					set care [format %x $care]
-					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$item depth]]+3]]'h$care,[expr "[ld [$item getAttributeValue software.osys::rfg::absolute_address]]-[ld [expr [$registerFile register_size]/8]]"]'b$dontCare\}:"
+					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$item depth]]+3]]'h$care,[ld [$item depth]]'b$dontCare\}:"
 					puts "				begin"
 					puts "					read_data\[[expr "[$item width]-1"]:0\] <= [getName $item]_rf_rdata;"
 					if {[$item width] != [$registerFile register_size]} {

@@ -1,5 +1,6 @@
 source ../../tcl/rfg.tm
 source ../../xml-generator/XMLGenerator.tm
+source ../../tcl/address-hierarchical/address-hierarchical.tm
 
 set result ""
 
@@ -8,6 +9,9 @@ set result ""
 ##########################################
 
 catch {source unit_test_checker_valid.rf} result
+
+osys::rfg::address::hierarchical::calculate $result
+osys::rfg::address::hierarchical::printTable $result
 
 #check for valid result 
 if {$result != "::extoll_rf"} {
