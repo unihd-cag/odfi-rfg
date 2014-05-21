@@ -127,7 +127,7 @@ namespace eval osys::rfg::address::hierarchical {
 
             set size [odfi::list::reduce $value {
 
-                puts "------ Left: $left Right: $right"
+                #puts "------ Left: $left Right: $right"
                 #puts "----- $left ([sizeOf $left ]) + $right ([sizeOf $right])"
 
                 switch -exact -- $right {
@@ -184,124 +184,67 @@ namespace eval osys::rfg::address::hierarchical {
 
         puts "--------- Distribute Abs -----------------------------------------"
         
+        ## Wit hMyles
+        ###################
+        ## Go Map top down 
+        ######################
+       
+        odfi::list::arrayEach $map {
+            puts "Address Distribution on : $key"
 
-
-        set ad 0 
-        set cumulated 0 
-
-        ## Set the address to 0 for the top
-        $rf attributes software {
-            ::absolute_address 0 
-        }
-
-        $rf walkDepthFirst {
-
-            ## Update Current address For address shifting and so on 
-            ###############
-            if {[$it isa ::osys::rfg::Region]} {
-
-                puts "For $it, size is  [sizeOf $it] and accumulated is $cumulated"
-
-                ## Get the number of Bits required for this region space 
-                #set regionBits [expr int(floor(log([$it size])/log(2)))]
-
-                ## If the size of the region + the accumulated elements size is still within the MSB space of the address space, don't go to the next power of two
-                set adSize [expr $ad == 0 ? 0 : 2**(int(floor(log($ad)/log(2))))] 
-                set itSize [sizeOf $it]
-                set futureSize [expr $cumulated+[sizeOf $it]]
-
-                #### BACKUP DISS WRITING ##########
-                #if {$ad==0 || ($futureSize < $adSize)} 
-                if {$ad==0 || ($cumulated <= $itSize)} {
-                #### BACKUP DISS WRITING ##########
-                    
-                    ## Take the next power of two for the Region, and OR it with ad 
-                    set nextPowerofTwo [expr 2**(int(floor(log([sizeOf $it])/log(2))))] 
-                    set ad [expr (($ad-$cumulated) | $nextPowerofTwo) ]
-                    
-
-                } else {
-
-                    set num_addr_bits [expr int(floor(log($itSize)/log(2)))]
-                    set c_num_addr_bits [expr int(floor(log($ad)/log(2)))]
-                    puts "For $it, Region is larger than available size in Address space, needed: $itSize bytes, which are $num_addr_bits, current: $c_num_addr_bits"
-
-                   
-                    ## Go to the next power of two after size increment of address
-                    incr ad $itSize
-                    set nextPowerofTwo [expr 2**(int(floor(log([expr $ad])/log(2))+1))] 
-                    set ad $nextPowerofTwo 
-                    
-
-                }
-               # incr ad [$it size]
-                #set nextPowerofTwo [expr 2**(int(floor(log($ad)/log(2)))+1)] 
-
-                #set ad $nextPowerofTwo
-               # set cumulated 0 
-                #set num_addr_bits [expr int(floor(log([$it size])/log(2)))]
-
-               # puts "For region of [$it size] addresses, we need -> $num_addr_bits bits "
-                #set ad [expr $ad | (1 << $num_addr_bits)]
-                #
-            }
-
-            ## Aligner 
-            if {[$it hasAttribute hardware.osys::rfg::aligner]} {
-
-                set cumulated 0
-                set ad [expr 1 << [$it getAttributeValue hardware.osys::rfg::aligner]]
-
-            }
-
-            ## Address assign 
-            set bla $it
-            $it attributes software {
-
-                    ::absolute_address $ad 
-                    puts "Setting attributes $this for $it -> $attr_list, c addr $ad"
-            }
-
-             if {[$bla isa ::osys::rfg::Region]} {
-
-                ## Go to next power of two: do log2 to get the number of bits, then power of two +1 for the next
-                if {$cumulated!=0} {
-                    
-                    set current_address_bits  [expr int(floor(log($ad)/log(2)))]
-
-                  #  puts "For $bla, going to next power of two (our address bits count is $current_address_bits) "
-
-                    set nextPowerofTwo [expr 2**(int(floor(log($ad)/log(2)))+1)] 
-                    set ad [expr $nextPowerofTwo]
-
-                    puts "--> After region $bla, reset ad to $ad"
-
-                    set cumulated 0 
-                } else {
-                    set ad [expr $ad << 1]
-                }
-                #set ad [expr $ad << 1]
-                #set ad [expr $nextPowerofTwo]
-                
-
+            set start_address 0 
+            set ad 0
+             set cumulated 0 
+            if {[$key hasAttribute software.osys::rfg::absolute_address]} {
+                set start_address [$key getAttributeValue software.osys::rfg::absolute_address]
+                set ad $start_address
             } else {
+                ##[$key setA software.osys::rfg::absolute_address]
 
-                ## Not a region, accumulate, and increment ad by the same
-                incr ad [sizeOf $bla]
-                incr cumulated [sizeOf $bla]
             }
 
-        #    incr ad [sizeOf $bla]
-            #set ad [expr $ad+1]
+            $key attributes software {
+                ::absolute_address $start_address
+            }
 
-            return true
+            set baseAddress $start_address
+            set currentAddress 0
+            set blockAddress 0
+            foreach it $value {
+
+                if {$it==$key} {
+                    continue
+                }
+                
+                ## Get Size of block, rounded up to next power of two size
+                set itSize [sizeOf $it]
+                set num_addr_bits [expr int(ceil(log($itSize)/log(2)))]
+                set blockSize [expr 2**$num_addr_bits]
+
+
+                ## The address of current element is:
+                ##   - The current address + the size of the block 
+                set blockAddress [expr (($currentAddress+$blockSize-1)/$blockSize)*$blockSize]
+
+               
+                #puts "[$it name] Block address [format %0-20b $blockAddress], bs=$$blockSize Current Address = $currentAddress, bloc ksize -1:  [format %0-20b [expr $blockSize-1]]"
+
+                ## Address assign 
+                set bla $it
+                $it attributes software {
+
+                    ::absolute_address [expr $baseAddress | $blockAddress]
+                }
+
+                ## The next current address is the block address + the size of this block
+                set currentAddress [expr $blockAddress+$blockSize]
+                 
+
+            }
+               
+
         }
 
-        ## Set the last address on top so that we have the address bits used
-        $rf attributes software {
-            ::absolute_end_address $ad 
-        }
-     
 
         return [list  $map $sizeMap]
 
@@ -315,8 +258,10 @@ namespace eval osys::rfg::address::hierarchical {
         puts "|---------------------------|-------------|"
 
         $rf walkDepthFirst {
-
-        puts "| [$it fullName]\t    |  [format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]"
+        
+            if {[$it hasAttribute software.osys::rfg::absolute_address]} {
+                puts "| [format "%20s" [$it name]]\t   |  [format %#0-20b [$it getAttributeValue software.osys::rfg::absolute_address]]"
+            }
 
 
             return true
