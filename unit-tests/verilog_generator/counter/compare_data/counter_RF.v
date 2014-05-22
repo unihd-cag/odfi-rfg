@@ -4,9 +4,9 @@
 /* address map
 tsc: base: 0x0 size: 8
 cnt_rreinit: base: 0x8 size: 8
-tsc2: base: 0x16 size: 8
-tsc3: base: 0x24 size: 8
-tsc4: base: 0x32 size: 8
+tsc2: base: 0x10 size: 8
+tsc3: base: 0x18 size: 8
+tsc4: base: 0x20 size: 8
 
 */
 /* instantiation template
@@ -74,7 +74,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc_I (
+	) tsc_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc_cnt_countup),
@@ -85,7 +85,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc2_I (
+	) tsc2_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc2_cnt_countup),
@@ -96,7 +96,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc3_I (
+	) tsc3_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc3_cnt_countup),
@@ -107,7 +107,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc4_I (
+	) tsc4_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc4_cnt_countup),

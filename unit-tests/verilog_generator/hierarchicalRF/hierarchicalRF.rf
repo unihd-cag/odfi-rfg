@@ -7,13 +7,21 @@ registerFile hierarchicalRF {
 
     group G2 {
         register r1 {
-        
+            field f1 {
+                width 64
+                hardware rw
+                software rw
+            }
         }
     }
  
     group G3 {
         register r2 {
-
+            field f1 {
+                width 64
+                hardware rw
+                software rw
+            }
         }
     }
 }
