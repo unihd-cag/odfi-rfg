@@ -28,8 +28,20 @@
 	proc getName {object} {
 		set name {}
 		set list [lreplace [$object parents] 0 0]
+		set i 0
+		set deleteIndex 0
 		foreach element $list {
-			lappend	name [$element name]		
+			if {[$element isa osys::rfg::RegisterFile] && [$element hasAttribute hardware.osys::rfg::external]} {
+				set deleteIndex [expr $i+1]
+			}
+			incr i 1
+		}
+		set i 0
+		foreach element $list {
+			if {$i >= $deleteIndex} { 
+				lappend	name [$element name]
+			}
+			incr i 1		
 		}
 		return [join $name "_"]	
 	}
@@ -53,17 +65,17 @@
 	}
 
 	# write the verilog template for an easy implementation in a higher level module 
-	proc writeTemplate {object} {
+	proc writeTemplate {object context} {
 		set signalList {}
 		$object walkDepthFirst {
 			if {[$it isa osys::rfg::RamBlock]} {
 				
 				$it onAttributes {hardware.osys::rfg::rw} { 
-					lappend signalList "	.[getName $it]_addr()"
-					lappend signalList "	.[getName $it]_ren()"
-					lappend signalList "	.[getName $it]_rdata()"
-					lappend signalList "	.[getName $it]_wen()"
-					lappend signalList "	.[getName $it]_wdata()"
+					lappend signalList "	.${context}[getName $it]_addr()"
+					lappend signalList "	.${context}[getName $it]_ren()"
+					lappend signalList "	.${context}[getName $it]_rdata()"
+					lappend signalList "	.${context}[getName $it]_wen()"
+					lappend signalList "	.${context}[getName $it]_wdata()"
 				}
 
 			} elseif {[$it isa osys::rfg::Register]} {
@@ -73,51 +85,51 @@
 						$it onAttributes {hardware.osys::rfg::counter} {
 							
 							$it onAttributes {hardware.osys::rfg::rw} {
-								lappend signalList "	.[getName $it]_next()"
-								lappend signalList "	.[getName $it]()"
-								lappend signalList "	.[getName $it]_wen()"
+								lappend signalList "	.${context}[getName $it]_next()"
+								lappend signalList "	.${context}[getName $it]()"
+								lappend signalList "	.${context}[getName $it]_wen()"
 							}
 							
 							$it onAttributes {hardware.osys::rfg::wo} {
-								lappend signalList "	.[getName $it]_next()"
-								lappend signalList "	.[getName $it]_wen()"
+								lappend signalList "	.${context}[getName $it]_next()"
+								lappend signalList "	.${context}[getName $it]_wen()"
 							}
 
 							$it onAttributes {hardware.osys::rfg::ro} {
-								lappend signalList "	.[getName $it]()"
+								lappend signalList "	.${context}[getName $it]()"
 							}
 
 							$it onAttributes {hardware.osys::rfg::software_written} {
-								lappend signalList "	.[getName $it]_written()"
+								lappend signalList "	.${context}[getName $it]_written()"
 							}
 
-							lappend signalList "	.[getName $it]_countup()"
+							lappend signalList "	.${context}[getName $it]_countup()"
 
 						} otherwise {
 
 							$it onAttributes {hardware.osys::rfg::rw} {
-								lappend signalList "	.[getName $it]_next()"
-								lappend signalList "	.[getName $it]()"
+								lappend signalList "	.${context}[getName $it]_next()"
+								lappend signalList "	.${context}[getName $it]()"
 								
 								$it onAttributes {hardware.osys::rfg::hardware_wen} {
-									lappend signalList "	.[getName $it]_wen()"
+									lappend signalList "	.${context}[getName $it]_wen()"
 								}
 							}
 							
 							$it onAttributes {hardware.osys::rfg::wo} {
-								lappend signalList "	.[getName $it]_next()"
+								lappend signalList "	.${context}[getName $it]_next()"
 								
 								$it onAttributes {hardware.osys::rfg::hardware_wen} {
-									lappend signalList "	.[getName $it]_wen()"
+									lappend signalList "	.${context}[getName $it]_wen()"
 								}
 							}
 
 							$it onAttributes {hardware.osys::rfg::ro} {
-								lappend signalList "	.[getName $it]()"
+								lappend signalList "	.${context}[getName $it]()"
 							}
 
 							$it onAttributes {hardware.osys::rfg::software_written} {
-								lappend signalList "	.[getName $it]_written()"
+								lappend signalList "	.${context}[getName $it]_written()"
 							}
 
 						}
@@ -127,6 +139,15 @@
 			}
 
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+				set registerfile $it
+				puts "	.[$registerfile name]_address(),"
+				puts "	.[$registerfile name]_read_data(),"
+				puts "	.[$registerfile name]_invalid_address(),"
+				puts "	.[$registerfile name]_access_complete(),"
+				puts "	.[$registerfile name]_read_en(),"
+				puts "	.[$registerfile name]_write_en(),"
+				puts "	.[$registerfile name]_write_data(),"
+ 				writeTemplate $it "[$registerfile name]_"
 				return false
 			} else {
 				return true
@@ -139,17 +160,17 @@
 	}
 	
 	# write Inputs and Outputs
-	proc writeBlackbox {object} {
+	proc writeBlackbox {object context} {
 		set signalList {}
 		$object walkDepthFirst {
 			if {[$it isa osys::rfg::RamBlock]} {
 
 				$it onAttributes {hardware.osys::rfg::rw} { 
-					lappend signalList "	input wire\[[expr [ld [$it depth]]-1]:0\] [getName $it]_addr"
-					lappend signalList "	input wire [getName $it]_ren"
-					lappend signalList "	output wire\[[expr [$it width]-1]:0\] [getName $it]_rdata"
-					lappend signalList "	input wire [getName $it]_wen"
-					lappend signalList "	input wire\[[expr [$it width]-1]:0\] [getName $it]_wdata"
+					lappend signalList "	input wire\[[expr [ld [$it depth]]-1]:0\] ${context}[getName $it]_addr"
+					lappend signalList "	input wire ${context}[getName $it]_ren"
+					lappend signalList "	output wire\[[expr [$it width]-1]:0\] ${context}[getName $it]_rdata"
+					lappend signalList "	input wire ${context}[getName $it]_wen"
+					lappend signalList "	input wire\[[expr [$it width]-1]:0\] ${context}[getName $it]_wdata"
 				}
 
 			} elseif {[$it isa osys::rfg::Register]} {
@@ -159,88 +180,101 @@
 							
 						$it onAttributes {hardware.osys::rfg::rw} {
 							if {[$it width] == 1} {
-								lappend signalList "	input wire [getName $it]_next"
-								lappend signalList "	output wire [getName $it]"			
+								lappend signalList "	input wire ${context}[getName $it]_next"
+								lappend signalList "	output wire ${context}[getName $it]"			
 							} else {
-								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [getName $it]_next"
-								lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [getName $it]"
+								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]_next"
+								lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]"
 							}
 
-							lappend signalList "	input wire [getName $it]_wen"
+							lappend signalList "	input wire ${context}[getName $it]_wen"
 						}
 							
 						$it onAttributes {hardware.osys::rfg::wo} {
 							if {[$it width] == 1} {
-								lappend signalList "	input wire [getName $it]_next"	
+								lappend signalList "	input wire ${context}[getName $it]_next"	
 							} else {
-								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [getName $it]_next"
+								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]_next"
 							}
 
-							lappend signalList "	input wire [getName $it]_wen"	
+							lappend signalList "	input wire ${context}[getName $it]_wen"	
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
 							if {[$it width] == 1} {
-								lappend signalList "	output wire [getName $it]"		
+								lappend signalList "	output wire ${context}[getName $it]"		
 							} else {
-								lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] [getName $it]"
+								lappend signalList "	output wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]"
 							}
 
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "	output reg [getName $it]_written"
+							lappend signalList "	output reg ${context}[getName $it]_written"
 						}
 
-						lappend signalList "	input wire [getName $it]_countup"
+						lappend signalList "	input wire ${context}[getName $it]_countup"
 
 					} otherwise {
 
 						$it onAttributes {hardware.osys::rfg::rw} {
 							if {[$it width] == 1} {
-								lappend signalList "	input wire [getName $it]_next"
-								lappend signalList "	output reg [getName $it]"	
+								lappend signalList "	input wire ${context}[getName $it]_next"
+								lappend signalList "	output reg ${context}[getName $it]"	
 							} else {
-								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [getName $it]_next"
-								lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [getName $it]"
+								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]_next"
+								lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] ${context}[getName $it]"
 							}	
 
 							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "	input wire [getName $it]_wen"
+								lappend signalList "	input wire ${context}[getName $it]_wen"
 							}
 						}
 							
 						$it onAttributes {hardware.osys::rfg::wo} {
 							if {[$it width] == 1} {
-								lappend signalList "	input wire [getName $it]_next"		
+								lappend signalList "	input wire ${context}[getName $it]_next"		
 							} else {
-								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] [getName $it]_next"
+								lappend signalList "	input wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]_next"
 							}	
 
 							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "	input wire [getName $it]_wen"	
+								lappend signalList "	input wire ${context}[getName $it]_wen"	
 							}
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
 							if {[$it width] == 1} {
-								lappend signalList "	output reg [getName $it]"
+								lappend signalList "	output reg ${context}[getName $it]"
 							} else {
-								lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] [getName $it]"
+								lappend signalList "	output reg\[[expr {[$it width]-1}]:0\] ${context}[getName $it]"
 							}
 							
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "	output reg [getName $it]_written"	
+							lappend signalList "	output reg ${context}[getName $it]_written"	
 						}
 
 					}
 
 				}	
 			}
-			
+			## ToDo rewrite with wire and reg signals
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+				set registerfile $it
+				if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
+					puts "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address,"
+				} else {
+					puts "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address,"
+				}
+				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_read_data(),"
+				puts "	input wire [$registerfile name]_invalid_address,"
+				puts "	input wire [$registerfile name]_access_complete(),"
+				puts "	output reg [$registerfile name]_read_en(),"
+				puts "	output reg [$registerfile name]_write_en(),"
+				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_write_data(),"
+ 				writeBlackbox $it "[$registerfile name]_"
 				return false
 			} else {
 				return true
@@ -354,6 +388,7 @@
 		puts "		end"
 	}
 
+	# write counter instance
 	proc writeCounterModule {register field} {
 		puts "	counter48 #("
 		puts "		.DATASIZE([$field width])"
@@ -385,6 +420,7 @@
 		puts ""
 	}
 
+	# write Ram Instance
 	proc writeRamModule {ramBlock} {
 		puts "	ram_2rw_1c #("
 		puts "		.DATASIZE([$ramBlock width]),"
@@ -406,6 +442,105 @@
 		puts ""
 	}
 
+	# write RF instance
+	proc writeRFModule {registerfile} {
+		puts "	[$registerfile name] [$registerfile name]_I ("
+		puts "		.res_n(res_n),"
+		puts "		.clk(clk),"
+		puts "		.address([$registerfile name]_address),"
+		puts "		.read_data([$registerfile name]_read_data),"
+		puts "		.invalid_address([$registerfile name]_invalid_address),"
+		puts "		.access_complete([$registerfile name]_access_complete),"
+		puts "		.read_en([$registerfile name]_read_en),"
+		puts "		.write_en([$registerfile name]_write_en),"
+		puts "		.write_data([$registerfile name]_write_data),"
+
+ 		set signalList {}
+		$registerfile walkDepthFirst {
+			if {[$it isa osys::rfg::RamBlock]} {
+				
+				$it onAttributes {hardware.osys::rfg::rw} { 
+					lappend signalList "		.[getName $it]_addr([$registerfile name]_[getName $it]_addr)"
+					lappend signalList "		.[getName $it]_ren([$registerfile name]_[getName $it]_ren)"
+					lappend signalList "		.[getName $it]_rdata([$registerfile name]_[getName $it]_rdata)"
+					lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+					lappend signalList "		.[getName $it]_wdata([$registerfile name]_[getName $it]_wdata)"
+				}
+
+			} elseif {[$it isa osys::rfg::Register]} {
+
+				$it onEachField {
+					if {[$it name] != "Reserved"} {
+						$it onAttributes {hardware.osys::rfg::counter} {
+							
+							$it onAttributes {hardware.osys::rfg::rw} {
+								lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
+								lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+								lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							}
+							
+							$it onAttributes {hardware.osys::rfg::wo} {
+								lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
+								lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							}
+
+							$it onAttributes {hardware.osys::rfg::ro} {
+								lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							}
+
+							$it onAttributes {hardware.osys::rfg::software_written} {
+								lappend signalList "		.[getName $it]_written([$registerfile name]_[getName $it]_written)"
+							}
+
+							lappend signalList "		.[getName $it]_countup([$registerfile name]_[getName $it]_countup)"
+
+						} otherwise {
+
+							$it onAttributes {hardware.osys::rfg::rw} {
+								lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
+								lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+								
+								$it onAttributes {hardware.osys::rfg::hardware_wen} {
+									lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+								}
+							}
+							
+							$it onAttributes {hardware.osys::rfg::wo} {
+								lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
+								
+								$it onAttributes {hardware.osys::rfg::hardware_wen} {
+									lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+								}
+							}
+
+							$it onAttributes {hardware.osys::rfg::ro} {
+								lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							}
+
+							$it onAttributes {hardware.osys::rfg::software_written} {
+								lappend signalList "		.[getName $it]_written([$registerfile name]_[getName $it]_written)"
+							}
+
+						}
+
+					}
+				}
+			}
+
+			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+				return false
+			} else {
+				return true
+			}
+
+		}
+
+		puts [join $signalList ",\n"]
+
+ 		puts "	);"
+		puts ""
+	}
+
 	# write counter instance 
 	proc writeModules {object} {
 		$object walkDepthFirst {
@@ -423,6 +558,7 @@
 			}
 
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+				##writeRFModule $it
 				return false
 			} else {
 				return true
@@ -809,7 +945,7 @@
 	.read_en(),
 	.write_en(),
 	.write_data(),
-<% writeTemplate $registerFile  %>);
+<% writeTemplate $registerFile ""%>);
 */
 module <%puts [$registerFile name]%>(
 	///\defgroup sys
@@ -832,7 +968,7 @@ module <%puts [$registerFile name]%>(
 	input wire write_en,
 	input wire[<% puts -nonewline "[expr [$registerFile register_size]-1]"%>:0] write_data,
 	///}@ 
-<% writeBlackbox $registerFile %>
+<% writeBlackbox $registerFile ""%>
 );
 
 <% writeRegisternames $registerFile %>
