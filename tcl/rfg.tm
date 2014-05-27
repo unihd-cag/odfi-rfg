@@ -369,12 +369,11 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
 
-
         ## external Method
         ####################
         ## Sources an external RegisterFile 
+
         public method external {rf_filename} {
-            puts itcl::find objects
             set RF_list_old {}
             set RF_list_new {}
             foreach object [itcl::find objects] {
@@ -382,11 +381,30 @@ namespace eval osys::rfg {
                     lappend RF_list_old $object   
                 }
             }
+            
             source $rf_filename
+
             foreach object [itcl::find objects] {
-                
+                if {[$object isa osys::rfg::RegisterFile]} {
+                    lappend RF_list_new $object
+                }
             }
-            puts itcl::find objects
+
+            foreach RF $RF_list_old {
+                set index [lsearch -exact $RF_list_new $RF]
+                set RF_list_new [lreplace $RF_list_new $index $index]     
+            }
+            puts $RF_list_old
+            puts $RF_list_new
+
+            foreach RF $RF_list_new {
+                if {[$RF parent] == $this} {
+                    puts "External set..."
+                    $RF attributes hardware {
+                        external
+                    }
+                }
+            }
         }
 
         public method registerFile {gName closure} {
@@ -658,7 +676,7 @@ namespace eval osys::rfg {
 
                 set res [odfi::closures::doClosure $closure 1]
 
-                #puts "---> Decision: $res"
+                ##puts "---> Decision: $res"
 
                 ## If Decision is true and we have a group -> Go down the tree 
                 #################

@@ -1,0 +1,96 @@
+## Create Register File
+registerFile SimpleRF {
+
+    group info_rf {
+
+        register driver {
+
+            field version {
+
+                # Direct variable set
+                width 32
+
+                # Direct variable set
+                software ro
+
+                ## Reset value 
+                reset 32'h12abcd
+             }
+
+        }
+
+        register node {
+
+            field id {
+
+                width 16
+                software rw
+                hardware ro
+            }
+
+            field guid {
+
+                width 24
+                reset 24'h12abcd
+
+                software ro
+                hardware wo
+            
+            }
+            
+            field vpids {
+            
+                width 16
+                software ro
+            
+            }
+
+        }
+
+        register r1 {
+            
+            field r1_1 {
+            
+                width 16
+                software rw
+                hardware rw
+            
+            }
+
+            field r1_2 {
+            
+                width 16
+                software rw
+                hardware {
+                    rw
+                    software_written 1
+                }
+            
+            }
+            
+            field r1_3 {
+            
+                width 16
+                software rw
+                hardware {
+                    rw
+                    software_written 2
+                }
+            
+            }
+
+            field r1_4 {
+            
+                width 16
+                software rw
+                hardware {
+                    rw
+                    hardware_wen
+                }
+            
+            }
+
+        }
+    }
+}
+
