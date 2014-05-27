@@ -45,7 +45,7 @@ osys::rfg::registerFile absAddrRAM {
     # }
 
     ##group RAM_Group0 {
-        ramBlock RAM {
+        ramBlock RAM2 {
             description "a 16 bit wide RAM with 256 entries"
             width 16
             depth 32
@@ -53,7 +53,7 @@ osys::rfg::registerFile absAddrRAM {
             hardware rw
         }
     ##}
-        ramBlock RAM {
+        ramBlock RAM3 {
             description "a 16 bit wide RAM with 256 entries"
             width 16
             depth 32

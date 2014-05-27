@@ -91,6 +91,12 @@ registerFile SimpleRF {
             }
 
         }
+
+        # register r2 {
+        #     field r2_1 {
+        #         width 32
+        #     }
+        # }
     }
 }
 

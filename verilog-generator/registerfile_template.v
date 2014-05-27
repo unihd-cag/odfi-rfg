@@ -54,7 +54,7 @@
 			}
 			if {[$it isa osys::rfg::RegisterFile]} {
 				set size [getRFsize $it]
-				puts "[getName $it]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
+				puts "[$it name]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
 			}
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				return false	
@@ -802,6 +802,54 @@
 		}
 	}
 
+	proc writeRegisterFile {RF subRF} {
+		puts "	/* RegisterFile [$subRF name]*/"
+		puts "	`ifdef ASYNC_RES"
+		puts "	always @(posedge clk or negedge res_n) `else"
+		puts "	always @(posedge clk) `endif"
+		puts "	begin"
+		puts "	if (!res_n)"
+		puts "	begin"
+		puts "		[$subRF name]_write_en <= 1'b0;"
+		puts "		[$subRF name]_read_en  <= 1'b0;"
+		puts "		`ifdef ASIC"
+		puts "		[$subRF name]_write_data <= 64'b0;"
+		if {[expr [getAddrBits $subRF]-1] < [ld [expr [$subRF register_size]/8]]} {
+			puts "		[$subRF name]_address  <= [getAddrBits $subRF]'b0;"
+		} else {
+			puts "		[$subRF name]_address  <= [expr [getAddrBits $subRF]-1]'b0;"
+		}
+		
+		puts "		`endif"
+		puts "	end"
+		puts "	else"
+		puts "	begin"
+		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $subRF]*[$RF register_size]/8)]
+		set care [format %x $care]
+		puts "		if(address\[[getAddrBits $RF]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]+1]'h$care)"
+		puts "		begin"
+		puts "			[$subRF name]_address <= address\[[getAddrBits $subRF]:[ld [expr [$subRF register_size]/8]]\];"
+		puts "		end"
+		puts "		if( (address\[[getAddrBits $RF]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]+1]'h$care) && write_en)"
+		puts "		begin"
+		puts "			[$subRF name]_write_data <= write_data\[63:0\];"
+		puts "			[$subRF name]_write_en <= 1'b1;"
+		puts "		end"
+		puts "		else"
+		puts "		begin"
+		puts "			[$subRF name]_write_en <= 1'b0;"
+		puts "		end"
+		puts "		if( (address\[[getAddrBits $RF]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]+1]'h$care) && read_en)"
+		puts "		begin"
+		puts "			[$subRF name]_read_en <= 1'b1;"
+		puts "		end"
+		puts "		else"
+		puts "		begin"
+		puts "			[$subRF name]_read_en <= 1'b0;"
+		puts "		end"
+		puts "	"
+	}
+
 	# write the register function // rewrite this there is with if else constructs...
 	proc writeRegister {object} {
 		$object walkDepthFirst {
@@ -833,6 +881,7 @@
 			}
 
 			if {[$item isa osys::rfg::RegisterFile] && [$item hasAttribute hardware.osys::rfg::external]} {
+				writeRegisterFile $object $item
 				return false
 			} else {
 				return true

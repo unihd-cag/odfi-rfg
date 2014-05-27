@@ -1,0 +1,11 @@
+## Create Register File
+osys::rfg::registerFile SingleRF {
+   	register info_reg {
+   		field info_field {
+   			width 64
+   			hardware rw
+  			software rw
+   		}
+    }
+}
+
