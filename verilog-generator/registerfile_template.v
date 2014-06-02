@@ -828,7 +828,7 @@
 		set care [format %x $care]
 		puts "		if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
 		puts "		begin"
-		puts "			[$subRF name]_address <= address\[[getAddrBits $subRF]:[ld [expr [$subRF register_size]/8]]\];"
+		puts "			[$subRF name]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
 		puts "		end"
 		puts "		if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && write_en)"
 		puts "		begin"
@@ -975,7 +975,10 @@
 				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
 				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
 				puts "				begin"
-				puts ""
+				puts "					[$it name]_address <= address\[[expr [getAddrBits $it]-1]:[ld [expr [$it register_size]/8]]\];"
+				puts "					read_data <= [$it name]_read_data;"
+				puts "					invalid_address <= [$it name]_invalid_address;"
+				puts "					access_complete <= [$it name]_access_complete;"
 				puts "				end"
 				return false
 			} else {

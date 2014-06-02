@@ -2,17 +2,16 @@
 
 - different RAMs
 - RAM read/write rights
-- Counter read/write rights and rreinit
+- create ASIC dependet hardware on generation and not with defines in verilog
 - Trigger
-- reinit
-- hierarchical registerfiles
-- add new addressing methods for the verilog_generator
 - modify rfg script for simple usage
-- finish unit-test absoluteAddressRAM
+	- add some example scripts
+	- test a huge registerfile with the example script
+- update html-generator
+- update rfs_to_rfg Tool
 - add unit-test for RF_Wrapper
 - add automatic unit-testing
 - add unit-test for RF.rf
 - registerfile_template Registerfunction function divide by counter register and "normal" register
-- update counter unit-test
-- finish function to calculate absoluteAddress
-- add rreinit source register function 
+- test aligner with new addressing scheme
+- rewrite checker 

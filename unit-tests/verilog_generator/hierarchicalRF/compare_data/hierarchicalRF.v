@@ -108,7 +108,7 @@ module hierarchicalRF
 	begin
 		if(address[5:5] == 1'h0)
 		begin
-			SimpleRF_address <= address[5:3];
+			SimpleRF_address <= address[4:3];
 		end
 		if( (address[5:5] == 1'h0) && write_en)
 		begin
@@ -194,7 +194,10 @@ module hierarchicalRF
 			casex(address[5:3])
 				{1'h0,2'bxx}:
 				begin
-
+					SimpleRF_address <= address[4:3];
+					read_data <= SimpleRF_read_data;
+					invalid_address <= SimpleRF_invalid_address;
+					access_complete <= SimpleRF_access_complete;
 				end
 				3'h4:
 				begin
