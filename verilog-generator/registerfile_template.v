@@ -826,11 +826,11 @@
 		puts "	begin"
 		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $subRF]*[$RF register_size]/8)]
 		set care [format %x $care]
-		puts "		if(address\[[getAddrBits $RF]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]+1]'h$care)"
+		puts "		if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
 		puts "		begin"
 		puts "			[$subRF name]_address <= address\[[getAddrBits $subRF]:[ld [expr [$subRF register_size]/8]]\];"
 		puts "		end"
-		puts "		if( (address\[[getAddrBits $RF]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]+1]'h$care) && write_en)"
+		puts "		if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && write_en)"
 		puts "		begin"
 		puts "			[$subRF name]_write_data <= write_data\[63:0\];"
 		puts "			[$subRF name]_write_en <= 1'b1;"
@@ -839,7 +839,7 @@
 		puts "		begin"
 		puts "			[$subRF name]_write_en <= 1'b0;"
 		puts "		end"
-		puts "		if( (address\[[getAddrBits $RF]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]+1]'h$care) && read_en)"
+		puts "		if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && read_en)"
 		puts "		begin"
 		puts "			[$subRF name]_read_en <= 1'b1;"
 		puts "		end"
@@ -933,19 +933,19 @@
 
 		$object walkDepthFirst {
 			if {[$it isa osys::rfg::RamBlock]} {
-					set dontCare [string repeat x [ld [$it depth]]]
-					set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([$it depth]*[$registerFile register_size]/8)] 
-					set care [format %x $care]
-					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]]'h$care,[ld [$it depth]]'b$dontCare\}:"
-					puts "				begin"
-					puts "					read_data\[[expr "[$it width]-1"]:0\] <= [getName $it]_rf_rdata;"
-					if {[$it width] != [$registerFile register_size]} {
-						puts "					read_data\[[expr "[$registerFile register_size]-1"]:[$it width]\] <= [expr "[$registerFile register_size]-[$it width]"]'b0;"
-					}
-					puts "					invalid_address <= 1'b0;"
-					set delays 3
-					puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
-					puts "				end"
+				set dontCare [string repeat x [ld [$it depth]]]
+				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([$it depth]*[$registerFile register_size]/8)] 
+				set care [format %x $care]
+				puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]]'h$care,[ld [$it depth]]'b$dontCare\}:"
+				puts "				begin"
+				puts "					read_data\[[expr "[$it width]-1"]:0\] <= [getName $it]_rf_rdata;"
+				if {[$it width] != [$registerFile register_size]} {
+					puts "					read_data\[[expr "[$registerFile register_size]-1"]:[$it width]\] <= [expr "[$registerFile register_size]-[$it width]"]'b0;"
+				}
+				puts "					invalid_address <= 1'b0;"
+				set delays 3
+				puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
+				puts "				end"
 			} elseif {[$it isa osys::rfg::Register]} {
 				if {[getAddrBits $registerFile] == [ld [expr [$registerFile register_size]/8]]} {
 					puts "				[expr [getAddrBits $registerFile]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8]]:"
@@ -970,6 +970,13 @@
 			}
 			
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
+				set care [format %x $care]
+				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
+				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
+				puts "				begin"
+				puts ""
+				puts "				end"
 				return false
 			} else {
 				return true

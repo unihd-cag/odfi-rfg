@@ -106,11 +106,11 @@ module hierarchicalRF
 	end
 	else
 	begin
-		if(address[6:5] == 2'h0)
+		if(address[5:5] == 1'h0)
 		begin
 			SimpleRF_address <= address[5:3];
 		end
-		if( (address[6:5] == 2'h0) && write_en)
+		if( (address[5:5] == 1'h0) && write_en)
 		begin
 			SimpleRF_write_data <= write_data[63:0];
 			SimpleRF_write_en <= 1'b1;
@@ -119,7 +119,7 @@ module hierarchicalRF
 		begin
 			SimpleRF_write_en <= 1'b0;
 		end
-		if( (address[6:5] == 2'h0) && read_en)
+		if( (address[5:5] == 1'h0) && read_en)
 		begin
 			SimpleRF_read_en <= 1'b1;
 		end
@@ -192,6 +192,10 @@ module hierarchicalRF
 		begin
 
 			casex(address[5:3])
+				{1'h0,2'bxx}:
+				begin
+
+				end
 				3'h4:
 				begin
 					read_data[63:0] <= G2_r1_f1;
