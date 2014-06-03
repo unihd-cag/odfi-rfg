@@ -147,7 +147,7 @@
 				puts "	.[$registerfile name]_read_en(),"
 				puts "	.[$registerfile name]_write_en(),"
 				puts "	.[$registerfile name]_write_data(),"
- 				writeTemplate $it "[$registerfile name]_"
+ 				##writeTemplate $it "[$registerfile name]_"
 				return false
 			} else {
 				return true
@@ -268,13 +268,13 @@
 				} else {
 					puts "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address,"
 				}
-				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_read_data(),"
+				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_read_data,"
 				puts "	input wire [$registerfile name]_invalid_address,"
-				puts "	input wire [$registerfile name]_access_complete(),"
-				puts "	output reg [$registerfile name]_read_en(),"
-				puts "	output reg [$registerfile name]_write_en(),"
-				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_write_data(),"
- 				writeBlackbox $it "[$registerfile name]_"
+				puts "	input wire [$registerfile name]_access_complete,"
+				puts "	output reg [$registerfile name]_read_en,"
+				puts "	output reg [$registerfile name]_write_en,"
+				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_write_data,"
+ 				##writeBlackbox $it "[$registerfile name]_"
 				return false
 			} else {
 				return true
@@ -808,46 +808,48 @@
 		puts "	always @(posedge clk or negedge res_n) `else"
 		puts "	always @(posedge clk) `endif"
 		puts "	begin"
-		puts "	if (!res_n)"
-		puts "	begin"
-		puts "		[$subRF name]_write_en <= 1'b0;"
-		puts "		[$subRF name]_read_en  <= 1'b0;"
-		puts "		`ifdef ASIC"
-		puts "		[$subRF name]_write_data <= 64'b0;"
-		if {[expr [getAddrBits $subRF]-1] < [ld [expr [$subRF register_size]/8]]} {
-			puts "		[$subRF name]_address  <= [getAddrBits $subRF]'b0;"
-		} else {
-			puts "		[$subRF name]_address  <= [expr [getAddrBits $subRF]-1]'b0;"
-		}
-		
-		puts "		`endif"
-		puts "	end"
-		puts "	else"
-		puts "	begin"
-		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $subRF]*[$RF register_size]/8)]
-		set care [format %x $care]
-		puts "		if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
-		puts "		begin"
-		puts "			[$subRF name]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
-		puts "		end"
-		puts "		if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && write_en)"
-		puts "		begin"
-		puts "			[$subRF name]_write_data <= write_data\[63:0\];"
-		puts "			[$subRF name]_write_en <= 1'b1;"
-		puts "		end"
-		puts "		else"
+		puts "		if (!res_n)"
 		puts "		begin"
 		puts "			[$subRF name]_write_en <= 1'b0;"
-		puts "		end"
-		puts "		if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && read_en)"
-		puts "		begin"
-		puts "			[$subRF name]_read_en <= 1'b1;"
+		puts "			[$subRF name]_read_en  <= 1'b0;"
+		puts "			`ifdef ASIC"
+		puts "			[$subRF name]_write_data <= 64'b0;"
+		if {[expr [getAddrBits $subRF]-1] < [ld [expr [$subRF register_size]/8]]} {
+			puts "			[$subRF name]_address  <= [getAddrBits $subRF]'b0;"
+		} else {
+			puts "			[$subRF name]_address  <= [expr [getAddrBits $subRF]-1]'b0;"
+		}
+		
+		puts "			`endif"
 		puts "		end"
 		puts "		else"
 		puts "		begin"
-		puts "			[$subRF name]_read_en <= 1'b0;"
+		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $subRF]*[$RF register_size]/8)]
+		set care [format %x $care]
+		puts "			if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
+		puts "			begin"
+		puts "				[$subRF name]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
+		puts "			end"
+		puts "			if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && write_en)"
+		puts "			begin"
+		puts "				[$subRF name]_write_data <= write_data\[63:0\];"
+		puts "				[$subRF name]_write_en <= 1'b1;"
+		puts "			end"
+		puts "			else"
+		puts "			begin"
+		puts "				[$subRF name]_write_en <= 1'b0;"
+		puts "			end"
+		puts "			if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && read_en)"
+		puts "			begin"
+		puts "				[$subRF name]_read_en <= 1'b1;"
+		puts "			end"
+		puts "			else"
+		puts "			begin"
+		puts "				[$subRF name]_read_en <= 1'b0;"
+		puts "			end"
 		puts "		end"
-		puts "	"
+		puts "	end"
+		puts ""
 	}
 
 	# write the register function // rewrite this there is with if else constructs...
@@ -975,7 +977,6 @@
 				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
 				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
 				puts "				begin"
-				puts "					[$it name]_address <= address\[[expr [getAddrBits $it]-1]:[ld [expr [$it register_size]/8]]\];"
 				puts "					read_data <= [$it name]_read_data;"
 				puts "					invalid_address <= [$it name]_invalid_address;"
 				puts "					access_complete <= [$it name]_access_complete;"

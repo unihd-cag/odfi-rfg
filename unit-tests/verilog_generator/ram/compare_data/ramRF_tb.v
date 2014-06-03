@@ -5,7 +5,7 @@ module ramRF_tb();
     integer i;
     reg res_n;
     reg clk = 0;
-    reg[8:3] address;
+    reg[7:3] address;
     wire[63:0] read_data;
     wire invalid_address;
     reg read_en;

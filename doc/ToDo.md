@@ -12,6 +12,8 @@
 - add unit-test for RF_Wrapper
 - add automatic unit-testing
 - add unit-test for RF.rf
+- internal RFs
 - registerfile_template Registerfunction function divide by counter register and "normal" register
 - test aligner with new addressing scheme
 - rewrite checker 
+- unit-test ram only solve problem with new addressing scheme

@@ -1,5 +1,5 @@
 ## Create Register File
-registerFile SimpleRF {
+registerFile subRF {
 
     group info_rf {
 
