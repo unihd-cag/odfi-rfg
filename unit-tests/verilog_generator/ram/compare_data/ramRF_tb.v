@@ -55,7 +55,7 @@ module ramRF_tb();
         @(negedge(clk));
         res_n <= 1'b1;
         write_en <= 1'b1;
-        for(i=32;i<64;i=i+1)
+        for(i=0;i<32;i=i+1)
         begin
         	address <= i;
         	write_data <= i;
@@ -68,7 +68,7 @@ module ramRF_tb();
         begin
         	TestRAM_addr <= i;
         	@(negedge(clk));
-            if (TestRAM_rdata != i+32)
+            if (TestRAM_rdata != i)
             begin
                 $error("TestRAM_rdata does not match the written data...");
                 $stop;
@@ -84,7 +84,7 @@ module ramRF_tb();
         end
         TestRAM_wen <= 1'b0;
         read_en <= 1'b1;
-        for(i=32;i<64;i=i+1)
+        for(i=0;i<32;i=i+1)
         begin
         	read_en <= 1'b1;
         	address <= i;
@@ -93,7 +93,7 @@ module ramRF_tb();
         		@(negedge(clk));
         		read_en <= 1'b0;
         	end
-            if (read_data != i-32) begin
+            if (read_data != i) begin
                 $error("read_data does not match written data...");
                 $stop;
             end

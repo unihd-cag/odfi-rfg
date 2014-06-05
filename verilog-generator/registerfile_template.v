@@ -588,13 +588,21 @@
 			puts "		else"
 			puts "		begin"
 			set equal [expr [$ramBlock getAttributeValue software.osys::rfg::absolute_address]/([$ramBlock depth]*[$registerFile register_size]/8)]
-			puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
-			puts "			begin"
-			puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
-			puts "				[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
-			puts "				[getName $ramBlock]_rf_wen <= write_en;"
-			puts "				[getName $ramBlock]_rf_ren <= read_en;"
-			puts "			end"
+			if {[expr [getAddrBits $registerFile]-1] < [expr [ld [$ramBlock depth]]+3]} {
+				puts "			[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
+				puts "			[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "			[getName $ramBlock]_rf_wen <= write_en;"
+				puts "			[getName $ramBlock]_rf_ren <= read_en;"
+			} else {
+				puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
+				puts "			begin"
+				puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
+				puts "				[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "				[getName $ramBlock]_rf_wen <= write_en;"
+				puts "				[getName $ramBlock]_rf_ren <= read_en;"
+				puts "			end"
+			}
+			
 			puts "		end"
 			puts "	end"
 			puts ""

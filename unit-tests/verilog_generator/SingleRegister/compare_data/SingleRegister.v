@@ -17,7 +17,8 @@ SingleRF SingleRF_I (
 	.write_en(),
 	.write_data(),
 	.info_reg_info_field_next(),
-	.info_reg_info_field()
+	.info_reg_info_field(),
+	.info_reg_info_field_wen()
 );
 */
 module SingleRF
@@ -38,7 +39,8 @@ module SingleRF
 	input wire[63:0] write_data,
 	///}@ 
 	input wire[63:0] info_reg_info_field_next,
-	output reg[63:0] info_reg_info_field
+	output reg[63:0] info_reg_info_field,
+	input wire info_reg_info_field_wen
 
 );
 
@@ -60,7 +62,7 @@ module SingleRF
 			begin
 				info_reg_info_field <= write_data[63:0];
 			end
-			else
+			else if(info_reg_info_field_wen)
 			begin
 				info_reg_info_field <= info_reg_info_field_next;
 			end

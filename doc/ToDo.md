@@ -14,6 +14,7 @@
 - add unit-test for RF.rf
 - internal RFs
 - registerfile_template Registerfunction function divide by counter register and "normal" register
-- test aligner with new addressing scheme
+- aligner are not working
+	- add aligner as class in the rfg.tm
+	- add aligner in the addressing scheme
 - rewrite checker 
-- unit-test ram only solve problem with new addressing scheme

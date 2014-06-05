@@ -1,2 +1,2 @@
- iverilog -o hierarchicalRF -c hierarchicalRF.f
- vvp -n hierarchicalRF
+ iverilog -o hierarchicalRF.iverilog -c hierarchicalRF.f
+ vvp -n hierarchicalRF.iverilog

@@ -92,13 +92,10 @@ module ramRF
 		end
 		else
 		begin
-			if (address[7:8] == 0)
-			begin
-				info_rf_TestRAM_rf_addr <= address[7:3];
-				info_rf_TestRAM_rf_wdata <= write_data[15:0];
-				info_rf_TestRAM_rf_wen <= write_en;
-				info_rf_TestRAM_rf_ren <= read_en;
-			end
+			info_rf_TestRAM_rf_addr <= address[7:3];
+			info_rf_TestRAM_rf_wdata <= write_data[15:0];
+			info_rf_TestRAM_rf_wen <= write_en;
+			info_rf_TestRAM_rf_ren <= read_en;
 		end
 	end
 

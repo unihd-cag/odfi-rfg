@@ -7,7 +7,7 @@ catch {source ramRF.rf} result
 puts $result
 
 osys::rfg::address::hierarchical::calculate $result
-osys::rfg::address::hierarchical::printTable $result
+##osys::rfg::address::hierarchical::printTable $result
 
 set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
 

@@ -4,16 +4,16 @@
 
 ### registerFiles
 
-A registerFile can be seen as the main entity.
+A registerFile can be seen as the main entity it can contain other registerfiles, groups and registers.
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
  	    description "Test registerfile"
 
 	}
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 
 	}
@@ -29,7 +29,7 @@ A group can be used in a registerfile to group elements inside a registerFile
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -47,7 +47,7 @@ A register can be used in registerfile or group. The register describes a physic
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -71,7 +71,7 @@ A field is used inside a register and describes a part of the physical unit of t
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -101,7 +101,7 @@ A ramBlock can be used in a registerfile or a group. The ramBlock will be implem
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    group test_group {
 	        ramBlock test_ram {
 	            width 16
@@ -122,7 +122,7 @@ This examples alignes the next object to the next 2**12 address
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 
 	    group test_group1 {
 	        register test_register {
@@ -164,7 +164,7 @@ A checker can be used to check the addresses in the address space, should be use
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 
 	    checker 12 {
 	        group test_group1 {
@@ -259,7 +259,7 @@ This are properties of the hardware interface to the register.
 
 Real Example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -294,7 +294,7 @@ We generate with the repeat statement 16 general purpose registers with a field 
 
 Our last group contains a ramBlock which has 256 entries and is 16 bit wide.
 
-	osys::rfg::registerFile RF {
+	registerFile RF {
     
 	    checker 8 {
 

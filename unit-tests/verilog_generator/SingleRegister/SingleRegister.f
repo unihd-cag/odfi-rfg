@@ -1,2 +1,2 @@
-compare_data/SimpleRF.v
-compare_data/SimpleRF_tb.v
+compare_data/SingleRegister.v
+compare_data/SingleRegister_tb.v

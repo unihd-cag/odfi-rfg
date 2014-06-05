@@ -3,9 +3,11 @@ osys::rfg::registerFile SingleRF {
    	register info_reg {
    		field info_field {
    			width 64
-   			hardware rw
+   			hardware {
+   				rw
+   				hardware_wen
+   			}
   			software rw
    		}
     }
 }
-
