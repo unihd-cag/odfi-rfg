@@ -1,0 +1,2099 @@
+
+<html>
+    <head>
+        
+
+    <!-- JQuery -->
+    <script src="bs/jquery-1.10.2.min.js"></script>
+
+    <!-- JQuery UI -->
+    <script src="bs/jquery-ui.js"></script>
+    <link rel="stylesheet" href="bs/bootstrap.min.css">
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="bs/bootstrap.min.css">
+
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="bs/bootstrap-theme.min.css">
+
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="bs/bootstrap.min.js"></script>
+
+    <style type="text/css">
+
+    .ui-autocomplete {
+        background-color: white;
+        border: 1px black solid;
+    }
+
+    </style>
+
+    <script>
+
+    function openClose(elementId) {
+        console.log("Open close")
+        $("#"+elementId).toggle("slow")
+    }
+    function updateFilter() {
+
+        var filter = $("#filter").val()
+        //console.log("Filter: "+filter)
+
+        if (filter) {
+
+            // Hide All
+            //--------------
+            $("#rfg-tree ul").each(function(i,element) {
+            //console.log("found")
+                $(element).hide()
+
+
+            })
+
+            // Show Parents
+            //--------------
+            $("ul[data-name*='"+filter+"']").each(function(i,element) {
+            //console.log("found")
+
+                // Show Parents
+
+                $(element).show()
+
+                $($(element).parents()).each(function(i,e){ $(e).show()})
+
+            })
+        } else {
+
+            $("#rfg-tree ul").each(function(i,element) {
+            //console.log("found")
+            $(element).show()
+            })
+
+        }
+        
+
+        ///[$item parents]
+
+    }
+
+    </script
+
+    </head>
+    <body>
+        
+    <h1>info_rf
+</h1>
+
+    <!-- Filter -->
+    <div class="ui-widget">
+      <label for="filter">Filter: </label>
+       <input type="text" id="filter" onkeyup="updateFilter()" style="width:100%"/>
+    </div>
+ 
+
+    <!-- Tree -->
+    <!-- #### -->
+    <div id="rfg-tree">
+    <ul data-name="info_rf">
+
+
+        <li>
+            info_rf
+            <span class="badge">0x0</span>
+    
+<ul data-name="info_rf/driver">
+            <li> <span class="glyphicon glyphicon-book"></span> driver <span class="badge">0x0</span> <span class="caret" onclick="openClose('info_rf-driver')"></span>
+            <p>
+                
+            </p>
+    
+<div id="info_rf-driver" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var driver = read("info_rf/driver")
+    write(value) into "info_rf/driver"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>ver</td>
+                <td style="width:auto"></td>
+                <td>32</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/driver.ver</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/node">
+            <li> <span class="glyphicon glyphicon-book"></span> node <span class="badge">0x8</span> <span class="caret" onclick="openClose('info_rf-node')"></span>
+            <p>
+                
+            </p>
+    
+<div id="info_rf-node" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var node = read("info_rf/node")
+    write(value) into "info_rf/node"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>guid</td>
+                <td style="width:auto"></td>
+                <td>24</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::wo</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/node.guid</td>
+</tr>
+<tr>
+
+                <td>id</td>
+                <td style="width:auto"></td>
+                <td>16</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::software_written</td>
+                                        <td>2</td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/node.id</td>
+</tr>
+<tr>
+
+                <td>vpids</td>
+                <td style="width:auto"></td>
+                <td>16</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/node.vpids</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/management_sw">
+            <li> <span class="glyphicon glyphicon-book"></span> management_sw <span class="badge">0x10</span> <span class="caret" onclick="openClose('info_rf-management_sw')"></span>
+            <p>
+                
+            </p>
+    
+<div id="info_rf-management_sw" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var management_sw = read("info_rf/management_sw")
+    write(value) into "info_rf/management_sw"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>cfg_ip</td>
+                <td style="width:auto">IP address of the backend process that started the latest enumeration</td>
+                <td>32</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/management_sw.cfg_ip</td>
+</tr>
+<tr>
+
+                <td>enum_cnt</td>
+                <td style="width:auto">Count that specifies the latest enumeration attempt that reached this node</td>
+                <td>8</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/management_sw.enum_cnt</td>
+</tr>
+<tr>
+
+                <td>cfg_count</td>
+                <td style="width:auto">Count that specifies the latest configuration attempt that reached this node</td>
+                <td>8</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/management_sw.cfg_count</td>
+</tr>
+<tr>
+
+                <td>Reserved</td>
+                <td style="width:auto"></td>
+                <td>15</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/management_sw.Reserved</td>
+</tr>
+<tr>
+
+                <td>backend</td>
+                <td style="width:auto">This bit is set on nodes that currently have a backend enumeration or configuration attempt running</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/management_sw.backend</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/ip_addresses">
+            <li> <span class="glyphicon glyphicon-book"></span> ip_addresses <span class="badge">0x18</span> <span class="caret" onclick="openClose('info_rf-ip_addresses')"></span>
+            <p>
+                This register holds the primary IP address of the node as well as the IP address given to the EXTOLL interface (if any). Both registers are initialized by node system software.
+            </p>
+    
+<div id="info_rf-ip_addresses" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var ip_addresses = read("info_rf/ip_addresses")
+    write(value) into "info_rf/ip_addresses"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>primary_ip_address</td>
+                <td style="width:auto">Primary IP address of the node (in network byte order). It can be used to get the hostname of the node using a reverse DNS lookup</td>
+                <td>32</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/ip_addresses.primary_ip_address</td>
+</tr>
+<tr>
+
+                <td>extoll_ip_address</td>
+                <td style="width:auto">IP address of the EXTOLL interface (in network byte order). Usefull for ARP implementation over EXTOLL.</td>
+                <td>32</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/ip_addresses.extoll_ip_address</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/mgt_ip_addresses">
+            <li> <span class="glyphicon glyphicon-book"></span> mgt_ip_addresses <span class="badge">0x20</span> <span class="caret" onclick="openClose('info_rf-mgt_ip_addresses')"></span>
+            <p>
+                This register should be set by system software and give directions to find the primary management entity in the system.
+            </p>
+    
+<div id="info_rf-mgt_ip_addresses" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var mgt_ip_addresses = read("info_rf/mgt_ip_addresses")
+    write(value) into "info_rf/mgt_ip_addresses"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>primary_mgt_ip_address</td>
+                <td style="width:auto">The EXTOLL Node ID of the primary management ID for this node.</td>
+                <td>32</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/mgt_ip_addresses.primary_mgt_ip_address</td>
+</tr>
+<tr>
+
+                <td>extoll_mgt_ip_address</td>
+                <td style="width:auto">The IP Address of the primary management ID for this node.</td>
+                <td>32</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/mgt_ip_addresses.extoll_mgt_ip_address</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/tsc">
+            <li> <span class="glyphicon glyphicon-book"></span> tsc <span class="badge">0x28</span> <span class="caret" onclick="openClose('info_rf-tsc')"></span>
+            <p>
+                This register implements the EXTOLL time stamp counter (TSC). The counter is incremented at every clock cycle. A software write to the register loads the counter with the given value. In addition, the counter can be set from the global interrupt hardware to implement a globally sychronized time source.
+            </p>
+    
+<div id="info_rf-tsc" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var tsc = read("info_rf/tsc")
+    write(value) into "info_rf/tsc"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>tsc</td>
+                <td style="width:auto"></td>
+                <td>48</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::counter</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::hardware_wen</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc.tsc</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/tsc_global_load_value">
+            <li> <span class="glyphicon glyphicon-book"></span> tsc_global_load_value <span class="badge">0x30</span> <span class="caret" onclick="openClose('info_rf-tsc_global_load_value')"></span>
+            <p>
+                This register specifies the value the TSC register will be loaded with, in case of an global interrupt.
+            </p>
+    
+<div id="info_rf-tsc_global_load_value" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var tsc_global_load_value = read("info_rf/tsc_global_load_value")
+    write(value) into "info_rf/tsc_global_load_value"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>tsc_data</td>
+                <td style="width:auto"></td>
+                <td>48</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_value.tsc_data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_0">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_0 <span class="badge">0x38</span> <span class="caret" onclick="openClose('info_rf-scratchpad_0')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_0" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_0 = read("info_rf/scratchpad_0")
+    write(value) into "info_rf/scratchpad_0"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_0.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_1">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_1 <span class="badge">0x40</span> <span class="caret" onclick="openClose('info_rf-scratchpad_1')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_1" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_1 = read("info_rf/scratchpad_1")
+    write(value) into "info_rf/scratchpad_1"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_1.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_2">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_2 <span class="badge">0x48</span> <span class="caret" onclick="openClose('info_rf-scratchpad_2')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_2" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_2 = read("info_rf/scratchpad_2")
+    write(value) into "info_rf/scratchpad_2"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_2.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_3">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_3 <span class="badge">0x50</span> <span class="caret" onclick="openClose('info_rf-scratchpad_3')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_3" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_3 = read("info_rf/scratchpad_3")
+    write(value) into "info_rf/scratchpad_3"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_3.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_4">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_4 <span class="badge">0x58</span> <span class="caret" onclick="openClose('info_rf-scratchpad_4')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_4" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_4 = read("info_rf/scratchpad_4")
+    write(value) into "info_rf/scratchpad_4"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_4.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_5">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_5 <span class="badge">0x60</span> <span class="caret" onclick="openClose('info_rf-scratchpad_5')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_5" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_5 = read("info_rf/scratchpad_5")
+    write(value) into "info_rf/scratchpad_5"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_5.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_6">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_6 <span class="badge">0x68</span> <span class="caret" onclick="openClose('info_rf-scratchpad_6')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_6" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_6 = read("info_rf/scratchpad_6")
+    write(value) into "info_rf/scratchpad_6"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_6.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/scratchpad_7">
+            <li> <span class="glyphicon glyphicon-book"></span> scratchpad_7 <span class="badge">0x70</span> <span class="caret" onclick="openClose('info_rf-scratchpad_7')"></span>
+            <p>
+                This register is one entry of the 64 byte scratchpad space offered by EXTOLL.
+            </p>
+    
+<div id="info_rf-scratchpad_7" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var scratchpad_7 = read("info_rf/scratchpad_7")
+    write(value) into "info_rf/scratchpad_7"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>data</td>
+                <td style="width:auto">Scratchpad data.</td>
+                <td>64</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/scratchpad_7.data</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/tsc_global_load_enable">
+            <li> <span class="glyphicon glyphicon-book"></span> tsc_global_load_enable <span class="badge">0x78</span> <span class="caret" onclick="openClose('info_rf-tsc_global_load_enable')"></span>
+            <p>
+                Enable/Disable TSC loading from the 4 global interrupt sources and control re-init of the timer interrupt logic from global interrupts
+            </p>
+    
+<div id="info_rf-tsc_global_load_enable" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var tsc_global_load_enable = read("info_rf/tsc_global_load_enable")
+    write(value) into "info_rf/tsc_global_load_enable"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>tsc_load_en_irq0</td>
+                <td style="width:auto">Enable global interrupt 0 to load the tsc with the value from the tsc_global_load_value register</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.tsc_load_en_irq0</td>
+</tr>
+<tr>
+
+                <td>tsc_load_en_irq1</td>
+                <td style="width:auto">Enable global interrupt 1 to load the tsc with the value from the tsc_global_load_value register</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.tsc_load_en_irq1</td>
+</tr>
+<tr>
+
+                <td>tsc_load_en_irq2</td>
+                <td style="width:auto">Enable global interrupt 2 to load the tsc with the value from the tsc_global_load_value register</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.tsc_load_en_irq2</td>
+</tr>
+<tr>
+
+                <td>tsc_load_en_irq3</td>
+                <td style="width:auto">Enable global interrupt 3 to load the tsc with the value from the tsc_global_load_value register</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.tsc_load_en_irq3</td>
+</tr>
+<tr>
+
+                <td>Reserved</td>
+                <td style="width:auto"></td>
+                <td>4</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.Reserved</td>
+</tr>
+<tr>
+
+                <td>global_irq_reinit_en0</td>
+                <td style="width:auto">Enable global interrupt 0 to reinit the timer register (see timer_interrupt)</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.global_irq_reinit_en0</td>
+</tr>
+<tr>
+
+                <td>global_irq_reinit_en1</td>
+                <td style="width:auto">Enable global interrupt 0 to reinit the timer register (see timer_interrupt)</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.global_irq_reinit_en1</td>
+</tr>
+<tr>
+
+                <td>global_irq_reinit_en2</td>
+                <td style="width:auto">Enable global interrupt 0 to reinit the timer register (see timer_interrupt)</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.global_irq_reinit_en2</td>
+</tr>
+<tr>
+
+                <td>global_irq_reinit_en3</td>
+                <td style="width:auto">Enable global interrupt 0 to reinit the timer register (see timer_interrupt)</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/tsc_global_load_enable.global_irq_reinit_en3</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+<ul data-name="info_rf/timer_interrupt">
+            <li> <span class="glyphicon glyphicon-book"></span> timer_interrupt <span class="badge">0x80</span> <span class="caret" onclick="openClose('info_rf-timer_interrupt')"></span>
+            <p>
+                Control the integrated timer.
+            </p>
+    
+<div id="info_rf-timer_interrupt" style="display:none">
+
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var timer_interrupt = read("info_rf/timer_interrupt")
+    write(value) into "info_rf/timer_interrupt"
+        </pre>
+    </div>
+
+    
+<div>
+<table class="table table-bordered table-hover table-condensed">
+<caption>Fields</caption>
+<theader>
+  <tr>
+                    <th>Name</th>
+                    <th style="width:auto">Description</th>
+                    <th>Width</th>
+                    <th>Attributes</th>
+                    <th>Path</th>
+            </tr>
+</theader>
+<tbody>
+<tr>
+
+                <td>timer_interrupt_period</td>
+                <td style="width:auto">The period of the timer in clock cycles. Timer will count down from this value to zero and fire.</td>
+                <td>48</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/timer_interrupt.timer_interrupt_period</td>
+</tr>
+<tr>
+
+                <td>timer_interrupt_enable</td>
+                <td style="width:auto">Set this bit to one to enable the logic. Will be reset to 0 if a one-shot has occured.</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::software_written</td>
+                                        <td>1</td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::hardware_wen</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/timer_interrupt.timer_interrupt_enable</td>
+</tr>
+<tr>
+
+                <td>timer_interrupt_one_shot</td>
+                <td style="width:auto">Set this bit to one, to run timer logic in one-shot logic, i.e. once an interrupt has fired wait.             Otherwise logic will run in recurring mode and fire again after period cycles.</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::rw</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/timer_interrupt.timer_interrupt_one_shot</td>
+</tr>
+<tr>
+
+                <td>Reserved</td>
+                <td style="width:auto"></td>
+                <td>6</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/timer_interrupt.Reserved</td>
+</tr>
+<tr>
+
+                <td>timer_interrupt_toggle</td>
+                <td style="width:auto">Toggles everytime an interrupt is fired.</td>
+                <td>1</td>
+                
+<td>
+<table class="table table-bordered table-hover table-condensed">
+<theader>
+<tr>
+                                    <th>Name</th>
+                                    <th>Value</th>
+                            </tr>
+</theader>
+<tbody>
+<tr><td colspan='2'>rfg</td></tr>
+<tr>
+                                        <td>osys::rfg::file</td>
+                                        <td></td>
+                                    </tr>
+<tr>
+                                        <td>osys::rfg::line</td>
+                                        <td>0</td>
+                                    </tr>
+<tr><td colspan='2'>software</td></tr>
+<tr>
+                                        <td>osys::rfg::ro</td>
+                                        <td></td>
+                                    </tr>
+<tr><td colspan='2'>hardware</td></tr>
+<tr>
+                                        <td>osys::rfg::wo</td>
+                                        <td></td>
+                                    </tr>
+</tbody>
+</table>
+</td>
+<td>info_rf/timer_interrupt.timer_interrupt_toggle</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</li>
+</ul>
+</li>
+</ul>
+
+
+    </div>
+
+    <!-- Autocomplete -->
+    <script>
+    
+    $(function() {
+    var availableTags = [
+      "info_rf" "info_rf/driver" "info_rf/node" "info_rf/management_sw" "info_rf/ip_addresses" "info_rf/mgt_ip_addresses" "info_rf/tsc" "info_rf/tsc_global_load_value" "info_rf/scratchpad_0" "info_rf/scratchpad_1" "info_rf/scratchpad_2" "info_rf/scratchpad_3" "info_rf/scratchpad_4" "info_rf/scratchpad_5" "info_rf/scratchpad_6" "info_rf/scratchpad_7" "info_rf/tsc_global_load_enable" "info_rf/timer_interrupt" "info_rf/driver/ver" "info_rf/node/guid" "info_rf/node/id" "info_rf/node/vpids" "info_rf/management_sw/cfg_ip" "info_rf/management_sw/enum_cnt" "info_rf/management_sw/cfg_count" "info_rf/management_sw/Reserved" "info_rf/management_sw/backend" "info_rf/ip_addresses/primary_ip_address" "info_rf/ip_addresses/extoll_ip_address" "info_rf/mgt_ip_addresses/primary_mgt_ip_address" "info_rf/mgt_ip_addresses/extoll_mgt_ip_address" "info_rf/tsc/tsc" "info_rf/tsc_global_load_value/tsc_data" "info_rf/scratchpad_0/data" "info_rf/scratchpad_1/data" "info_rf/scratchpad_2/data" "info_rf/scratchpad_3/data" "info_rf/scratchpad_4/data" "info_rf/scratchpad_5/data" "info_rf/scratchpad_6/data" "info_rf/scratchpad_7/data" "info_rf/tsc_global_load_enable/tsc_load_en_irq0" "info_rf/tsc_global_load_enable/tsc_load_en_irq1" "info_rf/tsc_global_load_enable/tsc_load_en_irq2" "info_rf/tsc_global_load_enable/tsc_load_en_irq3" "info_rf/tsc_global_load_enable/Reserved" "info_rf/tsc_global_load_enable/global_irq_reinit_en0" "info_rf/tsc_global_load_enable/global_irq_reinit_en1" "info_rf/tsc_global_load_enable/global_irq_reinit_en2" "info_rf/tsc_global_load_enable/global_irq_reinit_en3" "info_rf/timer_interrupt/timer_interrupt_period" "info_rf/timer_interrupt/timer_interrupt_enable" "info_rf/timer_interrupt/timer_interrupt_one_shot" "info_rf/timer_interrupt/Reserved" "info_rf/timer_interrupt/timer_interrupt_toggle"
+
+    ];
+    /*$( "#filter" ).autocomplete({
+      source: availableTags
+    });*/
+  });
+    </script>
+
+    </body>
+
+</html>

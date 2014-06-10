@@ -1,0 +1,340 @@
+set HMC_NUM_LANES 4
+set HMC_RX_TOKEN_COUNT 4
+
+registerFile hmc_rf  {
+    
+    register status {
+        description "HMC controller status"
+        
+        field link_up {
+            description "link is ready for HMC requests"
+            width        1
+            reset        1'h0
+            software ro
+            hardware wo  
+        }
+
+        field link_training {
+            description "link training in progress"
+            width        1
+            reset        1'h0
+            software ro
+            hardware wo
+        }
+
+        field descramblers_aligned {
+            description "The descramblers are aligned"
+            width        1
+            reset        1'h0
+            software ro
+            hardware wo
+        }
+
+        field sleep_mode {
+            description "HMC is in sleep mode (HMC LxTXPS = 0)"
+            width        1
+            reset        1'h0
+            software ro   
+            hardware wo
+        }
+
+        field lanes_reversed {
+            description "The Rx lanes are in Lane Reversal Mode"
+            width        1
+            reset        1'h0
+            software ro   
+            hardware wo
+        }
+
+        field rsvd0 {
+            width        3
+            reset        3'h0
+            software ro
+        }
+
+        field tx_init_NULL_1 {
+            description "TX sending first NULL FLITs"
+            width        1
+            reset        1'h0
+            software ro
+            hardware wo
+        }
+
+        field tx_init_TS1 {
+            description "TX sending TS1 FLITs"
+            width        1
+            reset        1'h0
+            software ro
+            hardware wo
+        }
+
+        field tx_init_NULL_2 {
+            description "TX sending second NULL FLITs"
+            width        1
+            reset        1'h0
+            software ro
+            hardware wo
+        }
+
+        field hmc_init_TS1 {
+            description "HMC sending TS1 FLITs"
+            width        1
+            reset        1'h0
+            software ro 
+            hardware wo
+        }
+
+        field hmc_init_NULL_2 {
+            description "HMC sending second NULL FLITs"
+            width        1
+            reset        1'h0
+            software ro
+            hardware wo
+        }
+
+        field hmc_init_TRET {
+            description "HMC sending TRET FLITs"
+            width        1
+            reset        1'h0
+            software ro 
+            hardware wo 
+        }
+
+        field rsvd1 {
+            width        2
+            reset        2'h0
+            software ro 
+        }
+
+        field token_count {
+            description "Link Flow control FLIT count"
+            width        10
+            reset        1'h0
+            software ro
+            hardware wo 
+        }
+
+        field rsvd2 {
+            width        6
+            reset        6'h0
+            software ro
+        }
+
+        field lane_polarity_reversed {
+            description "The Lane Polarity is reversed from the HMC"
+            width        $HMC_NUM_LANES
+            reset        0
+            software ro
+            hardware wo
+        }
+
+        field lane_descramblers_locked {
+            description "per-lane lock status bits"
+            width        $HMC_NUM_LANES
+            reset        0
+            software ro 
+            hardware wo
+        }
+
+        field phy_ready {
+
+
+            description "SERDES reset_done."
+            width        1
+            reset        1'h0
+            software ro 
+            hardware wo
+        }
+
+    }
+
+
+    register control {
+        description "HMC controller control"
+        
+        field put_hmc_in_sleep_mode {
+            width        1
+            reset        1'h0
+            software rw
+            hardware ro
+        }
+
+        field scrambler_disable {
+            description "Disable scrambling for debugging"
+            width        1
+            reset        1'h0
+            software rw
+            hardware ro
+        }
+
+        field upper_lanes {
+            description "enable/disable upper 8 lanes for 16-lane operation"
+            width        1
+            reset        1'h0
+            software rw
+            hardware ro
+        }
+
+        field p_rst_n {
+            description "active low reset signal for the HMC when the HTAX clock domain is ready"
+            width        1
+            reset        1'h0
+            software rw
+            hardware ro
+        }
+
+        field first_cube_ID {
+            description "ID of the cube that is used during initialization"
+            width        3
+            reset        3'h0
+            software rw
+            hardware ro
+        }
+
+        field rx_token_count {
+            description "Memory Controller Input Buffer Size"
+            width        10
+            reset        $HMC_RX_TOKEN_COUNT
+            software rw
+            hardware ro
+        }
+
+        field rsvd_control_2 {
+            width        6
+            reset        6'h0
+            software ro
+        }
+
+        field bit_slip_time {
+            description "Phy-dependent number of clocks to wait after a bit slip (max 255)"
+            width        8
+            reset        8'h30
+            software rw
+            hardware ro
+        }
+
+        field irtry_received_threshold {
+            description "IRTRY packet received threshold"
+            width        5
+            reset        5'h10
+            software rw
+            hardware ro
+        }
+
+        field irtry_to_send {
+            description "IRTRY packets to be sent"
+            width        5
+            reset        5'h10
+            software rw
+            hardware ro
+        }
+
+    }
+
+
+    register counter_reset {
+        description "Reset performance counters"
+        hardware {
+            rreinit_source    
+        }
+    }
+
+
+    register link_retries {
+        description "Count of re-transmit requests (poisoned packets and bit errors)"
+        
+        field count {
+            width        32
+            reset    
+            software ro
+            hardware {    
+                counter
+                rreinit
+            }
+        }
+
+    }
+
+
+    register poisoned_packets {
+        description "Count of packets that had too few bit transitions"
+        
+        field count {
+            width        32
+            reset    
+            software ro    
+            hardware {
+                counter
+                rreinit
+            }  
+        }
+
+    }
+
+
+    register sent_np {
+        description "Nonposted requests sent to the HMC"
+        
+        field count {
+            width        32
+            reset        
+            software ro
+            hardware {    
+                counter
+                rreinit
+            }
+        }
+
+    }
+
+
+    register sent_p {
+        description "Posted requests sent to the HMC"
+        
+        field count {
+            width        32
+            reset        
+            software ro    
+            hardware {
+                counter
+                rreinit
+            }
+        }
+
+    }
+
+
+    register sent_r {
+        description "Read requests sent to the HMC"
+        
+        field count {
+            width        32
+            reset    
+            software ro      
+            hardware {    
+                counter
+                rreinit
+            }
+        }
+
+    }
+
+
+    register rcvd_rsp {
+        description "Responses received from the HMC"
+        
+        field count {
+            width        32
+            reset    
+            software ro    
+            hardware {    
+                counter
+                rreinit
+            }
+        }
+
+    }
+
+}
+
+    
