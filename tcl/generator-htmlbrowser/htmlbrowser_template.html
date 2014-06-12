@@ -34,13 +34,16 @@ proc writeGroup {out group} {
 
     #[$group name]
     # [breadCrumbsName $group]
-    puts "<ul data-name=\"[dataName $group]\">
+    if {[$group getAttributeValue software.osys::rfg::absolute_address] != false} {
+        puts "<ul data-name=\"[dataName $group]\">
 
 
         <li>
             [$group name]
             <span class=\"badge\">0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]</span>
-    "
+        "       
+    }
+
 
 
     $group onEachGroup {

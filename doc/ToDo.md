@@ -9,13 +9,16 @@
 	- test a huge registerfile with the example script
 - test html-generator with hierarchical registerfiles
 - html-generator rreinit source register not working 
-- update rfs_to_rfg Tool
+- update rfs_to_rfg Tool (external)
 - add unit-test for RF_Wrapper
-- add automatic unit-testing
 - add unit-test for RF.rf
 - internal RFs
 - registerfile_template Registerfunction function divide by counter register and "normal" register
 - aligner are not working
 	- add aligner as class in the rfg.tm
 	- add aligner in the addressing scheme
-- rewrite checker 
+- rewrite checker
+- add hierarchical RFs in RF_wrapper 
+- multiple external RFs with different names
+- hw_clear
+- external ram

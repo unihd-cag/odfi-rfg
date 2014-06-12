@@ -1,6 +1,7 @@
 source ../../../tcl/rfg.tm
 source ../../../verilog-generator/VerilogGenerator.tm
 source ../../../tcl/address-hierarchical/address-hierarchical.tm
+source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
 
 set rf_fileList [glob *.rf]
 foreach rf_file $rf_fileList {
@@ -16,6 +17,7 @@ foreach rf_file $rf_fileList {
 	set destinationFile "compare_data/[file rootname $rf_file].v"
 
 	$veriloggenerator produce_RegisterFile $destinationFile 
+	
 }
 
 catch {exec sh "iverilog_run.sh"} result
@@ -24,3 +26,4 @@ if {$result != "VCD info: dumpfile hierarchicalRF.vcd opened for output."} {
 } else {
  	puts "Test sucessfull..."
 }
+

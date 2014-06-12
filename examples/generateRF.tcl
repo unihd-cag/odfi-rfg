@@ -1,15 +1,28 @@
+#!/bin/tclsh
 source $::env(RFG_PATH)/tcl/rfg.tm
 source $::env(RFG_PATH)/verilog-generator/VerilogGenerator.tm
 source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
 source $::env(RFG_PATH)/tcl/address-hierarchical/address-hierarchical.tm
 
-
-if {$argc > 0} {
-	set path [lindex $argv 1]
-	puts "searching in path: [lindex $argv 1]"
-} else {
+if {$argc == 1} {
+	puts $argv
+	puts [lindex $argv 1]
+	set top [lindex $argv 0]	
 	set path ./
-	puts "searching in path: ./"
+	puts "searching in path: $path"
+	puts "using $top as top!"
+} else {
+	if {$argc == 2} {
+		set top [lindex $argv 0]	
+		set path [lindex $argv 1]
+		puts "searching in path: $path"
+		puts "using $top as parent!"
+	} else {
+		set top 0
+		set path ./
+		puts "searching in path: ./"
+		puts "no parent defined RF_Wrapper will not be generated"
+	}
 }
 
 set rf_fileList [glob -path $path *.rf]
@@ -36,6 +49,15 @@ foreach rf_file $rf_fileList {
 	puts "$rf_file > [file rootname $rf_file].v"
 	puts ""
 
+	if {$rf_file == [append path $top]} {
+		set destinationFile "RF_Wrapper.v"
+		$veriloggenerator produce_RF_Wrapper $destinationFile
+		puts ""
+		puts "generate RF_Wrapper:"
+		puts "$top > RF_Wrapper.v"
+		puts ""
+	}
+	
 	set htmlbrowser [::new osys::rfg::generator::htmlbrowser::HTMLBrowser #auto $result]
 	set destinationFile "[file rootname $rf_file].html"
 	$htmlbrowser produceToFile $destinationFile
