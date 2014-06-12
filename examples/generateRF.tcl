@@ -1,7 +1,7 @@
-source ../tcl/rfg.tm
-source ../verilog-generator/VerilogGenerator.tm
-source ../tcl/generator-htmlbrowser/htmlbrowser.tm
-source ../tcl/address-hierarchical/address-hierarchical.tm
+source $::env(RFG_PATH)/tcl/rfg.tm
+source $::env(RFG_PATH)/verilog-generator/VerilogGenerator.tm
+source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
+source $::env(RFG_PATH)/tcl/address-hierarchical/address-hierarchical.tm
 
 
 if {$argc > 0} {
