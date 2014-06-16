@@ -5,65 +5,64 @@ source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
 source $::env(RFG_PATH)/tcl/address-hierarchical/address-hierarchical.tm
 
 if {$argc == 1} {
-	puts $argv
-	puts [lindex $argv 1]
-	set top [lindex $argv 0]	
-	set path ./
-	puts "searching in path: $path"
-	puts "using $top as top!"
+	set rf_head [lindex $argv 0]
+	puts ""
+	puts "Using [lindex $argv 0] as top rf file"
+	puts ""
 } else {
-	if {$argc == 2} {
-		set top [lindex $argv 0]	
-		set path [lindex $argv 1]
-		puts "searching in path: $path"
-		puts "using $top as parent!"
-	} else {
-		set top 0
-		set path ./
-		puts "searching in path: ./"
-		puts "no parent defined RF_Wrapper will not be generated"
-	}
+	puts "No top rf file defined..."
 }
 
-set rf_fileList [glob -path $path *.rf]
+set rf_list {}
 
-puts "found the following registerfiles:"
+proc registerFileWalk {rf} \
+{
+	global rf_list
+	lappend rf_list $rf
+	$rf walkDepthFirst {
+		if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+			registerFileWalk $it
+		}
 
-foreach rf_file $rf_fileList {
-	puts $rf_file
+		return true
+	}	
 }
 
-puts "processing registerfiles:"
-foreach rf_file $rf_fileList {
+catch {namespace inscope osys::rfg {source $rf_head}} result
 
-	catch {namespace inscope osys::rfg {source $rf_file}} result
+registerFileWalk $result
 
-	osys::rfg::address::hierarchical::calculate $result
+foreach rf $rf_list {
+	
+	osys::rfg::address::hierarchical::calculate $rf 
 	##osys::rfg::address::hierarchical::printTable $result
+	
+	set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $rf]
+	
+	if {[$rf parent] == ""} {
+	 	set destinationFile "RF_Wrapper.v"
+  		$veriloggenerator produce_RF_Wrapper $destinationFile
+  		puts ""
+  		puts "generate RF_Wrapper:"
+  		puts "[$rf name].rf > RF_Wrapper.v"
+  		puts ""
+	}
 
-	set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
-	set destinationFile "[file rootname $rf_file].v"
+	
+	set destinationFile "[$rf name].v"
+ 	
 	$veriloggenerator produce_RegisterFile $destinationFile
 	puts ""
-	puts "generate verilog description:"
-	puts "$rf_file > [file rootname $rf_file].v"
-	puts ""
+ 	puts "generate verilog description:"
+ 	puts "[$rf name].rf > [$rf name].v"
+ 	puts ""
 
-	if {$rf_file == [append path $top]} {
-		set destinationFile "RF_Wrapper.v"
-		$veriloggenerator produce_RF_Wrapper $destinationFile
-		puts ""
-		puts "generate RF_Wrapper:"
-		puts "$top > RF_Wrapper.v"
-		puts ""
-	}
-	
-	set htmlbrowser [::new osys::rfg::generator::htmlbrowser::HTMLBrowser #auto $result]
-	set destinationFile "[file rootname $rf_file].html"
-	$htmlbrowser produceToFile $destinationFile
-	puts ""
-	puts "generate htmlbrowser:"
-	puts "$rf_file > [file rootname $rf_file].html"
-	puts ""
+ 	set htmlbrowser [::new osys::rfg::generator::htmlbrowser::HTMLBrowser #auto $rf]
+ 	set destinationFile "[$rf name].html"
+ 	
+ 	$htmlbrowser produceToFile $destinationFile
+ 	puts ""
+ 	puts "generate htmlbrowser:"
+ 	puts "[$rf name].rf > [$rf name].html"
+ 	puts ""
 }
-

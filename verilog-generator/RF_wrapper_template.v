@@ -1,4 +1,28 @@
 <%
+
+    # logarithmus dualis function for address bit calculation
+    proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
+    
+    # function to get the address Bits for the register file 
+    proc getRFsize {registerfile} {
+        set size 0
+        set offset [$registerfile getAttributeValue software.osys::rfg::absolute_address]
+        $registerfile walk {
+            if {![$item isa osys::rfg::Group]} {
+                if {[string is integer [$item getAttributeValue software.osys::rfg::absolute_address]]} {
+                    if {$size <= [$item getAttributeValue software.osys::rfg::absolute_address]} {
+                        set size [expr [$item getAttributeValue software.osys::rfg::absolute_address]+[$item getAttributeValue software.osys::rfg::size]]
+                    }
+                }
+            }
+        }
+        return [expr $size - $offset]
+    }
+
+    proc getAddrBits {registerfile} {
+        return [ld [getRFsize $registerfile]]
+    }
+
     # function which returns the Name with all parents
     proc getName {object} {
         set name {}
@@ -118,6 +142,7 @@
 
 proc writeBlackbox {object context} {
         set signalList {}
+
         $object walkDepthFirst {
             if {[$it isa osys::rfg::RamBlock]} {
 
@@ -130,6 +155,7 @@ proc writeBlackbox {object context} {
                 }
 
             } elseif {[$it isa osys::rfg::Register]} {
+                
                 $it onEachField {
 
                     $it onAttributes {hardware.osys::rfg::counter} {
