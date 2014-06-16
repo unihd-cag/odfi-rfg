@@ -16,8 +16,11 @@ foreach rf_file $rf_fileList {
 	set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
 	set destinationFile "compare_data/[file rootname $rf_file].v"
 
-	$veriloggenerator produce_RegisterFile $destinationFile 
-	
+	$veriloggenerator produce_RegisterFile $destinationFile
+
+	if {$result == "::hierarchicalRF"} { 
+		$veriloggenerator produce_RF_Wrapper "compare_data/RF_Wrapper.v" 
+	}
 }
 
 catch {exec sh "iverilog_run.sh"} result

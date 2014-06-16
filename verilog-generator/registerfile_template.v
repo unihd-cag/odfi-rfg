@@ -140,13 +140,13 @@
 
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				set registerfile $it
-				puts "	.[$registerfile name]_address(),"
-				puts "	.[$registerfile name]_read_data(),"
-				puts "	.[$registerfile name]_invalid_address(),"
-				puts "	.[$registerfile name]_access_complete(),"
-				puts "	.[$registerfile name]_read_en(),"
-				puts "	.[$registerfile name]_write_en(),"
-				puts "	.[$registerfile name]_write_data(),"
+				lappend signalList "	.[$registerfile name]_address(),"
+				lappend signalList "	.[$registerfile name]_read_data(),"
+				lappend signalList "	.[$registerfile name]_invalid_address(),"
+				lappend signalList "	.[$registerfile name]_access_complete(),"
+				lappend signalList "	.[$registerfile name]_read_en(),"
+				lappend signalList "	.[$registerfile name]_write_en(),"
+				lappend signalList "	.[$registerfile name]_write_data(),"
  				##writeTemplate $it "[$registerfile name]_"
 				return false
 			} else {

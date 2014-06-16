@@ -7,7 +7,6 @@
 - modify rfg script for simple usage
 	- add some example scripts
 	- test a huge registerfile with the example script
-- test html-generator with hierarchical registerfiles
 - html-generator rreinit source register not working 
 - update rfs_to_rfg Tool (external)
 - add unit-test for RF_Wrapper
