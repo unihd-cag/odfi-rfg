@@ -141,6 +141,45 @@ group <xsl:value-of select="@name"/> {
 <xsl:apply-templates />
 </xsl:template>
 
+   <!-- ########################## -->
+    <!-- rrinst --> 
+    <!-- ########################## -->
+    <xsl:template match="rrinst">
+    <xsl:variable name="hier-pos"><xsl:number from="regroot" count="regroot|rrinst|hwreg" level="multiple" format="1"></xsl:number></xsl:variable>
+    <xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
+    <xsl:variable name="hier-level-tab-more"><xsl:value-of select="$hier-level-tab"></xsl:value-of><xsl:text>    </xsl:text></xsl:variable>
+    <xsl:if test="@external">
+    <xsl:choose>
+    <xsl:when test="@external='1'">    external <xsl:value-of select="fn:replace(@file,'.xml','.rf')"> </xsl:value-of><xsl:text> </xsl:text><xsl:value-of select="@name"></xsl:value-of></xsl:when>
+    <xsl:when test="@external='0'">    internal <xsl:value-of select="fn:replace(@file,'.xml','.rf')"> </xsl:value-of><xsl:text> </xsl:text><xsl:value-of select="@name"></xsl:value-of></xsl:when>
+        </xsl:choose>
+    </xsl:if>
+
+    <xsl:if test= "not(@external)">
+    internal <xsl:value-of select="fn:replace(@file,'.xml','.rf')"></xsl:value-of><xsl:text> </xsl:text><xsl:value-of select="@name"></xsl:value-of>
+    </xsl:if>
+<xsl:text>
+</xsl:text>
+
+<xsl:apply-templates />
+</xsl:template>
+
+   <!-- ########################## -->
+    <!-- aligner --> 
+    <!-- ########################## -->
+    <xsl:template match="aligner">
+    <xsl:variable name="hier-pos"><xsl:number from="regroot" count="regroot|aligner|hwreg" level="multiple" format="1"></xsl:number></xsl:variable>
+    <xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
+    <xsl:variable name="hier-level-tab-more"><xsl:value-of select="$hier-level-tab"></xsl:value-of><xsl:text>    </xsl:text></xsl:variable>
+    <xsl:if test="@absolute">
+    aligner <xsl:value-of select="@absolute"></xsl:value-of>
+    </xsl:if>
+<xsl:text>
+</xsl:text>
+
+<xsl:apply-templates />
+</xsl:template>
+
     <!-- ########################## -->
     <!-- Reg64 --> 
     <!-- ########################## -->
