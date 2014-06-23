@@ -4,15 +4,6 @@ source $::env(RFG_PATH)/verilog-generator/VerilogGenerator.tm
 source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
 source $::env(RFG_PATH)/tcl/address-hierarchical/address-hierarchical.tm
 
-if {$argc == 1} {
-	set rf_head [lindex $argv 0]
-	puts ""
-	puts "Using [lindex $argv 0] as top rf file"
-	puts ""
-} else {
-	puts "No top rf file defined..."
-}
-
 set rf_list {}
 
 proc registerFileWalk {rf} \
@@ -26,6 +17,15 @@ proc registerFileWalk {rf} \
 
 		return true
 	}	
+}
+
+if {$argc == 1} {
+	set rf_head [lindex $argv 0]
+	puts ""
+	puts "Using [lindex $argv 0] as top rf file"
+	puts ""
+} else {
+	puts "No top rf file defined..."
 }
 
 catch {namespace inscope osys::rfg {source $rf_head}} result

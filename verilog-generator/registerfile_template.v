@@ -30,32 +30,42 @@
 		set list [lreplace [$object parents] 0 0]
 		set i 0
 		set deleteIndex 0
+		
 		foreach element $list {
 			if {[$element isa osys::rfg::RegisterFile] && [$element hasAttribute hardware.osys::rfg::external]} {
 				set deleteIndex [expr $i+1]
 			}
+
 			incr i 1
 		}
-		set i 0
-		foreach element $list {
-			if {$i >= $deleteIndex} { 
-				lappend	name [$element name]
+
+		if {$deleteIndex == [llength $list]} {
+			foreach element $list {
+				lappend name [$element name]
 			}
-			incr i 1		
+		} else {
+			set i 0
+			foreach element $list {
+				if {$i >= $deleteIndex} { 
+					lappend	name [$element name]
+				}
+				incr i 1		
+			}
 		}
+
 		return [join $name "_"]	
 	}
 
 	proc writeAddressMap {object} {
 		$object walkDepthFirst {
-			if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+			if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
 				set size [$it getAttributeValue software.osys::rfg::size]
 				puts "[getName $it]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
 			}
-			if {[$it isa osys::rfg::RegisterFile]} {
-				set size [getRFsize $it]
-				puts "[$it name]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
-			}
+			# if {[$it isa osys::rfg::RegisterFile]} {
+			# 	set size [getRFsize $it]
+			# 	puts "[$it name]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
+			# }
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				return false	
 			} else {
@@ -140,13 +150,13 @@
 
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				set registerfile $it
-				lappend signalList "	.[$registerfile name]_address()"
-				lappend signalList "	.[$registerfile name]_read_data()"
-				lappend signalList "	.[$registerfile name]_invalid_address()"
-				lappend signalList "	.[$registerfile name]_access_complete()"
-				lappend signalList "	.[$registerfile name]_read_en()"
-				lappend signalList "	.[$registerfile name]_write_en()"
-				lappend signalList "	.[$registerfile name]_write_data()"
+				lappend signalList "	.[getName $registerfile]_address()"
+				lappend signalList "	.[getName $registerfile]_read_data()"
+				lappend signalList "	.[getName $registerfile]_invalid_address()"
+				lappend signalList "	.[getName $registerfile]_access_complete()"
+				lappend signalList "	.[getName $registerfile]_read_en()"
+				lappend signalList "	.[getName $registerfile]_write_en()"
+				lappend signalList "	.[getName $registerfile]_write_data()"
  				##writeTemplate $it "[$registerfile name]_"
 				return false
 			} else {
@@ -264,16 +274,16 @@
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				set registerfile $it
 				if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
-					puts "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address,"
+					puts "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address,"
 				} else {
-					puts "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address,"
+					puts "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address,"
 				}
-				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_read_data,"
-				puts "	input wire [$registerfile name]_invalid_address,"
-				puts "	input wire [$registerfile name]_access_complete,"
-				puts "	output reg [$registerfile name]_read_en,"
-				puts "	output reg [$registerfile name]_write_en,"
-				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_write_data,"
+				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_read_data,"
+				puts "	input wire [getName $registerfile]_invalid_address,"
+				puts "	input wire [getName $registerfile]_access_complete,"
+				puts "	output reg [getName $registerfile]_read_en,"
+				puts "	output reg [getName $registerfile]_write_en,"
+				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_write_data,"
  				##writeBlackbox $it "[$registerfile name]_"
 				return false
 			} else {
@@ -811,21 +821,21 @@
 	}
 
 	proc writeRegisterFile {RF subRF} {
-		puts "	/* RegisterFile [$subRF name]*/"
+		puts "	/* RegisterFile [getName $subRF]*/"
 		puts "	`ifdef ASYNC_RES"
 		puts "	always @(posedge clk or negedge res_n) `else"
 		puts "	always @(posedge clk) `endif"
 		puts "	begin"
 		puts "		if (!res_n)"
 		puts "		begin"
-		puts "			[$subRF name]_write_en <= 1'b0;"
-		puts "			[$subRF name]_read_en  <= 1'b0;"
+		puts "			[getName $subRF]_write_en <= 1'b0;"
+		puts "			[getName $subRF]_read_en  <= 1'b0;"
 		puts "			`ifdef ASIC"
-		puts "			[$subRF name]_write_data <= 64'b0;"
+		puts "			[getName $subRF]_write_data <= 64'b0;"
 		if {[expr [getAddrBits $subRF]-1] < [ld [expr [$subRF register_size]/8]]} {
-			puts "			[$subRF name]_address  <= [getAddrBits $subRF]'b0;"
+			puts "			[getName $subRF]_address  <= [getAddrBits $subRF]'b0;"
 		} else {
-			puts "			[$subRF name]_address  <= [expr [getAddrBits $subRF]-1]'b0;"
+			puts "			[getName $subRF]_address  <= [expr [getAddrBits $subRF]-1]'b0;"
 		}
 		
 		puts "			`endif"
@@ -836,24 +846,24 @@
 		set care [format %x $care]
 		puts "			if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
 		puts "			begin"
-		puts "				[$subRF name]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
+		puts "				[getName $subRF]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
 		puts "			end"
 		puts "			if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && write_en)"
 		puts "			begin"
-		puts "				[$subRF name]_write_data <= write_data\[63:0\];"
-		puts "				[$subRF name]_write_en <= 1'b1;"
+		puts "				[getName $subRF]_write_data <= write_data\[63:0\];"
+		puts "				[getName $subRF]_write_en <= 1'b1;"
 		puts "			end"
 		puts "			else"
 		puts "			begin"
-		puts "				[$subRF name]_write_en <= 1'b0;"
+		puts "				[getName $subRF]_write_en <= 1'b0;"
 		puts "			end"
 		puts "			if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && read_en)"
 		puts "			begin"
-		puts "				[$subRF name]_read_en <= 1'b1;"
+		puts "				[getName $subRF]_read_en <= 1'b1;"
 		puts "			end"
 		puts "			else"
 		puts "			begin"
-		puts "				[$subRF name]_read_en <= 1'b0;"
+		puts "				[getName $subRF]_read_en <= 1'b0;"
 		puts "			end"
 		puts "		end"
 		puts "	end"
@@ -985,9 +995,9 @@
 				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
 				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
 				puts "				begin"
-				puts "					read_data <= [$it name]_read_data;"
-				puts "					invalid_address <= [$it name]_invalid_address;"
-				puts "					access_complete <= [$it name]_access_complete;"
+				puts "					read_data <= [getName $it]_read_data;"
+				puts "					invalid_address <= [getName $it]_invalid_address;"
+				puts "					access_complete <= [getName $it]_access_complete;"
 				puts "				end"
 				return false
 			} else {

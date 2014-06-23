@@ -24,26 +24,42 @@
     }
 
     # function which returns the Name with all parents
+    proc getAddrBits {registerfile} {
+        return [ld [getRFsize $registerfile]]
+    }
+
+    # function which returns the Name with all parents
     proc getName {object} {
         set name {}
         set list [lreplace [$object parents] 0 0]
         set i 0
         set deleteIndex 0
+        
         foreach element $list {
             if {[$element isa osys::rfg::RegisterFile] && [$element hasAttribute hardware.osys::rfg::external]} {
                 set deleteIndex [expr $i+1]
             }
+
             incr i 1
         }
-        set i 0
-        foreach element $list {
-            if {$i >= $deleteIndex} { 
+
+        if {$deleteIndex == [llength $list]} {
+            foreach element $list {
                 lappend name [$element name]
             }
-            incr i 1        
+        } else {
+            set i 0
+            foreach element $list {
+                if {$i >= $deleteIndex} { 
+                    lappend name [$element name]
+                }
+                incr i 1        
+            }
         }
+
         return [join $name "_"] 
     }
+
 
     # write the verilog template for an easy implementation in a higher level module 
     proc writeTemplate {object context} {
@@ -121,13 +137,13 @@
 
             if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
                 set registerfile $it
-                lappend signalList "        .[$registerfile name]_address()"
-                lappend signalList "        .[$registerfile name]_read_data()"
-                lappend signalList "        .[$registerfile name]_invalid_address()"
-                lappend signalList "        .[$registerfile name]_access_complete()"
-                lappend signalList "        .[$registerfile name]_read_en()"
-                lappend signalList "        .[$registerfile name]_write_en()"
-                lappend signalList "        .[$registerfile name]_write_data()"
+                lappend signalList "        .[getName $registerfile]_address()"
+                lappend signalList "        .[getName $registerfile]_read_data()"
+                lappend signalList "        .[getName $registerfile]_invalid_address()"
+                lappend signalList "        .[getName $registerfile]_access_complete()"
+                lappend signalList "        .[getName $registerfile]_read_en()"
+                lappend signalList "        .[getName $registerfile]_write_en()"
+                lappend signalList "        .[getName $registerfile]_write_data()"
                 ##writeTemplate $it "[$registerfile name]_"
                 return false
             } else {
@@ -246,16 +262,16 @@ proc writeBlackbox {object context} {
             if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
                 set registerfile $it
                 if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
-                    lappend signalList "    output wire\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address"
+                    lappend signalList "    output wire\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
                 } else {
-                    lappend signalList "    output wire\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address"
+                    lappend signalList "    output wire\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
                 }
-                lappend signalList "    input wire\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_read_data"
-                lappend signalList "    input wire [$registerfile name]_invalid_address"
-                lappend signalList "    input wire [$registerfile name]_access_complete"
-                lappend signalList "    output wire [$registerfile name]_read_en"
-                lappend signalList "    output wire [$registerfile name]_write_en"
-                lappend signalList "    output wire\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_write_data"
+                lappend signalList "    input wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_read_data"
+                lappend signalList "    input wire [getName $registerfile]_invalid_address"
+                lappend signalList "    input wire [getName $registerfile]_access_complete"
+                lappend signalList "    output wire [getName $registerfile]_read_en"
+                lappend signalList "    output wire [getName $registerfile]_write_en"
+                lappend signalList "    output wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_write_data"
                 ##writeBlackbox $it "[$registerfile name]_"
                 return false
             } else {
@@ -353,13 +369,13 @@ proc writeBlackbox {object context} {
 
             if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
                 set registerfile $it
-                lappend signalList "        .[$registerfile name]_address([$registerfile name]_address)"
-                lappend signalList "        .[$registerfile name]_read_data([$registerfile name]_read_data)"
-                lappend signalList "        .[$registerfile name]_invalid_address([$registerfile name]_invalid_address)"
-                lappend signalList "        .[$registerfile name]_access_complete([$registerfile name]_access_complete)"
-                lappend signalList "        .[$registerfile name]_read_en([$registerfile name]_read_en)"
-                lappend signalList "        .[$registerfile name]_write_en([$registerfile name]_write_en)"
-                lappend signalList "        .[$registerfile name]_write_data([$registerfile name]_write_data)"
+                lappend signalList "        .[getName $registerfile]_address([getName $registerfile]_address)"
+                lappend signalList "        .[getName $registerfile]_read_data([getName $registerfile]_read_data)"
+                lappend signalList "        .[getName $registerfile]_invalid_address([getName $registerfile]_invalid_address)"
+                lappend signalList "        .[getName $registerfile]_access_complete([getName $registerfile]_access_complete)"
+                lappend signalList "        .[getName $registerfile]_read_en([getName $registerfile]_read_en)"
+                lappend signalList "        .[getName $registerfile]_write_en([getName $registerfile]_write_en)"
+                lappend signalList "        .[getName $registerfile]_write_data([getName $registerfile]_write_data)"
                 return false
             } else {
                 return true
