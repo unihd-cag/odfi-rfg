@@ -18,9 +18,9 @@
 - rewrite checker
 - hw_clear
 - sw_write_clear
-- hierarchical RF's multiple instances of one RF... (Attribute filename, seperate through groups)
 
 ### Unit Tests 
+
 - add unit-test for RF_Wrapper
 - add unit-test for RF.rf
 - unit-test enviroment
@@ -28,20 +28,24 @@
 ### HTML Generator 
 
 - html-generator rreinit source register not working 
-- Groups not displayed
 
 ### rfs_to_rfg Tool 
 
 - hw_clear
 - sw_write_clear
+- te ? in ht3_rf.xml
+- aligner to bits?
+- external RAM 
 
 ### Generation Script 
 
 - modify rfg script for simple usage
 	- test a huge registerfile with the example script
+- rewrite script to use file attribute for generation
 
 ### Documentation/ Presentation
 
 - write presentation
 - write Getting Started and HowTo's
 - find place for this and the project (github.io?, redmine)
+- clean github repository

@@ -42,6 +42,13 @@ proc writeGroup {out group} {
             [$group name]
             <span class=\"badge\">0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]</span>
         "       
+    } else {
+        puts "<ul data-name=\"[dataName $group]\">
+
+
+        <li>
+            [$group name]
+        "
     }
 
 

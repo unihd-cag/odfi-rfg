@@ -258,7 +258,7 @@ proc writeBlackbox {object context} {
 
                 }   
             }
-            ## ToDo rewrite with wire and reg signals
+    
             if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
                 set registerfile $it
                 if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {

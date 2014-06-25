@@ -1,0 +1,11 @@
+## Create Register File
+registerFile externalNames {
+    external subRF.rf 
+    external subRF.rf test
+    external subRF.rf test2
+    external subRF.rf test4
+    ::repeat 8 {
+         external subRF.rf
+    }
+}
+
