@@ -6,8 +6,7 @@ source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
 set rf_fileList [glob *.rf]
 foreach rf_file $rf_fileList {
 
-	catch {namespace inscop
-		e osys::rfg {source $rf_file}} result
+	catch {namespace inscope osys::rfg {source $rf_file}} result
 
 	puts "Processes RF: $result"
 

@@ -142,6 +142,10 @@
 								lappend signalList "	.${context}[getName $it]_written()"
 							}
 
+							$it onAttributes {hardware.osys::rfg::hardware_clear} {
+								lappend signalList "	.${context}[getName $it]_clear()"
+							} 
+
 						}
 
 					}
@@ -264,6 +268,10 @@
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							lappend signalList "	output reg ${context}[getName $it]_written"	
+						}
+
+						$it onAttributes {hardware.osys::rfg::hardware_clear} {
+							lappend signalList "	input wire ${context}[getName $it]_clear"	
 						}
 
 					}
@@ -632,6 +640,14 @@
 			}
 
 		} otherwise	{
+
+			$field onAttributes {hardware.osys::rfg::hardware_clear} {
+					puts "			if([getName $field]_clear)"
+					puts "			begin"
+					puts "				[getName $field] <= [$field width]'h0;"
+					puts "			end"
+			}
+
 			$register onAttributes {hardware.osys::rfg::rreinit_source} {
 					puts "			else"
 					puts "			begin"
@@ -710,9 +726,8 @@
 						puts "				[getName $it]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 						puts "			end"
 						
-						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
-							writeRegisterHardwareWrite $register $it
-						}
+						
+						writeRegisterHardwareWrite $register $it
 
 						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw]} {
 							puts "			else"
@@ -764,18 +779,21 @@
 							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 						}
 						puts "			begin"
-						
-						$it onAttributes {hardware.osys::rfg::software_write_xor} {
-							puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\] ^ [getName $it]);"
+						$it onAttributes {software.osys::rfg::software_write_clear} {
+							puts "			[getName $it] <= [$it width]'h0;"
+
 						} otherwise {
-							puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
-						}
 						
+							$it onAttributes {hardware.osys::rfg::software_write_xor} {
+								puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\] ^ [getName $it]);"
+							} otherwise {
+								puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+							}
+						}
 						puts "			end"
 						
-						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
-							writeRegisterHardwareWrite $register $it
-						}
+						writeRegisterHardwareWrite $register $it
+
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {

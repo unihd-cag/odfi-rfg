@@ -1,5 +1,5 @@
 ## Create Register File
-osys::rfg::registerFile SimpleRF {
+registerFile subRF {
 
     group info_rf {
 
@@ -89,25 +89,14 @@ osys::rfg::registerFile SimpleRF {
                 }
             
             }
-           # field r1_5 {
-            
-           #      width 8
-           #      software rw
-           #      hardware {
-           #          hardware_clear
-           #      }
-            
-           #  }
-           #  field r1_6 {
-            
-           #      width 8
-           #      software {
-           #             rw
-           #             software_write_clear
-           #      }
-           #      hardware rw
-           #  }
+
         }
+
+        # register r2 {
+        #     field r2_1 {
+        #         width 32
+        #     }
+        # }
     }
 }
 

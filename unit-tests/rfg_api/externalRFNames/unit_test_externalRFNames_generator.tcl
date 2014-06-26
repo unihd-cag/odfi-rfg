@@ -42,7 +42,7 @@ foreach rf_file $rf_fileList {
 			}
 			puts $i
 			incr i
-			puts [$it getAttributeValue rfg.osys::rfg::file]		
+			puts [$it getAttributeValue rfg.osys::rfg::file]
 		}
 		return true
 	}

@@ -16,8 +16,7 @@
 	- add aligner as class in the rfg.tm
 	- add aligner in the addressing scheme
 - rewrite checker
-- hw_clear
-- sw_write_clear
+- add hw_clear in RF Wrapper
 
 ### Unit Tests 
 
@@ -36,12 +35,12 @@
 - te ? in ht3_rf.xml
 - aligner to bits?
 - external RAM 
+- empty hw_en and empty hw_clears has to result in no value in new script
 
 ### Generation Script 
 
 - modify rfg script for simple usage
 	- test a huge registerfile with the example script
-- rewrite script to use file attribute for generation
 
 ### Documentation/ Presentation
 
