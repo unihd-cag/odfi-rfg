@@ -282,6 +282,11 @@ group <xsl:value-of select="@name"/> {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>
 </xsl:text>
+<!-- Special Attributes -->
+    <!-- ################### -->
+    <xsl:if test="@sw_write_clr">
+        <xsl:value-of select="$hier-level-tab-more"/>    software_write_clear
+    </xsl:if>
     <xsl:value-of select="$hier-level-tab-more"/>}    
 
 <xsl:text>  
@@ -308,6 +313,11 @@ group <xsl:value-of select="@name"/> {
     </xsl:if>
     <xsl:if test="@hw_wen">
         <xsl:value-of select="$hier-level-tab-more"/>hardware_wen  
+    </xsl:if>    
+    <xsl:text>
+</xsl:text>
+    <xsl:if test="@hw_clr">
+        <xsl:value-of select="$hier-level-tab-more"/>hardware_clear
     </xsl:if>    
     <xsl:text>
 </xsl:text>

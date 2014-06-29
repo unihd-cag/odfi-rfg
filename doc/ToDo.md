@@ -30,12 +30,13 @@
 
 ### rfs_to_rfg Tool 
 
-- hw_clear
-- sw_write_clear
+- hw_clr correct name in old script
+- sw_write_clr correct name in old script
 - te ? in ht3_rf.xml
 - aligner to bits?
 - external RAM 
-- empty hw_en and empty hw_clears has to result in no value in new script
+- check correct working for empty elements
+- check conversion for ramBlocks
 
 ### Generation Script 
 
@@ -46,5 +47,6 @@
 
 - write presentation
 - write Getting Started and HowTo's
-- find place for this and the project (github.io?, redmine)
+- find place for this and the project (github.io?, redmine) 
 - clean github repository
+- add V0.8 for RFG to odfi-tools
