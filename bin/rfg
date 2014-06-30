@@ -9,7 +9,6 @@ package require osys::rfg::xmlgenerator
 puts "Welcome to RFG: $rfgVersion"
 
 
-
 ## RFG SCript path
 ##########################
 

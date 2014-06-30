@@ -324,7 +324,7 @@ namespace eval osys::rfg {
                             if {[$item address] > [[$item parent] address]} {
                                 $item absoluteAddress [$item address]    
                             } else {
-                                $item absoluteAddress [expr "[$item address] * int([[$item parent] address]/[$item address]+1) "]
+                                $item absoluteAddress [expr "[$item address] * int(ceil(double([[$item parent] address])/double([$item address]))) "]
                             }
                         } else {
                             $item absoluteAddress [expr [[$item parent] address] + [$item address]]
@@ -371,6 +371,16 @@ namespace eval osys::rfg {
         constructor {cName cClosure} {Common::constructor $cName} {
             ## Execute closure 
             odfi::closures::doClosure $cClosure
+        }
+
+
+        ## external Method
+        ####################
+        ## Sources an external RegisterFile 
+        public method external {rf_filename} {
+            puts itcl::find objects
+            source $rf_filename
+            puts itcl::find objects
         }
 
         public method registerFile {gName closure} {
@@ -464,7 +474,6 @@ namespace eval osys::rfg {
             incr size [expr "$register_size/8"]
 
             ## Return 
-            ##puts $newRegister
             $newRegister parent $this
             return $newRegister 
 
