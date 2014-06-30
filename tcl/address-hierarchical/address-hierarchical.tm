@@ -225,7 +225,8 @@ namespace eval osys::rfg::address::hierarchical {
                 ## The address of current element is:
                 ##   - The current address + the size of the block 
                 set blockAddress [expr (($currentAddress+$blockSize-1)/$blockSize)*$blockSize]
-
+                #set blockAddress [expr (($currentAddress+ ($blockSize-1))/$blockSize)*$blockSize]
+                #set blockAddress [expr (($currentAddress+ ($blockSize-1))/$blockSize)*$blockSize]
                
                 #puts "[$it name] Block address [format %0-20b $blockAddress], bs=$$blockSize Current Address = $currentAddress, bloc ksize -1:  [format %0-20b [expr $blockSize-1]]"
 
