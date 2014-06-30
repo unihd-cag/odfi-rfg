@@ -3,6 +3,10 @@ registerFile hierarchicalRF {
     
     group G1 {
         external subRF.rf
+        ##ramBlock RAM {
+        ##    width 64
+        ##    depth 4
+        ##}
     }
 
     group G2 {

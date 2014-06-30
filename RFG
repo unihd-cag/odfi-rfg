@@ -1,0 +1,4 @@
+#!/bin/bash
+source /home/rleys/git/odfi/modules-manager/setup.linux.bash
+export RFG_PATH=/home/tmarkus/Documents/RegFileGen/RFG/rfg/
+

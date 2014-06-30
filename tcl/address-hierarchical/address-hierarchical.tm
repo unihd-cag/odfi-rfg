@@ -261,7 +261,7 @@ namespace eval osys::rfg::address::hierarchical {
         $rf walkDepthFirst {
         
             if {[$it hasAttribute software.osys::rfg::absolute_address]} {
-                puts "| [format "%20s" [$it name]]\t   |  [format %#0-20b [$it getAttributeValue software.osys::rfg::absolute_address]]"
+                puts "| [format "%20s" [$it name]]\t   |  [format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]"
             }
 
 

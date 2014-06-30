@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<regroot name="info_rf">																<!-- a regroot is a second hierarchy level in RF -->
-	<reg64 name="driver">												<!-- a 64 Bit register accessable with a unique address -->
-	</reg64>
-	<reg64 name="node">													<!-- a 64 Bit register accessable with a unique address -->
-	</reg64>
-</regroot>
-

@@ -1,4 +1,6 @@
 target/
 *~
+*.iverilog
+*.vcd
 unit-tests/verilog_generator/testing/
 example-design/

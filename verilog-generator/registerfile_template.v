@@ -30,32 +30,42 @@
 		set list [lreplace [$object parents] 0 0]
 		set i 0
 		set deleteIndex 0
+		
 		foreach element $list {
 			if {[$element isa osys::rfg::RegisterFile] && [$element hasAttribute hardware.osys::rfg::external]} {
 				set deleteIndex [expr $i+1]
 			}
+
 			incr i 1
 		}
-		set i 0
-		foreach element $list {
-			if {$i >= $deleteIndex} { 
-				lappend	name [$element name]
+
+		if {$deleteIndex == [llength $list]} {
+			foreach element $list {
+				lappend name [$element name]
 			}
-			incr i 1		
+		} else {
+			set i 0
+			foreach element $list {
+				if {$i >= $deleteIndex} { 
+					lappend	name [$element name]
+				}
+				incr i 1		
+			}
 		}
+
 		return [join $name "_"]	
 	}
 
 	proc writeAddressMap {object} {
 		$object walkDepthFirst {
-			if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+			if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
 				set size [$it getAttributeValue software.osys::rfg::size]
 				puts "[getName $it]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
 			}
-			if {[$it isa osys::rfg::RegisterFile]} {
-				set size [getRFsize $it]
-				puts "[getName $it]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
-			}
+			# if {[$it isa osys::rfg::RegisterFile]} {
+			# 	set size [getRFsize $it]
+			# 	puts "[$it name]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
+			# }
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				return false	
 			} else {
@@ -132,6 +142,10 @@
 								lappend signalList "	.${context}[getName $it]_written()"
 							}
 
+							$it onAttributes {hardware.osys::rfg::hardware_clear} {
+								lappend signalList "	.${context}[getName $it]_clear()"
+							} 
+
 						}
 
 					}
@@ -140,14 +154,14 @@
 
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				set registerfile $it
-				puts "	.[$registerfile name]_address(),"
-				puts "	.[$registerfile name]_read_data(),"
-				puts "	.[$registerfile name]_invalid_address(),"
-				puts "	.[$registerfile name]_access_complete(),"
-				puts "	.[$registerfile name]_read_en(),"
-				puts "	.[$registerfile name]_write_en(),"
-				puts "	.[$registerfile name]_write_data(),"
- 				writeTemplate $it "[$registerfile name]_"
+				lappend signalList "	.[getName $registerfile]_address()"
+				lappend signalList "	.[getName $registerfile]_read_data()"
+				lappend signalList "	.[getName $registerfile]_invalid_address()"
+				lappend signalList "	.[getName $registerfile]_access_complete()"
+				lappend signalList "	.[getName $registerfile]_read_en()"
+				lappend signalList "	.[getName $registerfile]_write_en()"
+				lappend signalList "	.[getName $registerfile]_write_data()"
+ 				##writeTemplate $it "[$registerfile name]_"
 				return false
 			} else {
 				return true
@@ -256,6 +270,10 @@
 							lappend signalList "	output reg ${context}[getName $it]_written"	
 						}
 
+						$it onAttributes {hardware.osys::rfg::hardware_clear} {
+							lappend signalList "	input wire ${context}[getName $it]_clear"	
+						}
+
 					}
 
 				}	
@@ -264,17 +282,17 @@
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				set registerfile $it
 				if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
-					puts "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address,"
+					puts "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address,"
 				} else {
-					puts "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [$registerfile name]_address,"
+					puts "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address,"
 				}
-				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_read_data(),"
-				puts "	input wire [$registerfile name]_invalid_address,"
-				puts "	input wire [$registerfile name]_access_complete(),"
-				puts "	output reg [$registerfile name]_read_en(),"
-				puts "	output reg [$registerfile name]_write_en(),"
-				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [$registerfile name]_write_data(),"
- 				writeBlackbox $it "[$registerfile name]_"
+				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_read_data,"
+				puts "	input wire [getName $registerfile]_invalid_address,"
+				puts "	input wire [getName $registerfile]_access_complete,"
+				puts "	output reg [getName $registerfile]_read_en,"
+				puts "	output reg [getName $registerfile]_write_en,"
+				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_write_data,"
+ 				##writeBlackbox $it "[$registerfile name]_"
 				return false
 			} else {
 				return true
@@ -588,13 +606,21 @@
 			puts "		else"
 			puts "		begin"
 			set equal [expr [$ramBlock getAttributeValue software.osys::rfg::absolute_address]/([$ramBlock depth]*[$registerFile register_size]/8)]
-			puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
-			puts "			begin"
-			puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
-			puts "				[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
-			puts "				[getName $ramBlock]_rf_wen <= write_en;"
-			puts "				[getName $ramBlock]_rf_ren <= read_en;"
-			puts "			end"
+			if {[expr [getAddrBits $registerFile]-1] < [expr [ld [$ramBlock depth]]+3]} {
+				puts "			[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
+				puts "			[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "			[getName $ramBlock]_rf_wen <= write_en;"
+				puts "			[getName $ramBlock]_rf_ren <= read_en;"
+			} else {
+				puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
+				puts "			begin"
+				puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
+				puts "				[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "				[getName $ramBlock]_rf_wen <= write_en;"
+				puts "				[getName $ramBlock]_rf_ren <= read_en;"
+				puts "			end"
+			}
+			
 			puts "		end"
 			puts "	end"
 			puts ""
@@ -614,6 +640,14 @@
 			}
 
 		} otherwise	{
+
+			$field onAttributes {hardware.osys::rfg::hardware_clear} {
+					puts "			if([getName $field]_clear)"
+					puts "			begin"
+					puts "				[getName $field] <= [$field width]'h0;"
+					puts "			end"
+			}
+
 			$register onAttributes {hardware.osys::rfg::rreinit_source} {
 					puts "			else"
 					puts "			begin"
@@ -692,9 +726,8 @@
 						puts "				[getName $it]_load_value <= write_data\[[expr $upperBound-1]:$lowerBound\];"
 						puts "			end"
 						
-						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
-							writeRegisterHardwareWrite $register $it
-						}
+						
+						writeRegisterHardwareWrite $register $it
 
 						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::wo] || [$it hasAttribute software.osys::rfg::rw]} {
 							puts "			else"
@@ -746,18 +779,21 @@
 							puts "			if((address\[[expr [getAddrBits $registerFile]-1]:[ld [expr [$registerFile register_size]/8]]\]== [expr [$register getAttributeValue software.osys::rfg::absolute_address]/8]) && write_en)"
 						}
 						puts "			begin"
-						
-						$it onAttributes {hardware.osys::rfg::software_write_xor} {
-							puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\] ^ [getName $it]);"
+						$it onAttributes {software.osys::rfg::software_write_clear} {
+							puts "			[getName $it] <= [$it width]'h0;"
+
 						} otherwise {
-							puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
-						}
 						
+							$it onAttributes {hardware.osys::rfg::software_write_xor} {
+								puts "				[getName $it] <= (write_data\[[expr $upperBound-1]:$lowerBound\] ^ [getName $it]);"
+							} otherwise {
+								puts "				[getName $it] <= write_data\[[expr $upperBound-1]:$lowerBound\];"
+							}
+						}
 						puts "			end"
 						
-						if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
-							writeRegisterHardwareWrite $register $it
-						}
+						writeRegisterHardwareWrite $register $it
+
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							if {[$it getAttributeValue hardware.osys::rfg::software_written]==2} {
 								if {[expr [getAddrBits $registerFile]-1]<[ld [expr [$registerFile register_size]/8]]} {
@@ -802,6 +838,56 @@
 		}
 	}
 
+	proc writeRegisterFile {RF subRF} {
+		puts "	/* RegisterFile [getName $subRF]*/"
+		puts "	`ifdef ASYNC_RES"
+		puts "	always @(posedge clk or negedge res_n) `else"
+		puts "	always @(posedge clk) `endif"
+		puts "	begin"
+		puts "		if (!res_n)"
+		puts "		begin"
+		puts "			[getName $subRF]_write_en <= 1'b0;"
+		puts "			[getName $subRF]_read_en  <= 1'b0;"
+		puts "			`ifdef ASIC"
+		puts "			[getName $subRF]_write_data <= 64'b0;"
+		if {[expr [getAddrBits $subRF]-1] < [ld [expr [$subRF register_size]/8]]} {
+			puts "			[getName $subRF]_address  <= [getAddrBits $subRF]'b0;"
+		} else {
+			puts "			[getName $subRF]_address  <= [expr [getAddrBits $subRF]-1]'b0;"
+		}
+		
+		puts "			`endif"
+		puts "		end"
+		puts "		else"
+		puts "		begin"
+		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $subRF]*[$RF register_size]/8)]
+		set care [format %x $care]
+		puts "			if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
+		puts "			begin"
+		puts "				[getName $subRF]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
+		puts "			end"
+		puts "			if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && write_en)"
+		puts "			begin"
+		puts "				[getName $subRF]_write_data <= write_data\[63:0\];"
+		puts "				[getName $subRF]_write_en <= 1'b1;"
+		puts "			end"
+		puts "			else"
+		puts "			begin"
+		puts "				[getName $subRF]_write_en <= 1'b0;"
+		puts "			end"
+		puts "			if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && read_en)"
+		puts "			begin"
+		puts "				[getName $subRF]_read_en <= 1'b1;"
+		puts "			end"
+		puts "			else"
+		puts "			begin"
+		puts "				[getName $subRF]_read_en <= 1'b0;"
+		puts "			end"
+		puts "		end"
+		puts "	end"
+		puts ""
+	}
+
 	# write the register function // rewrite this there is with if else constructs...
 	proc writeRegister {object} {
 		$object walkDepthFirst {
@@ -833,6 +919,7 @@
 			}
 
 			if {[$item isa osys::rfg::RegisterFile] && [$item hasAttribute hardware.osys::rfg::external]} {
+				writeRegisterFile $object $item
 				return false
 			} else {
 				return true
@@ -884,19 +971,19 @@
 
 		$object walkDepthFirst {
 			if {[$it isa osys::rfg::RamBlock]} {
-					set dontCare [string repeat x [ld [$it depth]]]
-					set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([$it depth]*[$registerFile register_size]/8)] 
-					set care [format %x $care]
-					puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]]'h$care,[ld [$it depth]]'b$dontCare\}:"
-					puts "				begin"
-					puts "					read_data\[[expr "[$it width]-1"]:0\] <= [getName $it]_rf_rdata;"
-					if {[$it width] != [$registerFile register_size]} {
-						puts "					read_data\[[expr "[$registerFile register_size]-1"]:[$it width]\] <= [expr "[$registerFile register_size]-[$it width]"]'b0;"
-					}
-					puts "					invalid_address <= 1'b0;"
-					set delays 3
-					puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
-					puts "				end"
+				set dontCare [string repeat x [ld [$it depth]]]
+				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([$it depth]*[$registerFile register_size]/8)] 
+				set care [format %x $care]
+				puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]]'h$care,[ld [$it depth]]'b$dontCare\}:"
+				puts "				begin"
+				puts "					read_data\[[expr "[$it width]-1"]:0\] <= [getName $it]_rf_rdata;"
+				if {[$it width] != [$registerFile register_size]} {
+					puts "					read_data\[[expr "[$registerFile register_size]-1"]:[$it width]\] <= [expr "[$registerFile register_size]-[$it width]"]'b0;"
+				}
+				puts "					invalid_address <= 1'b0;"
+				set delays 3
+				puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
+				puts "				end"
 			} elseif {[$it isa osys::rfg::Register]} {
 				if {[getAddrBits $registerFile] == [ld [expr [$registerFile register_size]/8]]} {
 					puts "				[expr [getAddrBits $registerFile]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8]]:"
@@ -921,6 +1008,15 @@
 			}
 			
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
+				set care [format %x $care]
+				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
+				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
+				puts "				begin"
+				puts "					read_data <= [getName $it]_read_data;"
+				puts "					invalid_address <= [getName $it]_invalid_address;"
+				puts "					access_complete <= [getName $it]_access_complete;"
+				puts "				end"
 				return false
 			} else {
 				return true

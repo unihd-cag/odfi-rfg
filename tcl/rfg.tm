@@ -373,9 +373,11 @@ namespace eval osys::rfg {
         ####################
         ## Sources an external RegisterFile 
 
-        public method external {rf_filename} {
+        public method external {rf_filename {name ""}} {
+            
             set RF_list_old {}
             set RF_list_new {}
+
             foreach object [itcl::find objects] {
                 if {[$object isa osys::rfg::RegisterFile]} {
                     lappend RF_list_old $object   
@@ -394,17 +396,40 @@ namespace eval osys::rfg {
                 set index [lsearch -exact $RF_list_new $RF]
                 set RF_list_new [lreplace $RF_list_new $index $index]     
             }
-            puts $RF_list_old
-            puts $RF_list_new
 
             foreach RF $RF_list_new {
                 if {[$RF parent] == $this} {
-                    puts "External set..."
+                    if {$name != ""} {
+                        $RF name $name 
+                    } else {
+                        set done 0
+                        set old_name [$RF name]
+                        set n 0
+                        set name_count 0
+                        while {!$done} {
+                            [$RF parent] onEachComponent {
+                                if {[$it name] == [$RF name]} {
+                                    incr name_count 
+                                }
+                                if {$name_count == 2} {
+                                    $RF name ${old_name}_$n
+
+                                    incr n
+                                    set done 0         
+                                } else {
+                                    set done 1 
+                                }
+                            } 
+                            set name_count 0
+                        }
+                        puts "WARNING: Automatic naming was used for [$RF name] in [$RF parent]"
+                    }
                     $RF attributes hardware {
                         external
                     }
                 }
             }
+
         }
 
         public method registerFile {gName closure} {
