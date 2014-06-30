@@ -74,7 +74,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc_I (
+	) tsc_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc_cnt_countup),
@@ -85,7 +85,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc2_I (
+	) tsc2_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc2_cnt_countup),
@@ -96,7 +96,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc3_I (
+	) tsc3_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc3_cnt_countup),
@@ -107,7 +107,7 @@ module counter_RF
 
 	counter48 #(
 		.DATASIZE(48)
-	) tsc4_I (
+	) tsc4_cnt_I (
 		.clk(clk),
 		.res_n(res_n),
 		.increment(tsc4_cnt_countup),

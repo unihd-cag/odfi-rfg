@@ -1,11 +1,13 @@
 ## Provides the base API interface for OSYS Register File Generator
 package provide osys::rfg 1.0.0
-package require Itcl 3.4
+package require Itcl  3.4
 package require odfi::common
 package require odfi::list 2.0.0
 
 namespace eval osys::rfg {
 
+
+    variable registerSize 64
 
     #############################
     ## Generator Search
@@ -58,6 +60,12 @@ namespace eval osys::rfg {
     ## Common Types
     #########################
   
+    itcl::class Region {
+
+         odfi::common::classField public size 0
+
+    }
+
     ## This class contains the base informations for a RF modelisation like name etc...
     itcl::class Common {
 
@@ -68,6 +76,15 @@ namespace eval osys::rfg {
         odfi::common::classField public parent ""
 
         constructor {cName} {
+
+            ## Set location 
+            #puts "----------------- LOC of $cName --------------------"
+            attributes rfg {
+
+                set location  [odfi::common::findUserCodeLocation]
+                osys::rfg::file [lindex $location 0]
+                osys::rfg::line [lindex $location 1]
+            }
 
             set name $cName
         }
@@ -83,6 +100,13 @@ namespace eval osys::rfg {
             }
             set parents [lreverse $parents]
             return $parents
+
+        }
+
+        ## Returns a . separated list per default with the names up to top
+        public method fullName {{sep .}} {
+
+            return [join [odfi::list::transform [parents] {return [$it name]}] $sep]
 
         }
 
@@ -126,7 +150,7 @@ namespace eval osys::rfg {
 
         }
 
-        public method OnAttributes {attributeList closure1 {keyword ""} {closure2 ""}} {
+        public method onAttributes {attributeList closure1 {keyword ""} {closure2 ""}} {
             set scoreList {}
             #puts "OnAttributes"
             foreach element $attributeList {
@@ -139,7 +163,7 @@ namespace eval osys::rfg {
             if {[lsearch -exact $scoreList "false"] == -1} {
                 odfi::closures::doClosure $closure1 1
             } else {
-                if {$keyword == "otherwise"} {
+                if {$closure2 != ""} {
                     odfi::closures::doClosure $closure2 1
                 }
             }
@@ -160,19 +184,28 @@ namespace eval osys::rfg {
             return false
         }
 
-        public method attributes {fName closure} {
-            ## Create 
-            ## puts "[namespace parent]::Attributes [lindex [split $this ::] end].$fName"
-            set newAttribute [::new [namespace parent]::Attributes [lindex [split $this ::] end].$fName $fName $closure]
+        public method attributes {groupName closure} {
 
+            ## Create if not existing already 
+            #############
+            set foundAttributes [lsearch -glob -inline $attributes *$groupName]
 
-            ##puts "Created field: $newField"
+            if {$foundAttributes!=""} {
+               
+               ## Apply Closure 
+               $foundAttributes apply $closure
 
-            ## Add to list
-            lappend attributes $newAttribute 
+            } else {
+                set foundAttributes [::new [namespace parent]::Attributes [lindex [split $this ::] end].$groupName $groupName $closure]
+
+                ## Add to list
+                lappend attributes $foundAttributes 
+
+        
+            }
 
             ## Return 
-            return $newAttribute
+            return $foundAttributes
         }  
 
         ## Execute closure on each Attributes, with variable name: $attrs
@@ -207,17 +240,28 @@ namespace eval osys::rfg {
     ## Attribute
     #####################
     itcl::class Attributes {
-        inherit Common 
+
+        odfi::common::classField public name ""
+
+        odfi::common::classField public description ""
+        
+        odfi::common::classField public parent ""
 
         ## List format: { {name value?}}
         odfi::common::classField public attr_list {}
 
-        constructor {cName cClosure} {Common::constructor $cName} {
+        constructor {cName cClosure} {
+
+            set name $cName
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
         
+        public method apply closure {
+            odfi::closures::doClosure $closure
+        }
+
         public method contains name {
 
             #puts "Looking for : $name"
@@ -241,12 +285,36 @@ namespace eval osys::rfg {
             return false
         }
 
-        public method addAttribute {fname args} {
-            if { [llength $args] == 0} {
-                lappend attr_list $fname
+        public method addAttribute {attributeName args} {
+
+            set attributeHasValue [expr [llength $args] == 0 ? false : true ]
+
+            ## If attribute is present:
+            ##   - Replace if value is provided 
+            ##   - Leave untouched if no value 
+            ## If attribute is not present, add 
+            set attributeIndex [lsearch -index 0 -exact  $attr_list  $attributeName]
+
+            if {$attributeIndex==-1} {
+
+                ## Not present, add 
+                if {$attributeHasValue} {
+                   lappend attr_list [list $attributeName [lindex $args 0]]
+                } else {
+                    lappend attr_list [list $attributeName]
+                }
+
             } else {
-                lappend attr_list [list $fname [lindex $args 0]]
-            }                
+
+                ## Present, update only if value 
+                if {$attributeHasValue} {
+                    set attr_list [lreplace $attr_list $attributeIndex $attributeIndex [list $attributeName [lindex $args 0]]]
+                }
+
+
+            }
+
+                          
         }
 
         ## Execute closure on each Attribute value, with variable names: $attr $value
@@ -284,114 +352,98 @@ namespace eval osys::rfg {
 
     }
 
-    #####################
-    ## Address
-    #####################
-    itcl::class Address {
-        inherit Common
-
-        odfi::common::classField public address 0
-        odfi::common::classField public absoluteAddress -1
-        odfi::common::classField public size 0
-
-
-        ## Resolve Absolute address by parent calling, return result if already defined
-        public method getAbsoluteAddress args {     
-            if {$absoluteAddress!=-1} {
-                ## Already defined 
-                return $absoluteAddress
-            } else {
-                ## Not Defined
-                if {[$this parent] != ""} {
-                    ## Resolve using parent
-                    return [expr [[$this parent] getAbsoluteAddress]+$address]
-
-                } else {
-
-                    ## No parent -> 0
-                    return 0
-                }
-            }
-        }
-
-        public method getAbsoluteAddress2 args {
-            if {$absoluteAddress != -1} {
-                return $absoluteAddress
-            } else {
-                [lindex [$this parents] 0] walk {
-                    if {![$item isa osys::rfg::RegisterFile] && ![$item isa osys::rfg::Field]} {
-                        if {[$item isa osys::rfg::RamBlock]} {
-                            if {[$item address] > [[$item parent] address]} {
-                                $item absoluteAddress [$item address]    
-                            } else {
-                                $item absoluteAddress [expr "[$item address] * int(ceil(double([[$item parent] address])/double([$item address]))) "]
-                            }
-                        } else {
-                            $item absoluteAddress [expr [[$item parent] address] + [$item address]]
-                        }
-                    }
-                }
-                return $absoluteAddress
-            }
-        }
-
-        public method setAbsoluteAddressFromHex args {
-
-            if {$args !=""} {
-                set absoluteAddress [scan $args 0x%x]
-
-            }
-            
-        }
-
-        ## Returns the absolute Adress as HEX string
-        public method getAbsoluteAddressHex args {
-            format "%X" [getAbsoluteAddress]
-        }
-
-        ## Returns the absolute Adress as HEX string
-        public method getAbsoluteAddressHex2 args {
-            format "%X" [getAbsoluteAddress2]
-        }
-    } 
-   
     ######################
     ## Group 
     ######################
     itcl::class Group {       
-        inherit Address
+        inherit Common
         
         ## maximal allowed register size                 
         odfi::common::classField public register_size 64
         
         ## Components
-         odfi::common::classField public components {}        
-        
-        public variable address_counter 0
+        odfi::common::classField public components {}        
+
         constructor {cName cClosure} {Common::constructor $cName} {
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
 
-
         ## external Method
         ####################
         ## Sources an external RegisterFile 
-        public method external {rf_filename} {
-            puts itcl::find objects
+
+        public method external {rf_filename {name ""}} {
+            
+            set RF_list_old {}
+            set RF_list_new {}
+
+            foreach object [itcl::find objects] {
+                if {[$object isa osys::rfg::RegisterFile]} {
+                    lappend RF_list_old $object   
+                }
+            }
+            
             source $rf_filename
-            puts itcl::find objects
+
+            foreach object [itcl::find objects] {
+                if {[$object isa osys::rfg::RegisterFile]} {
+                    lappend RF_list_new $object
+                }
+            }
+
+            foreach RF $RF_list_old {
+                set index [lsearch -exact $RF_list_new $RF]
+                set RF_list_new [lreplace $RF_list_new $index $index]     
+            }
+
+            foreach RF $RF_list_new {
+                if {[$RF parent] == $this} {
+                    if {$name != ""} {
+                        $RF name $name 
+                    } else {
+                        set done 0
+                        set old_name [$RF name]
+                        set n 0
+                        set name_count 0
+                        while {!$done} {
+                            [$RF parent] onEachComponent {
+                                if {[$it name] == [$RF name]} {
+                                    incr name_count 
+                                }
+                                if {$name_count == 2} {
+                                    $RF name ${old_name}_$n
+
+                                    incr n
+                                    set done 0         
+                                } else {
+                                    set done 1 
+                                }
+                            } 
+                            set name_count 0
+                        }
+                        puts "WARNING: Automatic naming was used for [$RF name] in [$RF parent]"
+                    }
+                    $RF attributes hardware {
+                        external
+                    }
+                }
+            }
+
         }
 
         public method registerFile {gName closure} {
             set newregisterFile [::new [namespace parent]::RegisterFile $name.$gName.#auto $gName $closure]
             lappend components $newregisterFile
-
-            $newregisterFile address $size
-            incr size [$newregisterFile size]
             $newregisterFile parent $this                            
             ## Return
             return $newregisterFile 
+        }
+
+        ## Content 
+        ################
+        public method add ct {
+            lappend components $ct
         }
 
         ## Groups 
@@ -408,9 +460,6 @@ namespace eval osys::rfg {
             lappend components $newGroup
             ## calculate size
             set size_int 0
-                
-            $newGroup address $size
-            incr size [$newGroup size]
             $newGroup parent $this                           
             ## Return
             return $newGroup 
@@ -452,9 +501,16 @@ namespace eval osys::rfg {
         ## @return the register instance
         public method register {rName closure} {
 
+        
+
+           # puts "$rName loc:  [odfi::common::findUserCodeLocation]"
+
             ## Create 
-            set newRegister [::new [namespace parent]::Register $name.$rName.#auto $rName $closure]
+            #set newRegister [::new [namespace parent]::Register $name.$rName $rName $closure]
+            set newRegister [::new [namespace parent]::Register $this.$rName $rName $closure]
             
+            
+
             ## Add to list
             lappend components $newRegister 
  
@@ -467,11 +523,6 @@ namespace eval osys::rfg {
             if {$register_width > $register_size} {
                 error "The register $newRegister is $register_width wide and exceeds the allowed $register_size bits!"
             }
-            
-            ## calculate address
-            $newRegister address $size
-            $newRegister size [expr "$register_size/8"]            
-            incr size [expr "$register_size/8"]
 
             ## Return 
             $newRegister parent $this
@@ -498,21 +549,21 @@ namespace eval osys::rfg {
             }
             
             ## calculate address
-            if {[expr "$size%([$newRamBlock depth]*$register_size/8)"] != 0} {
-                set offset [expr "int(floor($size/([$newRamBlock depth]*$register_size/8)))*[$newRamBlock depth]* $register_size/8"]
-                set size [expr "[$newRamBlock depth]* $register_size/8 + $offset"]
-            }
+            #if {[expr "$size%([$newRamBlock depth]*$register_size/8)"] != 0} {
+            #    set offset [expr "int(floor($size/([$newRamBlock depth]*$register_size/8)))*[$newRamBlock depth]* $register_size/8"]
+            #    set size [expr "[$newRamBlock depth]* $register_size/8 + $offset"]
+            #}
             
-            if {$size == 0} {
-                set offset [expr "int(floor($size/([$newRamBlock depth]*$register_size/8)))*[$newRamBlock depth]* $register_size/8"]
-                set size [expr "[$newRamBlock depth]* $register_size/8 + $offset"]
-            }
+            #if {$size == 0} {
+             #   set offset [expr "int(floor($size/([$newRamBlock depth]*$register_size/8)))*[$newRamBlock depth]* $register_size/8"]
+            #    set size [expr "[$newRamBlock depth]* $register_size/8 + $offset"]
+            #}
 
-            $newRamBlock address $size
-            $newRamBlock size [expr "[$newRamBlock depth] * $register_size/8"]
+           # $newRamBlock address $size
+            #$newRamBlock size [expr "[$newRamBlock depth] * $register_size/8"]
             ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
             
-            incr size [expr "[$newRamBlock depth] * $register_size/8"]       
+           # incr size [expr "[$newRamBlock depth] * $register_size/8"]       
             ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
 
             ## Return 
@@ -571,22 +622,116 @@ namespace eval osys::rfg {
                 }
             }
         }
+
+
+        public method walkWith closure {
+
+           # puts "-- Walking tree of $this"
+
+            ## Prepare list : Pairs of Parent / node
+            ##################
+            set componentsFifo [$this components]
+
+            ## First call -> this with no parent 
+            #########
+            #set parent ""
+            #set node $this 
+            #odfi::closures::doClosure $closure 
+
+            #set parent $this
+
+            ## Go on FIFO 
+            ##################
+            while {[llength $componentsFifo]>0} {
+
+                set it [lindex $componentsFifo 0]
+                set componentsFifo [lreplace $componentsFifo 0 0]
+
+
+                #puts "--> Element $it"
+
+                set res [odfi::closures::doClosure $closure 1]
+
+                #puts "---> Decision: $res"
+
+                ## If Decision is true and we have a group -> Go down the tree 
+                #################
+                if {$res && [$it isa [namespace current]]} {
+                    set componentsFifo [concat $componentsFifo [$it components]]
+                }
+
+                ## Group -> add all subgroups and registers as next possible Continue 
+                ##############
+                #if {[$item isa [namespace current]]} {
+                   
+                   #::puts "Gound gorupd"
+                #   set componentsFifo [concat $componentsFifo [$item components]]
+                   
+               # } elseif {[$item isa [namespace parent]::Register]} {
+               #     set componentsFifo [concat $componentsFifo [$item fields]]
+               # }
+            }
+        }
+
+        public method walkDepthFirst closure {
+
+           # puts "-- Walking tree of $this"
+
+            ## Prepare list : Pairs of Parent / node
+            ##################
+            set componentsFifo [$this components]
+
+            ## First call -> this with no parent 
+            #########
+            #set parent ""
+            #set node $this 
+            #odfi::closures::doClosure $closure 
+
+            #set parent $this
+
+            ## Go on FIFO 
+            ##################
+            while {[llength $componentsFifo]>0} {
+
+                set it [lindex $componentsFifo 0]
+                set componentsFifo [lreplace $componentsFifo 0 0]
+
+
+                #puts "--> Element $it"
+
+                set res [odfi::closures::doClosure $closure 1]
+
+                ##puts "---> Decision: $res"
+
+                ## If Decision is true and we have a group -> Go down the tree 
+                #################
+                if {([string is boolean $res] && $res) && [$it isa [namespace current]]} {
+                    set componentsFifo [concat [$it components] $componentsFifo]
+                }
+
+                ## Group -> add all subgroups and registers as next possible Continue 
+                ##############
+                #if {[$item isa [namespace current]]} {
+                   
+                   #::puts "Gound gorupd"
+                #   set componentsFifo [concat $componentsFifo [$item components]]
+                   
+               # } elseif {[$item isa [namespace parent]::Register]} {
+               #     set componentsFifo [concat $componentsFifo [$item fields]]
+               # }
+            }
+        }
+
     }
 
-    ############################
-    ## Register 
-    ############################
-    itcl::class Register {
-        inherit Address
-        
+    ################################
+    ## Fields 
+    ###############################
+    itcl::class FieldsSupport {
+
+
         ## List of fields
-       odfi::common::classField public fields {}
-
-        constructor {cName cClosure} {Common::constructor $cName} {
-
-            ## Execute closure 
-            odfi::closures::doClosure $cClosure
-        }
+        odfi::common::classField public fields {}
 
         ## Fields 
         ######################
@@ -596,7 +741,7 @@ namespace eval osys::rfg {
         public method field {fName closure} {
 
             ## Create 
-            set newField [::new [namespace parent]::Field $this.$fName.#auto $fName $closure]
+            set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
 
 
             ##puts "Created field: $newField"
@@ -632,17 +777,51 @@ namespace eval osys::rfg {
     }
 
     ############################
-    ## RamBlock 
+    ## Register 
     ############################
-    itcl::class RamBlock {
-        inherit Register
-        odfi::common::classField public depth 1
-        odfi::common::classField public width 64
-        constructor {cName cClosure} {Register::constructor $cName {}} {
+    itcl::class Register {
+        inherit FieldsSupport Common
+        
+       
+
+        constructor {cName cClosure} {Common::constructor $cName} {
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
+
+        
+
+    }
+
+    ############################
+    ## RamBlock 
+    ############################
+    itcl::class RamBlock {
+        inherit FieldsSupport Common Region 
+        odfi::common::classField public depth 1
+        odfi::common::classField public width 64
+
+        
+
+        constructor {cName cClosure} {Common::constructor $cName} {
+
+            ## Execute closure 
+            odfi::closures::doClosure $cClosure
+        }
+
+        public method apply closure {
+            odfi::closures::doClosure $closure
+        }
+
+    }
+    ## Update Size upon depth change 
+    itcl::configbody RamBlock::depth {
+
+        #puts "CONFIGURING SIZE for $depth in [namespace current]"
+        size [expr $osys::rfg::registerSize*$depth]
+
+        #puts "SIZE is now [size]"
     }
 
     ###########################
@@ -702,10 +881,18 @@ namespace eval osys::rfg {
   
         set attributeName [string trimleft $fname ::]
 
+        ## Category 
+        ##  1. Namespace of attributeFunction call location without leading ::
+        ##  2. Add :: to name
+        #################
+        set category [string trimleft [uplevel namespace current] ::]
+
+        set attributeName ${category}::$attributeName
+
         ## If name is not categorized using xx.xxx.attributeName, set it to global.attributeName
-        if {![string match *.* $attributeName]} {
-            set attributeName "global.$attributeName"
-        }
+       # if {![string match *.* $attributeName]} {
+        #    set attributeName "global.$attributeName"
+       # }
 
         set res "proc $fname args {
             uplevel 1 addAttribute $attributeName \$args 
@@ -722,13 +909,17 @@ namespace eval osys::rfg {
     }
 
     itcl::class RegisterFile {
-        inherit Group
+        inherit Group Region
         ## Constructor
         ## Call the parent Group constructor with empty closure, otherwise code won't see this registerfile special functions
         constructor {cName cClosure} {Group::constructor $cName {}} {
 
             ## Execute closure 
             odfi::closures::doClosure $cClosure
+        }
+
+        public method apply closure {
+            odfi::closures::doClosure $closure
         }
     }
 

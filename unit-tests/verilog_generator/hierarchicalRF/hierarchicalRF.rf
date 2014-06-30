@@ -1,0 +1,32 @@
+## Create Register File
+registerFile hierarchicalRF {
+    
+    group G1 {
+        external subRF.rf
+        ##ramBlock RAM {
+        ##    width 64
+        ##    depth 4
+        ##}
+    }
+
+    group G2 {
+        register r1 {
+            field f1 {
+                width 64
+                hardware rw
+                software rw
+            }
+        }
+    }
+ 
+    group G3 {
+        register r2 {
+            field f1 {
+                width 64
+                hardware rw
+                software rw
+            }
+        }
+    }
+}
+

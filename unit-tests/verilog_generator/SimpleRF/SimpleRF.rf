@@ -89,6 +89,24 @@ osys::rfg::registerFile SimpleRF {
                 }
             
             }
+           # field r1_5 {
+            
+           #      width 8
+           #      software rw
+           #      hardware {
+           #          hardware_clear
+           #      }
+            
+           #  }
+           #  field r1_6 {
+            
+           #      width 8
+           #      software {
+           #             rw
+           #             software_write_clear
+           #      }
+           #      hardware rw
+           #  }
         }
     }
 }

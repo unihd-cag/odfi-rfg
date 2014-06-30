@@ -4,16 +4,16 @@
 
 ### registerFiles
 
-A registerFile can be seen as the main entity.
+A registerFile can be seen as the main entity it can contain other registerfiles, groups and registers.
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
  	    description "Test registerfile"
 
 	}
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 
 	}
@@ -29,7 +29,7 @@ A group can be used in a registerfile to group elements inside a registerFile
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -47,7 +47,7 @@ A register can be used in registerfile or group. The register describes a physic
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -71,7 +71,7 @@ A field is used inside a register and describes a part of the physical unit of t
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -101,7 +101,7 @@ A ramBlock can be used in a registerfile or a group. The ramBlock will be implem
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    group test_group {
 	        ramBlock test_ram {
 	            width 16
@@ -122,7 +122,7 @@ This examples alignes the next object to the next 2**12 address
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 
 	    group test_group1 {
 	        register test_register {
@@ -164,7 +164,7 @@ A checker can be used to check the addresses in the address space, should be use
 
 Real example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 
 	    checker 12 {
 	        group test_group1 {
@@ -259,7 +259,7 @@ This are properties of the hardware interface to the register.
 
 Real Example:
 
-	osys::rfg::registerFile test_rf {
+	registerFile test_rf {
 	    description "Test registerfile"
 	    group test_group {
 	        description "Test group"
@@ -294,36 +294,33 @@ We generate with the repeat statement 16 general purpose registers with a field 
 
 Our last group contains a ramBlock which has 256 entries and is 16 bit wide.
 
-	osys::rfg::registerFile RF {
-    
-	    checker 8 {
+	registerFile RF {
 
-	        group info_Group {
+	    group info_Group {
             
-	            register info_register {
+	        register info_register {
                 
-	                field ID {
-	                    description "unique ID"
-	                    width 32
-	                    reset 32'h12abcd
-	                    software ro
-	                }
+	            field ID {
+	                description "unique ID"
+	                width 32
+	                reset 32'h12abcd
+	                software ro
+	            }
 
-	                field GUID {
-	                    description "generic user ID"
-	                    width 32
-	                    reset 32'h0
-	                    software ro
-	                    hardware wo
-	                }
-
+	            field GUID {
+	                description "generic user ID"
+	                width 32
+	                reset 32'h0
+	                software ro
+	                hardware wo
 	            }
 
 	        }
-
 	    }
 
-	    aligner 8
+
+
+	    ##aligner 8
 
 	    group GPR_Group {
 	        ::repeat 16 {
@@ -362,21 +359,22 @@ At the end we have our ramBlock with the size of 2048 Byte. The size is this big
 |Base Address|Element|Size|
 |------------|-------|----|
 |0x000|info_Group_info_register|8|
-|0x100|GPR_Group_GPR_0|8|
-|0x108|GPR_Group_GPR_1|8|
-|0x110|GPR_Group_GPR_2|8|
-|0x118|GPR_Group_GPR_3|8|
-|0x120|GPR_Group_GPR_4|8|
-|0x128|GPR_Group_GPR_5|8|
-|0x130|GPR_Group_GPR_6|8|
-|0x138|GPR_Group_GPR_7|8|
-|0x140|GPR_Group_GPR_8|8|
-|0x148|GPR_Group_GPR_10|8|
-|0x150|GPR_Group_GPR_11|8|
-|0x160|GPR_Group_GPR_12|8|
-|0x168|GPR_Group_GPR_13|8|
-|0x170|GPR_Group_GPR_14|8|
-|0x178|GPR_Group_GPR_15|8|
+|0x008|GPR_Group_GPR_0|8|
+|0x010|GPR_Group_GPR_1|8|
+|0x018|GPR_Group_GPR_2|8|
+|0x020|GPR_Group_GPR_3|8|
+|0x028|GPR_Group_GPR_4|8|
+|0x030|GPR_Group_GPR_5|8|
+|0x038|GPR_Group_GPR_6|8|
+|0x040|GPR_Group_GPR_7|8|
+|0x048|GPR_Group_GPR_8|8|
+|0x050|GPR_Group_GPR_8|8|
+|0x058|GPR_Group_GPR_10|8|
+|0x060|GPR_Group_GPR_11|8|
+|0x068|GPR_Group_GPR_12|8|
+|0x070|GPR_Group_GPR_13|8|
+|0x078|GPR_Group_GPR_14|8|
+|0x080|GPR_Group_GPR_15|8|
 |0x800|RAM_Group_RAM|2048|
 
 

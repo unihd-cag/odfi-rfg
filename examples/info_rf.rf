@@ -1,76 +1,422 @@
-#!/usr/bin/env rfg
+set NUM_VPIDS 0
 
+registerFile info_rf {
+    
+    register driver {
 
-## Create Register File
-osys::rfg::registerFile info_rf {
-
-    group info_rf {
-
-        register driver {
-
-            field version {
-
-                ## Width Declaration Examples
-
-                # verbose language bit(s) or byte(s) definition
-                it is 32 bits wide
-                it is 2 bytes wide 
-
-                # Direct variable set
-                width 16
-
-                ## Rights Declaration Examples
-
-                # verbose language
-                it is software readable
-                it is software writable,readable
-                it is hardware readable
-
-                # Direct variable set
-                software r w
-                hardware r
-
-                ## Reset value 
-                reset 0x12abcd
-
-                ## Other language possibilities (non implemented, but could be possible)
-                #with software readable
-                #with 32 bits wide
-                #with 32 bits
-                #is 32 bits
+        field ver {
+            width        32
+            reset        32'd18311
+            attributes software {
+                ro
+            }    
+            attributes hardware {
             }
         }
 
-        register node {
+    }
 
-            field id {
 
-                width 16
+    register node {
+        
+        field guid {
+            width        24
+            reset        24'h0
+            attributes software {
+                ro
+            }    
+            attributes hardware {
+                wo
+            }
+        }
 
-                
+        field id {
+            width        16
+            reset        16'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+                software_written 2
+            }
+        }
+
+        field vpids {
+            width        16
+            reset        $NUM_VPIDS
+            attributes software {
+                ro
+            }    
+            attributes hardware {
+            }
+        }
+
+    }
+
+
+    register management_sw {
+
+        field cfg_ip {
+            description "IP address of the backend process that started the latest enumeration"
+            width        32
+            reset        32'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+            }
+        }
+
+        field enum_cnt {
+            description "Count that specifies the latest enumeration attempt that reached this node"
+            width        8
+            reset        8'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+            }
+        }
+
+        field cfg_count {
+            description "Count that specifies the latest configuration attempt that reached this node"
+            width        8
+            reset        8'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+            }
+        }
+
+        reserved 15
+
+        field backend {
+            description "This bit is set on nodes that currently have a backend enumeration or configuration attempt running"
+            width        1
+            reset        1'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+            }
+        }
+
+    }
+
+
+    register ip_addresses {
+        description "This register holds the primary IP address of the node as well as the IP address given to the EXTOLL interface (if any). Both registers are initialized by node system software."
+        
+        field primary_ip_address {
+            description "Primary IP address of the node (in network byte order). It can be used to get the hostname of the node using a reverse DNS lookup"
+            width        32
+            reset        32'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
             }
 
-            field guid {
+        }
 
-                width 24
-                reset 0x12abcd
+        field extoll_ip_address {
+            description "IP address of the EXTOLL interface (in network byte order). Usefull for ARP implementation over EXTOLL."
+            width        32
+            reset        32'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+            }
+        }
 
-                software r w
-                hardware r
+    }
 
+
+    register mgt_ip_addresses {
+        description "This register should be set by system software and give directions to find the primary management entity in the system."
+        
+        field primary_mgt_ip_address {
+            description "The EXTOLL Node ID of the primary management ID for this node."
+            width        32
+            reset        32'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+            }
+        }
+
+        field extoll_mgt_ip_address {
+            description "The IP Address of the primary management ID for this node."
+            width        32
+            reset        32'h0
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+            }
+        }
+
+    }
+
+
+    register tsc {
+        description "This register implements the EXTOLL time stamp counter (TSC). The counter is incremented at every clock cycle. A software write to the register loads the counter with the given value. In addition, the counter can be set from the global interrupt hardware to implement a globally sychronized time source."
+
+        if {[info exists ASIC]} {
+            
+            field tsc {
+                width        64
+                reset        
+                attributes software {
+                    rw
+                }    
+                attributes hardware {
+                    rw
+                    counter
+                    hardware_wen  
+                }
             }
 
-            field vpids {
+        } else {
 
-                width 16
-
+            field tsc {
+                width        48
+                reset        
+                attributes software {
+                    rw
+                }    
+                attributes hardware {
+                    rw
+                    counter
+                    hardware_wen  
+                }
             }
 
         }
 
     }
 
-    #source /path/to/group/definition
 
+    register tsc_global_load_value {
+        description "This register specifies the value the TSC register will be loaded with, in case of an global interrupt."
+
+        if {[info exists ASIC]} {
+            
+            field tsc_data {
+                width        64
+                reset        
+                attributes software {
+                    rw
+                }    
+                attributes hardware {
+                    ro
+                }
+            }
+
+        } else {
+
+            field tsc_data {
+                width        48
+                reset        
+                attributes software {
+                    rw
+                }    
+                attributes hardware {
+                    ro
+                }
+            }
+        
+        }
+
+    }
+
+
+
+
+    ::repeat 8 {
+    
+        register scratchpad_$i {
+            description "This register is one entry of the 64 byte scratchpad space offered by EXTOLL."
+            
+            field data {
+                description "Scratchpad data."
+                width        64
+                reset        64'h0
+                attributes software {
+                    rw
+                }    
+                attributes hardware {
+                }
+            }
+
+        }
+
+    }
+
+    register tsc_global_load_enable {
+    description "Enable/Disable TSC loading from the 4 global interrupt sources and control re-init of the timer interrupt logic from global interrupts"
+        
+        field tsc_load_en_irq0 {
+            description "Enable global interrupt 0 to load the tsc with the value from the tsc_global_load_value register"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        field tsc_load_en_irq1 {
+            description "Enable global interrupt 1 to load the tsc with the value from the tsc_global_load_value register"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        field tsc_load_en_irq2 {
+            description "Enable global interrupt 2 to load the tsc with the value from the tsc_global_load_value register"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        field tsc_load_en_irq3 {
+            description "Enable global interrupt 3 to load the tsc with the value from the tsc_global_load_value register"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        reserved 4
+        
+        field global_irq_reinit_en0 {
+            description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }   
+            attributes hardware {
+                ro
+            }
+        }
+
+        field global_irq_reinit_en1 {
+            description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        field global_irq_reinit_en2 {
+            description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        field global_irq_reinit_en3 {
+            description "Enable global interrupt 0 to reinit the timer register (see timer_interrupt)"
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+    }
+
+    register timer_interrupt {
+        description "Control the integrated timer."
+        
+        field timer_interrupt_period {
+            description "The period of the timer in clock cycles. Timer will count down from this value to zero and fire."
+            width        48
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        field timer_interrupt_enable {
+            description "Set this bit to one to enable the logic. Will be reset to 0 if a one-shot has occured."
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                rw
+                software_written 1
+                hardware_wen  
+            }
+        }
+
+        field timer_interrupt_one_shot {
+            description "Set this bit to one, to run timer logic in one-shot logic, i.e. once an interrupt has fired wait.             Otherwise logic will run in recurring mode and fire again after period cycles."
+            width        1
+            reset        
+            attributes software {
+                rw
+            }    
+            attributes hardware {
+                ro
+            }
+        }
+
+        reserved 6
+        
+        field timer_interrupt_toggle {
+            description "Toggles everytime an interrupt is fired."
+            width        1
+            reset        
+            attributes software {
+                ro
+            }    
+            attributes hardware {
+                wo
+            }
+        }
+
+    }
 
 }
+
+    

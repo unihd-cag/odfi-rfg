@@ -34,13 +34,23 @@ proc writeGroup {out group} {
 
     #[$group name]
     # [breadCrumbsName $group]
-    puts "<ul data-name=\"[dataName $group]\">
+    if {[$group getAttributeValue software.osys::rfg::absolute_address] != false} {
+        puts "<ul data-name=\"[dataName $group]\">
 
 
         <li>
-            [$group name] 
-            <span class=\"badge\">0x[$group getAbsoluteAddressHex]</span>
-    "
+            [$group name]
+            <span class=\"badge\">0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]</span>
+        "       
+    } else {
+        puts "<ul data-name=\"[dataName $group]\">
+
+
+        <li>
+            [$group name]
+        "
+    }
+
 
 
     $group onEachGroup {
@@ -65,7 +75,7 @@ proc writeRegister {out register} {
     set regId   [dataName $register -]
 
     puts "<ul data-name=\"[dataName $register]\">
-            <li> <span class=\"glyphicon glyphicon-book\"></span> [$register name] <span class=\"badge\">0x[$register getAbsoluteAddressHex]</span> <span class=\"caret\" onclick=\"openClose('$regId')\"></span>
+            <li> <span class=\"glyphicon glyphicon-book\"></span> [$register name] <span class=\"badge\">0x[format %x [$register  getAttributeValue software.osys::rfg::absolute_address]]</span> <span class=\"caret\" onclick=\"openClose('$regId')\"></span>
             <p>
                 [$register description]
             </p>
@@ -296,7 +306,6 @@ odfi::common::println "</Attributes>" $out
         
     <h1><% puts [$registerFile name] %></h1>
 
-
     <!-- Filter -->
     <div class="ui-widget">
       <label for="filter">Filter: </label>
@@ -325,17 +334,18 @@ odfi::common::println "</Attributes>" $out
     <%
 
         set paths {}
+
         $registerFile walk {
 
             lappend paths "\"[dataName $item "/"]\""
 
         }
-
+        
 
     %>
     $(function() {
     var availableTags = [
-      <% puts [join $paths ,] %>
+      <% puts [join $paths " "]%>
     ];
     /*$( "#filter" ).autocomplete({
       source: availableTags

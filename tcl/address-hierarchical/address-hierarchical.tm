@@ -1,0 +1,325 @@
+
+package provide osys::rfg::address::hierarchical 1.0.0
+package require odfi::files 1.0.0
+
+namespace eval osys::rfg::address::hierarchical {
+
+    proc calculate rf {
+
+        ##################################################
+        ## Map -> All Regions to their physical contents (Stop at region boundary)
+        ## Reduce -> Region content to relative addressing
+        ## Distribute Addresses
+        ##################################################
+
+
+        set map {}
+        set processingStack [list $rf]
+
+        ## Map
+        #############
+        while {[llength $processingStack] > 0 } {
+
+            ## Get current element
+            ###############
+            set current [lindex $processingStack 0]
+            set processingStack [lreplace $processingStack 0 0]
+
+            ## For non groups: Stop there, and add homomorphic entry to content map 
+            if {![$current isa osys::rfg::Group]} {
+                set map [odfi::list::arrayConcat $map $current $current]
+                continue
+            }
+
+            ## For Groups: Walk The subtree and stop at regions
+            ##########################
+
+            set content {}
+            $current walkWith {
+
+                ## Add Element to map (ignore simple groups)
+                if {![$it isa osys::rfg::Group] || [$it isa osys::rfg::Region]} {
+                    set map [odfi::list::arrayConcat $map $current $it]
+                }
+
+                ## Stop At Region (Append region for next map process if it has children)
+                if {[$it isa osys::rfg::Region]} {
+
+                    lappend processingStack $it
+                    return false
+                } else {
+                    return true
+                }
+
+            }
+
+
+        }
+
+
+        ## Debug
+        puts "**** MAP Results ****" 
+        #puts $map
+        #foreach {key content} $map {
+        #    puts "$key\t -> $content"
+        #}
+
+        odfi::list::arrayEach $map {
+            puts "IM: $key\t -> $value"
+        }
+
+
+        ## Reduce Bottom UP The Map List for sizes 
+        ## Key: Region , Value: content 
+        ## Reduction: go through content, and increment the local address counter, including attributes for shifts and so on
+        ############################
+
+        set sizeMap {}
+
+
+        proc sizeOf operator {
+            odfi::closures::doClosure {
+
+
+            if {[string is integer "$operator"]} {
+                return $operator
+            } elseif {[$operator isa ::osys::rfg::Register]} {
+
+
+
+                return [expr $::osys::rfg::registerSize/8]
+
+            } elseif {[$operator isa ::osys::rfg::Region] && ![$operator isa ::osys::rfg::Group]} {
+
+                ## Non grouping regions must have size set
+                #puts "NGR: [$operator size]"
+                return [expr [$operator size]/8]
+
+            } elseif {[$operator isa ::osys::rfg::Region]} {
+
+                ## Search in map (size already in bytes)
+                set size [odfi::list::arrayGet $sizeMap $operator]
+
+                return $size
+
+                ## Regions must have the size as attribute
+                #$operator onAttributes hardware.size {
+
+                #    return [expr int([$operator a])]
+
+               # } otherwise {
+
+        #
+
+                #}
+                ## Ramblocks can 
+
+            } else {
+                return 0
+            }
+
+            }
+
+        }
+
+        odfi::list::arrayEach [lreverse $map] {
+            puts "-- Reducing: $key"
+
+            set size [odfi::list::reduce $value {
+
+                #puts "------ Left: $left Right: $right"
+                #puts "----- $left ([sizeOf $left ]) + $right ([sizeOf $right])"
+
+                switch -exact -- $right {
+                    "{}" -
+                    "" {
+
+                      set ls [sizeOf $left]
+                      $left attributes software {
+                        ::size  $ls
+                      }
+                      return $ls
+                    }
+                    default {
+
+                        ## Right Element size 
+                        set rightSize [sizeOf $right]
+                        $right attributes software {
+                            ::size  $rightSize
+                        }
+                        
+                        ## Left size 
+                        set ls [sizeOf $left]
+                        if {![string is integer $left]} {
+                            $left attributes software {
+                                ::size  $ls
+                            }
+                        }
+                        
+
+                        return [expr [sizeOf $left] + $rightSize ]
+                    }
+                }
+
+            }]
+
+            ## Save size to map and set on key 
+            $key attributes software {
+                ::size   $size
+            }
+            #$key size $size 
+            set sizeMap  [odfi::list::arrayConcat $sizeMap $key $size]
+
+        }
+
+
+        odfi::list::arrayEach $sizeMap {
+            puts "S: $key\t -> $value"
+        }
+
+
+        ## Distribute
+        ## Go again top down, and assign addresses 
+        ###################
+
+        puts "--------- Distribute Abs -----------------------------------------"
+        
+        ## Wit hMyles
+        ###################
+        ## Go Map top down 
+        ######################
+       
+        odfi::list::arrayEach $map {
+            puts "Address Distribution on : $key"
+
+            set start_address 0 
+            set ad 0
+             set cumulated 0 
+            if {[$key hasAttribute software.osys::rfg::absolute_address]} {
+                set start_address [$key getAttributeValue software.osys::rfg::absolute_address]
+                set ad $start_address
+            } else {
+                ##[$key setA software.osys::rfg::absolute_address]
+
+            }
+
+            $key attributes software {
+                ::absolute_address $start_address
+            }
+
+            set baseAddress $start_address
+            set currentAddress 0
+            set blockAddress 0
+            foreach it $value {
+
+                if {$it==$key} {
+                    continue
+                }
+                
+                ## Get Size of block, rounded up to next power of two size
+                set itSize [sizeOf $it]
+                set num_addr_bits [expr int(ceil(log($itSize)/log(2)))]
+                set blockSize [expr 2**$num_addr_bits]
+
+
+                ## The address of current element is:
+                ##   - The current address + the size of the block 
+                set blockAddress [expr (($currentAddress+$blockSize-1)/$blockSize)*$blockSize]
+                #set blockAddress [expr (($currentAddress+ ($blockSize-1))/$blockSize)*$blockSize]
+                #set blockAddress [expr (($currentAddress+ ($blockSize-1))/$blockSize)*$blockSize]
+               
+                #puts "[$it name] Block address [format %0-20b $blockAddress], bs=$$blockSize Current Address = $currentAddress, bloc ksize -1:  [format %0-20b [expr $blockSize-1]]"
+
+                ## Address assign 
+                set bla $it
+                $it attributes software {
+
+                    ::absolute_address [expr $baseAddress | $blockAddress]
+                }
+
+                ## The next current address is the block address + the size of this block
+                set currentAddress [expr $blockAddress+$blockSize]
+                 
+
+            }
+               
+
+        }
+
+
+        return [list  $map $sizeMap]
+
+
+    }
+
+    proc printTable rf {
+
+        puts "|---------------------------|-------------|"
+        puts "|    Name                   | Address     |"
+        puts "|---------------------------|-------------|"
+
+        $rf walkDepthFirst {
+        
+            if {[$it hasAttribute software.osys::rfg::absolute_address]} {
+                puts "| [format "%20s" [$it name]]\t   |  [format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]"
+            }
+
+
+            return true
+        }
+
+    }
+
+    proc saveCSV {rf file} {
+
+         set r [odfi::closures::embeddedTclFromStringToString {
+
+<%
+puts "Name,Address"
+%>
+<%
+    $rf walkDepthFirst {
+
+        puts "[$it fullName],[format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]"
+
+
+            return true
+        }
+%>
+}]
+    odfi::files::writeToFile  $file $r
+
+
+    }
+
+    proc printTableHTML rf {
+
+        set r [odfi::closures::embeddedTclFromStringToString {
+<table>
+    <thead>
+        <tr><th>Name</th><th>Address</th></tr>
+    </thead>
+    <tbody>
+    <%
+    $rf walkDepthFirst {
+
+        puts "<tr><td>[$it fullName]</td><td>[format %#0-20x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
+
+
+            return true
+        }
+    %>
+    </tbody>
+</table>
+}]
+
+        puts $r
+        return
+
+   
+
+    }
+
+
+
+}
