@@ -1,9 +1,5 @@
 package provide osys::rfg::generator::xmlgenerator 1.0.0
-<<<<<<< HEAD
 package require Itcl 3.4
-=======
-package require Itcl
->>>>>>> 81d433e6c3f5426265207e0f234e876927aa8c32
 package require odfi::common
 package require odfi::list 2.0.0
 
