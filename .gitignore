@@ -4,3 +4,4 @@ target/
 *.vcd
 unit-tests/verilog_generator/testing/
 example-design/
+*.nfs*
