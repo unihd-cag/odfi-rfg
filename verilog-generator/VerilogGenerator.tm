@@ -1,4 +1,4 @@
-package provide osys::rfg::veriloggenerator 1.0.0
+package provide osys::rfg::generator::veriloggenerator 1.0.0
 package require osys::rfg
 package require Itcl 3.4
 package require odfi::common
