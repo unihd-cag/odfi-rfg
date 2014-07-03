@@ -26,6 +26,7 @@
 ### HTML Generator 
 
 - html-generator rreinit source register not working 
+- blockRams now working
 
 ### rfs_to_rfg Tool 
 

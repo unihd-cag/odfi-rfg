@@ -1,13 +1,10 @@
 #!/bin/tclsh
-# source $::env(RFG_PATH)/tcl/rfg.tm
-# source $::env(RFG_PATH)/verilog-generator/VerilogGenerator.tm
-# source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
-# source $::env(RFG_PATH)/tcl/address-hierarchical/address-hierarchical.tm
 package require osys::rfg 1.0.0
 package require osys::rfg::address::hierarchical
-package require osys::rfg::veriloggenerator
+package require osys::rfg::generator::veriloggenerator
 package require osys::rfg::generator::htmlbrowser
 
+## reading the top.rf file 
 if {$argc == 1} {
 	set rf_head [lindex $argv 0]
 	puts ""
@@ -15,19 +12,17 @@ if {$argc == 1} {
 	puts ""
 } else {
 	puts ""
-	puts "No top rf file defined..."
-	puts ""
+	error "Wrong number of arguments!\n\nTool usage: tclsh GenerateRF.tcl <top_level_rf_file>\n\n"
 }
-
-set rf_head externalRFNames.rf
-
 catch {namespace inscope osys::rfg {source $rf_head}} rf_head
 
 set rf_list {}
 set generated_list {}
 
+## add top register file to list
 lappend rf_list $rf_head
 
+## add all underlaying register files
 $rf_head walkDepthFirst {
 	if {[$it isa osys::rfg::RegisterFile]} {
 		lappend rf_list $it
@@ -35,19 +30,24 @@ $rf_head walkDepthFirst {
 	return true
 }
 
+## walk through all registerFiles in the list
 foreach rf $rf_list {
+		## only generate files when the file name was not generated before...
 		if {[lsearch $generated_list [$rf getAttributeValue rfg.osys::rfg::file]] == -1} {
-			
+			## add file name to generated list
 			lappend generated_list [$rf getAttributeValue rfg.osys::rfg::file]
 
 			puts ""
 			puts "Reading $rf"
 			puts ""
-
+			
+			## read the registerfile
 			catch {namespace inscope osys::rfg {source [$rf getAttributeValue rfg.osys::rfg::file]}} result
 			
+			## calculate addresses
 			osys::rfg::address::hierarchical::calculate $result
 
+			## generate verilog code
 			set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
 			if {[$rf parent]== ""} {
 				set destinationFile "RF_Wrapper.v"
@@ -64,9 +64,9 @@ foreach rf $rf_list {
 	 		puts "[$result name].rf > [$result name].v"
 	 		puts ""			
 
+	 		## generate html documentation
 	 		set htmlbrowser [::new osys::rfg::generator::htmlbrowser::HTMLBrowser #auto $result]
 	 		set destinationFile "[$result name].html"
-	 	
 	 		$htmlbrowser produceToFile $destinationFile
 	 		puts ""
 	 		puts "generate htmlbrowser:"
