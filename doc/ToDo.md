@@ -1,24 +1,25 @@
 ## ToDo:
 
+- SNQ
+
+### Addressing
+ - calculate with aligner attribute
+
 ### Verilog Generator 
 
 - different RAMs
 - RAM read/write rights
 - external RAM
 - create ASIC dependent hardware on generation and not with defines in verilog
-- Trigger
 - internal RFs
-- aligner are not working
-	- add aligner as class in the rfg.tm
-	- add aligner in the addressing scheme
-- rewrite checker (checker needed)
+- rewrite checker (checker needed?, maybe directly in addressing)
 - add hardware_clear in RF Wrapper
 - do not create empty Hardware registers in the description
 
 ### Unit Tests 
 
 - add unit-test for RF_Wrapper
-- add unit-test for RF.rf
+- add some unit-test for addressing 
 - add internal Registerfiles test to hierarchical unit-test
 - unit-test enviroment
 
@@ -29,15 +30,12 @@
 
 ### rfs_to_rfg Tool 
 
-- te ? in ht3_rf.xml
-- aligner to bits?
-- external RAM 
+- external RAM correct item name ?
 - check conversion for ramBlocks
 
 ### Generation Script 
 
-- modify rfg script for simple usage
-	- test a huge registerfile with the example script
+- add GenerateRF_Defines.tm to set output directories
 
 ### Documentation/ Presentation
 
