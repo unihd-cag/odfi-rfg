@@ -1,13 +1,11 @@
 ## ToDo:
 
-
-
 ### Verilog Generator 
 
 - different RAMs
 - RAM read/write rights
 - external RAM
-- create ASIC dependet hardware on generation and not with defines in verilog
+- create ASIC dependent hardware on generation and not with defines in verilog
 - Trigger
 - internal RFs
 - aligner are not working
@@ -15,6 +13,7 @@
 	- add aligner in the addressing scheme
 - rewrite checker (checker needed)
 - add hardware_clear in RF Wrapper
+- do not create empty Hardware registers in the description
 
 ### Unit Tests 
 
@@ -26,7 +25,7 @@
 ### HTML Generator 
 
 - html-generator rreinit source register not working 
-- blockRams now working
+- blockRams not working
 
 ### rfs_to_rfg Tool 
 
@@ -44,6 +43,4 @@
 
 - write presentation
 - write Getting Started and HowTo's
-- find place for this and the project (github.io?, redmine) 
 - clean github repository
-- add V0.8 for RFG to odfi-tools
