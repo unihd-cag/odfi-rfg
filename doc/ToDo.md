@@ -30,7 +30,6 @@
 
 ### rfs_to_rfg Tool 
 
-- external RAM correct item name ?
 - check conversion for ramBlocks
 
 ### Generation Script 

@@ -102,62 +102,65 @@ proc writeRegister {out register} {
     ## Fields
     ###############
     #puts "<h3>Fields</h3>"
-    puts "<div>"
+    # puts "<div>"
 
-    puts "<table class=\"table table-bordered table-hover table-condensed\">"
+    # puts "<table class=\"table table-bordered table-hover table-condensed\">"
     
-        puts "<caption>Fields</caption>"
-        ## Header
-        puts "<theader>"
+    #     puts "<caption>Fields</caption>"
+    #     ## Header
+    #     puts "<theader>"
 
-            puts "  <tr>
-                    <th>Name</th>
-                    <th style=\"width:auto\">Description</th>
-                    <th>Width</th>
-                    <th>Attributes</th>
-                    <th>Path</th>
-            </tr>"
-        puts "</theader>"
+    #         puts "  <tr>
+    #                 <th>Name</th>
+    #                 <th style=\"width:auto\">Description</th>
+    #                 <th>Width</th>
+    #                 <th>Attributes</th>
+    #                 <th>Path</th>
+    #         </tr>"
+    #     puts "</theader>"
 
-        ## Body
-        puts "<tbody>"
+    #     ## Body
+    #     puts "<tbody>"
 
         
             $register onEachField {
-                puts "<tr>"
-                puts "
-                <td>[$it name]</td>
-                <td style=\"width:auto\">[$it description]</td>
-                <td>[$it width]</td>
-                "
+                set fieldId   [dataName $it -]
+                puts "<ul data-name=\"[dataName $it]\">
+                <li> <span class=\"glyphicon glyphicon-book\"></span> [$it name] <span class=\"badge\">width: [$it width]</span><span class=\"caret\" onclick=\"openClose('$fieldId')\"></span>
+                </ul>
+                 "
+                puts "<div id=\"$fieldId\" style=\"display:none\">"
+                 ## put here description 
+                 puts "<h4>Description: </h4>"
+                 puts "[$it description]"
+                
+                 ## Attributes
+                 #################
+                 puts "<td>"
 
-                ## Attributes
-                #################
-                puts "<td>"
+                     ## start of table
+                     puts "<table class=\"table table-bordered table-hover table-condensed\">"
 
-                    ## start of table
-                    puts "<table class=\"table table-bordered table-hover table-condensed\">"
+                         ## Header
+                         puts "<theader>"
 
-                        ## Header
-                        puts "<theader>"
+                             puts "<tr>
+                                     <th>Name</th>
+                                     <th>Value</th>
+                             </tr>"
+                         puts "</theader>"
 
-                            puts "<tr>
-                                    <th>Name</th>
-                                    <th>Value</th>
-                            </tr>"
-                        puts "</theader>"
+                         ## Content
+                         puts "<tbody>"
+                         $it onEachAttributes {
+                             puts "<tr><td colspan='2'>[$attrs name]</td></tr>"
 
-                        ## Content
-                        puts "<tbody>"
-                        $it onEachAttributes {
-                            puts "<tr><td colspan='2'>[$attrs name]</td></tr>"
-
-                            $attrs onEachAttribute {
-                                puts "<tr>
-                                        <td>$attr</td>
-                                        <td>$value</td>
-                                    </tr>"
-                            }
+                             $attrs onEachAttribute {
+                                 puts "<tr>
+                                         <td>$attr</td>
+                                         <td>$value</td>
+                                     </tr>"
+                             }
 
                         }
                         puts "</tbody>"
@@ -169,13 +172,14 @@ proc writeRegister {out register} {
                 ## Path and final
                 puts "<td>${regPath}.[$it name]</td>"
                 puts "</tr>"
+                puts "</div>"
             }
 
-        puts "</tbody>"
+    #     puts "</tbody>"
 
-    puts "</table>"
+    # puts "</table>"
 
-    puts "</div>"
+    # puts "</div>"
     
 
     ## End
