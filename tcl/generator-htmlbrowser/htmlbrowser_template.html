@@ -39,7 +39,7 @@ proc writeGroup {out group} {
 
 
         <li>
-            [$group name]
+            <span class=\"glyphicon glyphicon-book\"></span>[$group name]
             <span class=\"badge\">0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]</span>
         "       
     } else {
@@ -47,7 +47,7 @@ proc writeGroup {out group} {
 
 
         <li>
-            [$group name]
+            <span class=\"glyphicon glyphicon-book\"></span>[$group name]
         "
     }
 
@@ -75,7 +75,7 @@ proc writeRegister {out register} {
     set regId   [dataName $register -]
 
     puts "<ul data-name=\"[dataName $register]\">
-            <li> <span class=\"glyphicon glyphicon-book\"></span> [$register name] <span class=\"badge\">0x[format %x [$register  getAttributeValue software.osys::rfg::absolute_address]]</span> <span class=\"caret\" onclick=\"openClose('$regId')\"></span>
+            <li> <span class=\"glyphicon glyphicon-list\"></span> [$register name] <span class=\"badge\">0x[format %x [$register  getAttributeValue software.osys::rfg::absolute_address]]</span> <span class=\"caret\" onclick=\"openClose('$regId')\"></span>
             <p>
                 [$register description]
             </p>
@@ -126,7 +126,7 @@ proc writeRegister {out register} {
             $register onEachField {
                 set fieldId   [dataName $it -]
                 puts "<ul data-name=\"[dataName $it]\">
-                <li> <span class=\"glyphicon glyphicon-book\"></span> [$it name] <span class=\"badge\">width: [$it width]</span><span class=\"caret\" onclick=\"openClose('$fieldId')\"></span>
+                <li> <span class=\"glyphicon glyphicon-minus\"></span> [$it name] <span class=\"badge\">width: [$it width]</span><span class=\"caret\" onclick=\"openClose('$fieldId')\"></span>
                 </ul>
                  "
                 puts "<div id=\"$fieldId\" style=\"display:none\">"
