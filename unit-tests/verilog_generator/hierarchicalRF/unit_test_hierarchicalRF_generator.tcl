@@ -11,7 +11,7 @@ foreach rf_file $rf_fileList {
 	puts "Processes RF: $result"
 
 	osys::rfg::address::hierarchical::calculate $result
-	##osys::rfg::address::hierarchical::printTable $result
+	osys::rfg::address::hierarchical::printTable $result
 	set htmlbrowser [::new osys::rfg::generator::htmlbrowser::HTMLBrowser #auto $result]
 	set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
 	set destinationFile "compare_data/[file rootname $rf_file].v"

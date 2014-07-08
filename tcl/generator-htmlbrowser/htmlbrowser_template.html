@@ -58,9 +58,13 @@ proc writeGroup {out group} {
         writeGroup $out $it
     } 
 
-    $group onEachRegister {
-
-        writeRegister $out $it
+    $group onEachComponent {
+        if {[$it isa osys::rfg::Register]} {
+            writeRegister $out $it  
+        }
+        if {[$it isa osys::rfg::RamBlock]} {
+            writeRamBlock $it
+        }
     } 
 
     puts "</li>"
@@ -98,89 +102,57 @@ proc writeRegister {out register} {
 
     "
 
-
-    ## Fields
-    ###############
-    #puts "<h3>Fields</h3>"
-    # puts "<div>"
-
-    # puts "<table class=\"table table-bordered table-hover table-condensed\">"
+    $register onEachField {
+        set fieldId   [dataName $it -]
+        puts "<ul data-name=\"[dataName $it]\">
+            <li> <span class=\"glyphicon glyphicon-minus\"></span> [$it name] <span class=\"badge\">width: [$it width]</span><span class=\"caret\" onclick=\"openClose('$fieldId')\"></span>
+            </ul>
+            "
+        puts "<div id=\"$fieldId\" style=\"display:none\">"
+        ## put here description 
+        puts "<h4>Description: </h4>"
+        puts "[$it description]"
     
-    #     puts "<caption>Fields</caption>"
-    #     ## Header
-    #     puts "<theader>"
+        ## Attributes
+        #################
+        puts "<td>"
 
-    #         puts "  <tr>
-    #                 <th>Name</th>
-    #                 <th style=\"width:auto\">Description</th>
-    #                 <th>Width</th>
-    #                 <th>Attributes</th>
-    #                 <th>Path</th>
-    #         </tr>"
-    #     puts "</theader>"
+        ## start of table
+        puts "<table class=\"table table-bordered table-hover table-condensed\">"
 
-    #     ## Body
-    #     puts "<tbody>"
+        ## Header
+        puts "<theader>"
 
-        
-            $register onEachField {
-                set fieldId   [dataName $it -]
-                puts "<ul data-name=\"[dataName $it]\">
-                <li> <span class=\"glyphicon glyphicon-minus\"></span> [$it name] <span class=\"badge\">width: [$it width]</span><span class=\"caret\" onclick=\"openClose('$fieldId')\"></span>
-                </ul>
-                 "
-                puts "<div id=\"$fieldId\" style=\"display:none\">"
-                 ## put here description 
-                 puts "<h4>Description: </h4>"
-                 puts "[$it description]"
-                
-                 ## Attributes
-                 #################
-                 puts "<td>"
+        puts "<tr>
+                <th>Name</th>
+                <th>Value</th>
+            </tr>"
+        puts "</theader>"
 
-                     ## start of table
-                     puts "<table class=\"table table-bordered table-hover table-condensed\">"
+        ## Content
+        puts "<tbody>"
+        $it onEachAttributes {
+            puts "<tr><td colspan='2'>[$attrs name]</td></tr>"
 
-                         ## Header
-                         puts "<theader>"
-
-                             puts "<tr>
-                                     <th>Name</th>
-                                     <th>Value</th>
-                             </tr>"
-                         puts "</theader>"
-
-                         ## Content
-                         puts "<tbody>"
-                         $it onEachAttributes {
-                             puts "<tr><td colspan='2'>[$attrs name]</td></tr>"
-
-                             $attrs onEachAttribute {
-                                 puts "<tr>
-                                         <td>$attr</td>
-                                         <td>$value</td>
-                                     </tr>"
-                             }
-
-                        }
-                        puts "</tbody>"
-
-                    ## end of table
-                    puts "</table>"
-
-                puts "</td>"
-                ## Path and final
-                puts "<td>${regPath}.[$it name]</td>"
-                puts "</tr>"
-                puts "</div>"
+            $attrs onEachAttribute {
+                puts "<tr>
+                        <td>$attr</td>
+                        <td>$value</td>
+                    </tr>"
             }
 
-    #     puts "</tbody>"
+        }
+        puts "</tbody>"
 
-    # puts "</table>"
+        ## end of table
+        puts "</table>"
 
-    # puts "</div>"
-    
+        puts "</td>"
+        ## Path and final
+        puts "<td>${regPath}.[$it name]</td>"
+        puts "</tr>"
+        puts "</div>"
+    }
 
     ## End
     puts "</div>"
@@ -189,6 +161,40 @@ proc writeRegister {out register} {
     puts "</ul>"
 
 
+}
+
+proc writeRamBlock {ramBlock} {
+    set ramBlockPath [dataName $ramBlock]
+    set ramBlockId   [dataName $ramBlock -]
+
+    puts "<ul data-name=\"[dataName $ramBlock]\">
+            <li> <span class=\"glyphicon glyphicon-list\"></span> [$ramBlock name] <span class=\"badge\">0x[format %x [$ramBlock  getAttributeValue software.osys::rfg::absolute_address]]</span> <span class=\"badge\">width: [$ramBlock width] </span> <span class=\"badge\">size: [$ramBlock depth] </span> <span class=\"caret\" onclick=\"openClose('$ramBlockId')\"></span>
+            <p>
+                [$ramBlock description]
+            </p>
+    "
+
+    ## Start
+    puts "<div id=\"$ramBlockId\" style=\"display:none\">"
+
+    ## Scala Code
+    #################
+
+    puts "
+    <div>
+        <h4>Scala API Path</h4>
+        <pre>
+    var [$ramBlock name] = read(\"$ramBlockPath\")
+    write(value) into \"$ramBlockPath\"
+        </pre>
+    </div>
+
+    "
+    ## End
+    puts "</div>"
+
+    puts "</li>"
+    puts "</ul>"
 }
 
 proc writeField {out field} {

@@ -27,6 +27,7 @@
 
 - html-generator rreinit source register not working 
 - blockRams not working
+- Scala API snippet RAM 
 
 ### rfs_to_rfg Tool 
 
