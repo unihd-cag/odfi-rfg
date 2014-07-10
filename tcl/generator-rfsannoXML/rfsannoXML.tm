@@ -25,7 +25,10 @@ namespace eval osys::rfg::generator::rfsannoXML {
             #########
             set registerFile $cRegisterFile
         }
-
+        public method produceToFile targetFile {
+            set res [produce ]
+            odfi::files::writeToFile $targetFile $res 
+        }
         public method produce args {
 
 
@@ -218,12 +221,7 @@ namespace eval osys::rfg::generator::rfsannoXML {
                 odfi::common::println "<hwreg name=\"[$field name]\"  width=\"[$field width]\" desc=\"[$field description]\" $reset [join $attributes] />"  $out 
             }
             
-    
-        
-
         }
-
-        
 
     }
 

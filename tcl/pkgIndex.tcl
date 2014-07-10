@@ -5,6 +5,7 @@ package ifneeded osys::rfg::generator::xmlgenerator 1.0.0 [list source [file joi
 package ifneeded osys::rfg::generator::htmlbrowser 1.0.0 [list source [file join $dir generator-htmlbrowser htmlbrowser.tm]]
 package ifneeded osys::rfg::generator::rfsbackport 1.0.0 [list source [file join $dir generator-rfsbackport rfsbackport.tm]]
 package ifneeded osys::rfg::generator::veriloggenerator 1.0.0 [list source [file join $dir .. verilog-generator VerilogGenerator.tm]]
+package ifneeded osys::rfg::generator::rfsannoXML 1.0.0 [list source [file join $dir generator-rfsannoXML rfsannoXML.tm]]
 
 package ifneeded osys::rfg::address::linear 1.0.0        [list source [file join $dir address-linear address-linear.tm]]
 package ifneeded osys::rfg::address::hierarchical 1.0.0   [list source [file join $dir address-hierarchical address-hierarchical.tm]]
