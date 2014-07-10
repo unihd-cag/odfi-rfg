@@ -117,7 +117,7 @@ namespace eval osys::rfg::generator::rfsannoXML {
             odfi::common::printlnIndent
 
             ## rreinit source 
-            $register onAttribute {hardware.osys::rfg::rreinit_source} {
+            $register onAttributes {hardware.osys::rfg::rreinit_source} {
                 ## ToDo check for =1 and rreinit source name 
                 odfi::common::println "<rreinit_source/>" $out 
             }
@@ -147,15 +147,15 @@ namespace eval osys::rfg::generator::rfsannoXML {
             ## Prepare attributes
             set attributes [list ]
 
-            $field onAttribute {hardware.osys::rfg::rw} {
+            $field onAttributes {hardware.osys::rfg::rw} {
                 lappend attributes "hw=\"rw\""
             } otherwise {
 
-                $field onAttribute {hardware.osys::rfg::ro} {
+                $field onAttributes {hardware.osys::rfg::ro} {
                     lappend attributes "hw=\"ro\""
                 } otherwise {
 
-                    $field onAttribute {hardware.osys::rfg::wo} {
+                    $field onAttributes {hardware.osys::rfg::wo} {
                         lappend attributes "hw=\"wo\""
                     } otherwise {
                         lappend attributes "hw=\"\""
@@ -163,15 +163,15 @@ namespace eval osys::rfg::generator::rfsannoXML {
                 }
             }
 
-            $field onAttribute {software.osys::rfg::rw} {
+            $field onAttributes {software.osys::rfg::rw} {
                 lappend attributes "sw=\"rw\""
             } otherwise {
 
-                $field onAttribute {software.osys::rfg::ro} {
+                $field onAttributes {software.osys::rfg::ro} {
                     lappend attributes "sw=\"ro\""
                 } otherwise {
 
-                    $field onAttribute {software.osys::rfg::wo} {
+                    $field onAttributes {software.osys::rfg::wo} {
                         lappend attributes "sw=\"wo\""
                     } otherwise {
                         lappend attributes "sw=\"\""
@@ -179,35 +179,35 @@ namespace eval osys::rfg::generator::rfsannoXML {
                 }
             }
 
-            $field onAttribute {hardware.osys::rfg::counter} {
+            $field onAttributes {hardware.osys::rfg::counter} {
                 lappend attributes "counter=\"1\""
             }
 
-            $field onAttribute {hardware.osys::rfg::rreinit} {
+            $field onAttributes {hardware.osys::rfg::rreinit} {
                 lappend attributes "rreinit=\"1\""
             }
 
-            $field onAttribute {hardware.osys::rfg::hardware_wen} {
+            $field onAttributes {hardware.osys::rfg::hardware_wen} {
                 lappend attributes "hw_wen=\"1\""
             }
 
-            $field onAttribute {hardware.osys::rfg::sofware_written} {
+            $field onAttributes {hardware.osys::rfg::sofware_written} {
                 lappend attributes "sw_written=\"[$it getAttributeValue hardware.osys::rfg::software_written]\""
             }
 
-            $field onAttribute {hardware.osys::rfg::hardware_clear} {
+            $field onAttributes {hardware.osys::rfg::hardware_clear} {
                 lappend attributes "hw_clr=\"1\"" 
             }
 
-            $field onAttribute {hardware.osys::rfg::sticky} {
+            $field onAttributes {hardware.osys::rfg::sticky} {
                 lappend attributes "sticky=\"1\""
             }
 
-            $field onAttribute {hardware.osys::rfg::software_write_xor} {
+            $field onAttributes {hardware.osys::rfg::software_write_xor} {
                 lappend attributes "sw_write_xor=\"1\""
             }
 
-            $field onAttribute {software.osys::rfg::software_write_clear} {
+            $field onAttributes {software.osys::rfg::software_write_clear} {
                 lappend attributes "sw_write_clr=\"1\""
             }
 
