@@ -1,4 +1,4 @@
-package provide osys::rfg::generator::annoXML 1.0.0
+package provide osys::rfg::generator::rfsannoXML 1.0.0
 package require osys::rfg
 package require Itcl 3.4
 package require odfi::common
@@ -7,7 +7,7 @@ package require odfi::files
 
 package require odfi::ewww::webdata 1.0.0
 
-namespace eval osys::rfg::generator::annoXML {
+namespace eval osys::rfg::generator::rfsannoXML {
 
 
     proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
@@ -15,7 +15,7 @@ namespace eval osys::rfg::generator::annoXML {
     ##############################
     ## Implementation of generator
     ##############################
-    itcl::class AnnoXML {
+    itcl::class RfsannoXML {
 
         public variable registerFile 
 
