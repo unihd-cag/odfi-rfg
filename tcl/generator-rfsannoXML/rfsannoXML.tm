@@ -10,7 +10,7 @@ package require odfi::ewww::webdata 1.0.0
 namespace eval osys::rfg::generator::rfsannoXML {
 
 
-    proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
+   
 
     ##############################
     ## Implementation of generator
@@ -25,6 +25,9 @@ namespace eval osys::rfg::generator::rfsannoXML {
             #########
             set registerFile $cRegisterFile
         }
+
+        public method ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
+
         public method produceToFile targetFile {
             set res [produce ]
             odfi::files::writeToFile $targetFile $res 
