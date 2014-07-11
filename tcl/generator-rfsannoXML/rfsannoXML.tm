@@ -26,7 +26,7 @@ namespace eval osys::rfg::generator::rfsannoXML {
             set registerFile $cRegisterFile
         }
 
-        public method ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
+
 
         public method produceToFile targetFile {
             set res [produce ]
@@ -73,6 +73,8 @@ namespace eval osys::rfg::generator::rfsannoXML {
 
         }
 
+        ##public method ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
+
         public method writeGroup {out group} {
 
             ## No Name on top 
@@ -113,7 +115,7 @@ namespace eval osys::rfg::generator::rfsannoXML {
              #puts "Reg: $register"
 
             if {[$register isa osys::rfg::RamBlock]} {
-                odfi::common::println "<ramblock name=\"[$register name]\" desc=\"[$register description]\" absolute_address=\"[$register getAttributeValue software.osys::rfg::absolute_address]\" addrsize=\"[ld $register depth]\" width=\"[$register size]\">"  $out                         
+                odfi::common::println "<ramblock name=\"[$register name]\" desc=\"[$register description]\" absolute_address=\"[$register getAttributeValue software.osys::rfg::absolute_address]\" addrsize=\"[expr {int(ceil(log([$register depth])/[expr log(2)]))}]\" width=\"[$register size]\">"  $out                         
             } else {
                 odfi::common::println "<reg64 name=\"[$register name]\" desc=\"[$register description]\" absolute_address=\"[$register getAttributeValue software.osys::rfg::absolute_address]\">"  $out 
             }
