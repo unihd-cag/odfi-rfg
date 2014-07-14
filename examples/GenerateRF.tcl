@@ -4,6 +4,13 @@ package require osys::rfg::address::hierarchical
 package require osys::rfg::generator::veriloggenerator
 package require osys::rfg::generator::htmlbrowser
 
+#########################################################
+## Output folders for the generated files
+#########################################################
+set verilog_folder ""
+set doc_folder ""
+set xml_folder ""
+
 ## reading the top.rf file 
 if {$argc == 1} {
 	set rf_head [lindex $argv 0]
@@ -50,27 +57,27 @@ foreach rf $rf_list {
 			## generate verilog code
 			set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
 			if {[$rf parent]== ""} {
-				set destinationFile "RF_Wrapper.v"
+				set destinationFile "${verilog_folder}RF_Wrapper.v"
 	  			$veriloggenerator produce_RF_Wrapper $destinationFile
 	  			puts ""
 	  			puts "generate RF_Wrapper:"
-	  			puts "[$result name].rf > RF_Wrapper.v"
+	  			puts "[$result name].rf > ${verilog_folder}RF_Wrapper.v"
 	  			puts ""
 			}
-			set destinationFile "[$result name].v"
+			set destinationFile "${verilog_folder}[$result name].v"
 			$veriloggenerator produce_RegisterFile $destinationFile
 			puts ""
 	 		puts "generate verilog description:"
-	 		puts "[$result name].rf > [$result name].v"
+	 		puts "[$result name].rf > ${verilog_folder}[$result name].v"
 	 		puts ""			
 
 	 		## generate html documentation
 	 		set htmlbrowser [::new osys::rfg::generator::htmlbrowser::HTMLBrowser #auto $result]
-	 		set destinationFile "[$result name].html"
+	 		set destinationFile "${doc_folder}[$result name].html"
 	 		$htmlbrowser produceToFile $destinationFile
 	 		puts ""
 	 		puts "generate htmlbrowser:"
-	 		puts "[$result name].rf > [$result name].html"
+	 		puts "[$result name].rf > ${doc_folder}[$result name].html"
  			puts ""
 
 		}

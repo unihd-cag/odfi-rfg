@@ -2,7 +2,7 @@ package provide osys::rfg::generator::rfsbackport 1.0.0
 package require osys::rfg
 package require Itcl 3.4
 package require odfi::common
-package require odfi::list 2.0.0
+package require odfi::list
 package require odfi::files
 
 package require odfi::ewww::webdata 1.0.0

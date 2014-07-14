@@ -184,8 +184,8 @@ proc writeRamBlock {ramBlock} {
     <div>
         <h4>Scala API Path</h4>
         <pre>
-    var [$ramBlock name] = read(\"$ramBlockPath\")
-    write(value) into \"$ramBlockPath\"
+    var [$ramBlock name] = read(\"$ramBlockPath[\$address]\")
+    write(value) into \"$ramBlockPath[\$address]\"
         </pre>
     </div>
 

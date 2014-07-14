@@ -12,7 +12,6 @@
 - external RAM
 - create ASIC dependent hardware on generation and not with defines in verilog
 - internal RFs
-- rewrite checker (checker needed?, maybe directly in addressing)
 - add hardware_clear in RF Wrapper
 - do not create empty Hardware registers in the description
 
@@ -26,19 +25,22 @@
 ### HTML Generator 
 
 - html-generator rreinit source register not working 
-- blockRams not working
 - Scala API snippet RAM 
 
 ### rfs_to_rfg Tool 
 
 - check conversion for ramBlocks
 
+### rfs Backport ###
+
+- bring rfs Backport up to date
+
 ### Generation Script 
 
-- add GenerateRF_Defines.tm to set output directories
+- add set output directories in generator script
+- programm support for verilog defines
 
 ### Documentation/ Presentation
 
-- write presentation
-- write Getting Started and HowTo's
+- HowTo for developers
 - clean github repository

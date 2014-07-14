@@ -1,0 +1,27 @@
+This is pdfTeX, Version 3.1415926-1.40.10 (TeX Live 2009/Debian) (format=pdflatex 2013.11.22)  10 JUL 2014 15:50
+entering extended mode
+ %&-line parsing enabled.
+**/home/tmarkus/Documents/RegFileGen/RFG/rfg/examples/rfs_backport/convert.tcl
+(/home/tmarkus/Documents/RegFileGen/RFG/rfg/examples/rfs_backport/convert.tcl
+LaTeX2e <2009/09/24>
+Babel <v3.8l> and hyphenation patterns for english, usenglishmax, dumylang, noh
+yphenation, loaded.
+! You can't use `macro parameter character #' in vertical mode.
+l.1 #
+     !/usr/bin/env tclsh
+? 
+! Emergency stop.
+l.1 #
+     !/usr/bin/env tclsh
+End of file on the terminal!
+
+ 
+Here is how much of TeX's memory you used:
+ 7 strings out of 495061
+ 330 string characters out of 1182620
+ 45108 words of memory out of 3000000
+ 3282 multiletter control sequences out of 15000+50000
+ 3640 words of font info for 14 fonts, out of 3000000 for 9000
+ 28 hyphenation exceptions out of 8191
+ 5i,0n,1p,100b,8s stack positions out of 5000i,500n,10000p,200000b,50000s
+!  ==> Fatal error occurred, no output PDF file produced!
