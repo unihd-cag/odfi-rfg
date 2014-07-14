@@ -30,6 +30,7 @@
 ### rfs_to_rfg Tool 
 
 - check conversion for ramBlocks
+- add sticky and software_write_xor
 
 ### rfs Backport ###
 

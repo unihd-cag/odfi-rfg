@@ -3,6 +3,8 @@ package require osys::rfg 1.0.0
 package require osys::rfg::address::hierarchical
 package require osys::rfg::generator::veriloggenerator
 package require osys::rfg::generator::htmlbrowser
+package require osys::rfg::generator::rfsannoXML
+
 
 #########################################################
 ## Output folders for the generated files
@@ -80,5 +82,9 @@ foreach rf $rf_list {
 	 		puts "[$result name].rf > ${doc_folder}[$result name].html"
  			puts ""
 
+ 			## generate annotated rfs xml file 
+ 			set rfsannoXML [::new osys::rfg::generator::rfsannoXML::RfsannoXML #auto $result]
+ 			set destinationFile "[$result name].xml"
+ 			$rfsannoXML produceToFile $destinationFile 
 		}
 }
