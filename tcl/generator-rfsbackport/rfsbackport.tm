@@ -2,17 +2,20 @@ package provide osys::rfg::generator::rfsbackport 1.0.0
 package require osys::rfg
 package require Itcl 3.4
 package require odfi::common
-package require odfi::list
+package require odfi::list 2.0.0
 package require odfi::files
 
 package require odfi::ewww::webdata 1.0.0
 
 namespace eval osys::rfg::generator::rfsbackport {
 
+
+   
+
     ##############################
     ## Implementation of generator
     ##############################
-    itcl::class RFSBackport {
+    itcl::class Rfsbackport {
 
         public variable registerFile 
 
@@ -23,6 +26,12 @@ namespace eval osys::rfg::generator::rfsbackport {
             set registerFile $cRegisterFile
         }
 
+
+
+        public method produceToFile targetFile {
+            set res [produce ]
+            odfi::files::writeToFile $targetFile $res 
+        }
         public method produce args {
 
 
@@ -64,6 +73,8 @@ namespace eval osys::rfg::generator::rfsbackport {
 
         }
 
+        ##public method ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
+
         public method writeGroup {out group} {
 
             ## No Name on top 
@@ -104,26 +115,16 @@ namespace eval osys::rfg::generator::rfsbackport {
              #puts "Reg: $register"
 
             if {[$register isa osys::rfg::RamBlock]} {
-                odfi::common::println "<ramblock name=\"[$register name]\" desc=\"[$register description]\" addrsize=\"[string length [format %b [$register depth]]]\" width=\"[$register size]\">"  $out                         
+                odfi::common::println "<ramblock name=\"[$register name]\" desc=\"[$register description]\" absolute_address=\"[$register getAttributeValue software.osys::rfg::absolute_address]\" addrsize=\"[expr {int(ceil(log([$register depth])/[expr log(2)]))}]\" width=\"[$register size]\">"  $out                         
             } else {
-                odfi::common::println "<reg64 name=\"[$register name]\" desc=\"[$register description]\" >"  $out 
+                odfi::common::println "<reg64 name=\"[$register name]\" desc=\"[$register description]\" absolute_address=\"[$register getAttributeValue software.osys::rfg::absolute_address]\">"  $out 
             }
             odfi::common::printlnIndent
-       
 
-            ## Specical Stuff 
-            #########################
-
-            #$register onEachAttributes2 {
-            #    puts "Attr: $it"
-#
-             #   $it onEachAttribute2 {
-             #       puts "---> $it"
-            #    }
-            # }
-            ## rreinit 
-            if {[$register hasAttribute hardware.global.rreinit_source]} {
-                odfi::common::println "<rreinit/>" $out 
+            ## rreinit source 
+            $register onAttributes {hardware.osys::rfg::rreinit_source} {
+                ## ToDo check for =1 and rreinit source name 
+                odfi::common::println "<rreinit_source/>" $out 
             }
 
             ## Write Fields
@@ -148,67 +149,71 @@ namespace eval osys::rfg::generator::rfsbackport {
             ## Reset 
             set reset "reset=\"[$field reset]\""
 
-
-             #$field onEachAttributes2 {
-             #   puts "Attr: $it"
-
-             #   $it onEachAttribute2 {
-             #       puts "---> $it"
-              #  }
-             #}
-
             ## Prepare attributes
             set attributes [list ]
-            $field onEachAttributes {
 
-                #puts "Attributes: $attrs"
-                if {[$attrs name]=="hardware"} {
+            $field onAttributes {hardware.osys::rfg::rw} {
+                lappend attributes "hw=\"rw\""
+            } otherwise {
 
-                    ## Rights
-                    ################
-                    if {[$attrs contains "global.rw"]} {
-                        lappend attributes "hw=\"rw\""
-                    } elseif {[$attrs contains "global.ro"]} {
-                        lappend attributes "hw=\"ro\""
-                    } elseif {[$attrs contains "global.wo"]} {
+                $field onAttributes {hardware.osys::rfg::ro} {
+                    lappend attributes "hw=\"ro\""
+                } otherwise {
+
+                    $field onAttributes {hardware.osys::rfg::wo} {
                         lappend attributes "hw=\"wo\""
-                    } else {
+                    } otherwise {
                         lappend attributes "hw=\"\""
                     }
+                }
+            }
 
-                    ## Special stuff
-                    ##################
-                    if {[$attrs contains "global.counter"]} {
-                        lappend attributes "counter=\"1\""
-                        set reset ""
-                    }
-                    if {[$attrs contains "global.rreinit"]} {
-                        lappend attributes "rreinit=\"1\""
-                        set reset ""
-                    }
+            $field onAttributes {software.osys::rfg::rw} {
+                lappend attributes "sw=\"rw\""
+            } otherwise {
 
-                } elseif {[$attrs name]=="software"} {
+                $field onAttributes {software.osys::rfg::ro} {
+                    lappend attributes "sw=\"ro\""
+                } otherwise {
 
-                    if {[$attrs contains "global.rw"]} {
-                        lappend attributes "sw=\"rw\""
-                    } elseif {[$attrs contains "global.ro"]} {
-                        lappend attributes "sw=\"ro\""
-                    } elseif {[$attrs contains "global.wo"]} {
+                    $field onAttributes {software.osys::rfg::wo} {
                         lappend attributes "sw=\"wo\""
-                    } else {
+                    } otherwise {
                         lappend attributes "sw=\"\""
                     }
-
                 }
-
             }
 
-            ## Make sure hw and sw attributes are present
-            if {[lsearch -glob $attributes "hw*"]==-1} {
-                lappend attributes "hw=\"\""
+            $field onAttributes {hardware.osys::rfg::counter} {
+                lappend attributes "counter=\"1\""
             }
-            if {[lsearch -glob $attributes "sw*"]==-1} {
-                lappend attributes "sw=\"\""
+
+            $field onAttributes {hardware.osys::rfg::rreinit} {
+                lappend attributes "rreinit=\"1\""
+            }
+
+            $field onAttributes {hardware.osys::rfg::hardware_wen} {
+                lappend attributes "hw_wen=\"1\""
+            }
+
+            $field onAttributes {hardware.osys::rfg::sofware_written} {
+                lappend attributes "sw_written=\"[$it getAttributeValue hardware.osys::rfg::software_written]\""
+            }
+
+            $field onAttributes {hardware.osys::rfg::hardware_clear} {
+                lappend attributes "hw_clr=\"1\"" 
+            }
+
+            $field onAttributes {hardware.osys::rfg::sticky} {
+                lappend attributes "sticky=\"1\""
+            }
+
+            $field onAttributes {hardware.osys::rfg::software_write_xor} {
+                lappend attributes "sw_write_xor=\"1\""
+            }
+
+            $field onAttributes {software.osys::rfg::software_write_clear} {
+                lappend attributes "sw_write_clr=\"1\""
             }
 
             ## Output 
@@ -221,42 +226,8 @@ namespace eval osys::rfg::generator::rfsbackport {
                 odfi::common::println "<hwreg name=\"[$field name]\"  width=\"[$field width]\" desc=\"[$field description]\" $reset [join $attributes] />"  $out 
             }
             
-    
-        
-
         }
 
-        
-
     }
-
-
-    #####################
-    ## Utilities
-    #####################
-
-
-    ## Converts the file at provided location to RFS and returns the result as string
-    proc convertFileToRFS {filePath {targetFile ""}} {
-
-        ## Convert 
-        ################
-        set res [namespace eval ::osys::rfg "source $filePath"]
-
-        set gen [osys::rfg::getGenerator "RFSBackport" $res]
-
-        set res [$gen produce]
-
-        ## Write to file if required
-        ####################
-        if {$targetFile!=""} {
-            odfi::files::writeToFile $targetFile $res
-        }
-
-        ## Return 
-        return $res
-
-    }
-
 
 }

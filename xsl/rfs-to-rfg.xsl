@@ -311,6 +311,16 @@ group <xsl:value-of select="@name"/> {
     </xsl:if>    
     <xsl:text>
 </xsl:text>
+    <xsl:if test="@sticky">
+        <xsl:value-of select="$hier-level-tab-more"/>sticky
+    </xsl:if>    
+    <xsl:text>
+</xsl:text>
+    <xsl:if test="@sw_write_xor">
+        <xsl:value-of select="$hier-level-tab-more"/>software_write_xor
+    </xsl:if>    
+    <xsl:text>
+</xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/>}
 
 <xsl:text>

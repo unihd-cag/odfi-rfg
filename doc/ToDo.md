@@ -12,8 +12,8 @@
 - external RAM
 - create ASIC dependent hardware on generation and not with defines in verilog
 - internal RFs
-- add hardware_clear in RF Wrapper
 - do not create empty Hardware registers in the description
+- fields for ramBlocks
 
 ### Unit Tests 
 
@@ -21,6 +21,7 @@
 - add some unit-test for addressing 
 - add internal Registerfiles test to hierarchical unit-test
 - unit-test enviroment
+- unit-test for fields in block rams 
 
 ### HTML Generator 
 
@@ -30,16 +31,21 @@
 ### rfs_to_rfg Tool 
 
 - check conversion for ramBlocks
-- add sticky and software_write_xor
 
 ### rfs Backport ###
 
-- bring rfs Backport up to date
+- check generated xml
 
 ### Generation Script 
 
-- add set output directories in generator script
-- programm support for verilog defines
+- program support for verilog defines
+
+### RFG API 
+- repeat
+
+### Parameter
+- external with optional, required
+- parameter.tm 
 
 ### Documentation/ Presentation
 

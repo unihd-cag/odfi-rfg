@@ -3,7 +3,7 @@ package require osys::rfg 1.0.0
 package require osys::rfg::address::hierarchical
 package require osys::rfg::generator::veriloggenerator
 package require osys::rfg::generator::htmlbrowser
-package require osys::rfg::generator::rfsannoXML
+package require osys::rfg::generator::rfsbackport
 
 
 #########################################################
@@ -83,8 +83,12 @@ foreach rf $rf_list {
  			puts ""
 
  			## generate annotated rfs xml file 
- 			set rfsannoXML [::new osys::rfg::generator::rfsannoXML::RfsannoXML #auto $result]
- 			set destinationFile "[$result name].xml"
- 			$rfsannoXML produceToFile $destinationFile 
+ 			set rfsbackport [::new osys::rfg::generator::rfsbackport::Rfsbackport #auto $result]
+ 			set destinationFile "${xml_folder}[$result name].xml"
+ 			$rfsbackport produceToFile $destinationFile 
+ 			puts ""
+	 		puts "generate xml:"
+	 		puts "[$result name].rf > ${xml_folder}[$result name].xml"
+ 			puts ""
 		}
 }
