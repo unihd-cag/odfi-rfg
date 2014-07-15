@@ -282,16 +282,16 @@
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				set registerfile $it
 				if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
-					puts "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address,"
+					lappend signalList "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
 				} else {
-					puts "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address,"
+					lappend signalList "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
 				}
-				puts "	input wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_read_data,"
-				puts "	input wire [getName $registerfile]_invalid_address,"
-				puts "	input wire [getName $registerfile]_access_complete,"
-				puts "	output reg [getName $registerfile]_read_en,"
-				puts "	output reg [getName $registerfile]_write_en,"
-				puts "	output reg\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_write_data,"
+				lappend signalList "	input wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_read_data"
+				lappend signalList "	input wire [getName $registerfile]_invalid_address"
+				lappend signalList "	input wire [getName $registerfile]_access_complete"
+				lappend signalList "	output reg [getName $registerfile]_read_en"
+				lappend signalList "	output reg [getName $registerfile]_write_en"
+				lappend signalList "	output reg\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_write_data"
  				##writeBlackbox $it "[$registerfile name]_"
 				return false
 			} else {

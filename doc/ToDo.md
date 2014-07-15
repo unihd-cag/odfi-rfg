@@ -1,48 +1,55 @@
 ## ToDo:
 
+- SNQ
 
+### Addressing
+ - calculate with aligner attribute
 
 ### Verilog Generator 
 
 - different RAMs
 - RAM read/write rights
 - external RAM
-- create ASIC dependet hardware on generation and not with defines in verilog
-- Trigger
+- create ASIC dependent hardware on generation and not with defines in verilog
 - internal RFs
-- aligner are not working
-	- add aligner as class in the rfg.tm
-	- add aligner in the addressing scheme
-- rewrite checker (checker needed)
-- add hardware_clear in RF Wrapper
+- do not create empty Hardware registers in the description
+- fields for ramBlocks
 
 ### Unit Tests 
 
 - add unit-test for RF_Wrapper
-- add unit-test for RF.rf
+- add some unit-test for addressing 
 - add internal Registerfiles test to hierarchical unit-test
 - unit-test enviroment
+- unit-test for fields in block rams 
 
 ### HTML Generator 
 
 - html-generator rreinit source register not working 
+- Scala API snippet RAM 
 
 ### rfs_to_rfg Tool 
 
-- te ? in ht3_rf.xml
-- aligner to bits?
-- external RAM 
 - check conversion for ramBlocks
+
+### rfs Backport ###
+
+- check generated xml
 
 ### Generation Script 
 
-- modify rfg script for simple usage
-	- test a huge registerfile with the example script
+- program support for verilog defines
+- clean up 
+- generate .f
+
+### RFG API 
+- repeat
+
+### Parameter
+- external with optional, required
+- parameter.tm 
 
 ### Documentation/ Presentation
 
-- write presentation
-- write Getting Started and HowTo's
-- find place for this and the project (github.io?, redmine) 
+- HowTo for developers
 - clean github repository
-- add V0.8 for RFG to odfi-tools
