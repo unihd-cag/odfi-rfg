@@ -65,6 +65,15 @@ foreach rf $rf_list {
 	  			puts "generate RF_Wrapper:"
 	  			puts "[$result name].rf > ${verilog_folder}RF_Wrapper.v"
 	  			puts ""
+
+	  			## generate annotated rfs xml file 
+	 			set rfsbackport [::new osys::rfg::generator::rfsbackport::Rfsbackport #auto $result]
+	 			set destinationFile "${xml_folder}[$result name].xml"
+	 			$rfsbackport produceToFile $destinationFile 
+	 			puts ""
+		 		puts "generate xml:"
+		 		puts "[$result name].rf > ${xml_folder}[$result name].xml"
+	 			puts ""
 			}
 			set destinationFile "${verilog_folder}[$result name].v"
 			$veriloggenerator produce_RegisterFile $destinationFile
@@ -80,15 +89,6 @@ foreach rf $rf_list {
 	 		puts ""
 	 		puts "generate htmlbrowser:"
 	 		puts "[$result name].rf > ${doc_folder}[$result name].html"
- 			puts ""
-
- 			## generate annotated rfs xml file 
- 			set rfsbackport [::new osys::rfg::generator::rfsbackport::Rfsbackport #auto $result]
- 			set destinationFile "${xml_folder}[$result name].xml"
- 			$rfsbackport produceToFile $destinationFile 
- 			puts ""
-	 		puts "generate xml:"
-	 		puts "[$result name].rf > ${xml_folder}[$result name].xml"
  			puts ""
 		}
 }
