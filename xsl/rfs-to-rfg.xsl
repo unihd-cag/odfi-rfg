@@ -25,7 +25,7 @@ osys::rfg::registerFile <xsl:value-of select="./regroot/@name"/> {
 
     <xsl:template match="/regroot">
 
-group <xsl:value-of select="@name"/> {
+registerFile <xsl:value-of select="@name"/> {
     
 <xsl:apply-templates>
 </xsl:apply-templates>

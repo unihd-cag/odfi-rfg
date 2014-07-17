@@ -78,14 +78,12 @@ namespace eval osys::rfg::generator::rfsbackport {
         public method writeGroup {out group} {
 
             ## No Name on top 
-            set name ""
-            if {[$group parent]!=""} {
-                set name "name=\"[$group name]\""
-            } else {
+            set name "name=\"[$group name]\""
+            if {[$group parent]==""} {
                 odfi::common::println "<regfile>" $out
-            }
+            } 
 
-            odfi::common::println "<regroot _baseAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" _absolute_address=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" name=\"$name\" desc=\"[$group description]\">"  $out
+            odfi::common::println "<regroot _baseAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" _absoluteAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" $name desc=\"[$group description]\">"  $out
             
             odfi::common::printlnIndent
             
@@ -113,16 +111,16 @@ namespace eval osys::rfg::generator::rfsbackport {
              #puts "Reg: $register"
 
             if {[$register isa osys::rfg::RamBlock]} {
-                odfi::common::println "<ramblock name=\"[$register name]\" desc=\"[$register description]\" _absolute_address=\"0x[format %x [$register getAttributeValue software.osys::rfg::absolute_address]]\" addrsize=\"[expr {int(ceil(log([$register depth])/[expr log(2)]))}]\" width=\"[$register width]\">"  $out                         
+                odfi::common::println "<ramblock name=\"[$register name]\" desc=\"[$register description]\" _absoluteAddress=\"0x[format %x [$register getAttributeValue software.osys::rfg::absolute_address]]\" addrsize=\"[expr {int(ceil(log([$register depth])/[expr log(2)]))}]\" width=\"[$register width]\">"  $out                         
             } else {
-                odfi::common::println "<reg64 name=\"[$register name]\" desc=\"[$register description]\" _absolute_address=\"0x[format %x [$register getAttributeValue software.osys::rfg::absolute_address]]\">"  $out 
+                odfi::common::println "<reg64 name=\"[$register name]\" desc=\"[$register description]\" _absoluteAddress=\"0x[format %x [$register getAttributeValue software.osys::rfg::absolute_address]]\">"  $out 
             }
             odfi::common::printlnIndent
 
             ## rreinit source 
             $register onAttributes {hardware.osys::rfg::rreinit_source} {
                 ## ToDo check for =1 and rreinit source name 
-                odfi::common::println "<rreinit_source/>" $out 
+                odfi::common::println "<rreinit/>" $out 
             }
 
             ## Write Fields

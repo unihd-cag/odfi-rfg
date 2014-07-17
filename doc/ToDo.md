@@ -26,15 +26,10 @@
 ### HTML Generator 
 
 - html-generator rreinit source register not working 
-- Scala API snippet RAM 
 
 ### rfs_to_rfg Tool 
 
 - check conversion for ramBlocks
-
-### rfs Backport ###
-
-- check generated xml
 
 ### Generation Script 
 
@@ -53,3 +48,7 @@
 
 - HowTo for developers
 - clean github repository
+
+### rfg_v.h 
+
+- generate width defines for registerfiles in ../include
