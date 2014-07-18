@@ -35,7 +35,6 @@
 ### Generation Script 
 
 - program support for verilog defines
-- generate .f
 
 ### RFG API 
 - repeat
