@@ -383,7 +383,14 @@ registerFile <xsl:value-of select="@name"/> {
         if {[info exists <xsl:value-of select="$var"/>]} {
     </xsl:if>
 </xsl:template>
-    
+    <!-- ifndef -->
+    <xsl:template match="*/text()[fn:starts-with(fn:normalize-space(),'#ifndef ')]">
+        <!-- Search variable name-->
+    <xsl:if test="fn:matches(fn:normalize-space(),'#ifndef ')">
+        <xsl:variable name="var"><xsl:value-of select="fn:replace(fn:normalize-space(),'#ifndef ','')"/></xsl:variable>
+        if {![info exists <xsl:value-of select="$var"/>]} {
+    </xsl:if>
+</xsl:template>    
     <!-- #else -->
     <xsl:template match="*/text()[fn:starts-with(fn:normalize-space(),'#else')]">
 
