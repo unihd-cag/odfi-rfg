@@ -66,17 +66,24 @@ namespace eval osys::rfg::generator::rfgheader {
             odfi::common::println "`ifndef RFG_DEFINES" $out
             odfi::common::println "`define RFG_DEFINES" $out
             odfi::common::println "`define RFG_DATA_WIDTH [$registerFile register_size]" $out
-            
-            odfi::common::println "`define RFG_[string toupper [$registerFile name]]_RF_AWIDTH [expr [getAddrBits $registerFile]-3]" $out
-            odfi::common::println "`define RFG_[string toupper [$registerFile name]]_RF_RWIDTH [$registerFile register_size]" $out
-            odfi::common::println "`define RFG_[string toupper [$registerFile name]]_RF_WWIDTH [$registerFile register_size]" $out
+            if {[expr [getAddrBits $registerFile]-3] == 0} {
+                odfi::common::println "`define RFG_[string toupper [$registerFile name]]_AWIDTH 1" $out
+            } else {
+                odfi::common::println "`define RFG_[string toupper [$registerFile name]]_AWIDTH [expr [getAddrBits $registerFile]-3]" $out
+            }
+            odfi::common::println "`define RFG_[string toupper [$registerFile name]]_RWIDTH [$registerFile register_size]" $out
+            odfi::common::println "`define RFG_[string toupper [$registerFile name]]_WWIDTH [$registerFile register_size]" $out
             
             $registerFile walkDepthFirst {
 
                 if {[$it isa osys::rfg::RegisterFile]} {
-                    odfi::common::println "`define RFG_[string toupper [$it name]]_RF_AWIDTH [expr [getAddrBits $it]-3]" $out
-                    odfi::common::println "`define RFG_[string toupper [$it name]]_RF_RWIDTH [$it register_size]" $out
-                    odfi::common::println "`define RFG_[string toupper [$it name]]_RF_WWIDTH [$it register_size]" $out
+                    if {[expr [getAddrBits $registerFile]-3] == 0} {
+                        odfi::common::println "`define RFG_[string toupper [$registerFile name]]_AWIDTH 1" $out
+                    } else {
+                        odfi::common::println "`define RFG_[string toupper [$it name]]_AWIDTH [expr [getAddrBits $it]-3]" $out
+                    }
+                    odfi::common::println "`define RFG_[string toupper [$it name]]_RWIDTH [$it register_size]" $out
+                    odfi::common::println "`define RFG_[string toupper [$it name]]_WWIDTH [$it register_size]" $out
                 }
                 return true
             }

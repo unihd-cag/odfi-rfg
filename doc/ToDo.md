@@ -22,6 +22,7 @@
 - add internal Registerfiles test to hierarchical unit-test
 - unit-test enviroment
 - unit-test for fields in block rams 
+- unit-test for rfs_backport
 
 ### HTML Generator 
 
@@ -34,8 +35,6 @@
 ### Generation Script 
 
 - program support for verilog defines
-- clean up 
-- generate .f
 
 ### RFG API 
 - repeat
@@ -48,7 +47,3 @@
 
 - HowTo for developers
 - clean github repository
-
-### rfg_v.h 
-
-- generate width defines for registerfiles in ../include

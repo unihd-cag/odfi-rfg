@@ -59,6 +59,7 @@ file mkdir $verilog_folder $doc_folder $xml_folder $verilog_header_folder
 
 set rf_list {}
 set generated_list {}
+set fp [open "${verilog_folder}/[$rf_head name].f" w]
 
 ## add top register file to list
 lappend rf_list $rf_head
@@ -93,6 +94,7 @@ foreach rf $rf_list {
 			if {[$rf parent]== ""} {
 				set destinationFile "${verilog_folder}RF_Wrapper.v"
 	  			$veriloggenerator produce_RF_Wrapper $destinationFile
+	  			puts $fp "[pwd]/$destinationFile"
 	  			puts ""
 	  			puts "generate RF_Wrapper:"
 	  			puts "[$result name].rf > $destinationFile"
@@ -118,6 +120,7 @@ foreach rf $rf_list {
 			}
 			set destinationFile "${verilog_folder}[$result name].v"
 			$veriloggenerator produce_RegisterFile $destinationFile
+			puts $fp "[pwd]/$destinationFile"
 			puts ""
 	 		puts "generate verilog description:"
 	 		puts "[$result name].rf > $destinationFile"
