@@ -860,7 +860,7 @@
 		puts "		end"
 		puts "		else"
 		puts "		begin"
-		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $subRF]*[$RF register_size]/8)]
+		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]>>[ld [getRFsize $subRF]]]
 		set care [format %x $care]
 		puts "			if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
 		puts "			begin"
@@ -1008,7 +1008,11 @@
 			}
 			
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
-				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
+				##::puts "Absolute Address: [$it getAttributeValue software.osys::rfg::absolute_address]"
+				##::puts "Size in Bits: [ld [getRFsize $it]]"
+				##::puts "Shifted Result: [expr [$it getAttributeValue software.osys::rfg::absolute_address]>>[ld [getRFsize $it]]]"
+				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]>>[ld [getRFsize $it]]]
+				##set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
 				set care [format %x $care]
 				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
 				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
