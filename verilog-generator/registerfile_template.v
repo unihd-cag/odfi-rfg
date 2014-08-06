@@ -4,6 +4,29 @@
 	# logarithmus dualis function for address bit calculation
 	proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
 	
+	# function to getRFmaxWidth
+	proc getRFmaxWidth {$registerfile} {
+	 	set maxwidth 0
+	 	$registerfile walkDepthFirst {
+	 		if {[$it isa osys::rfg::RamBlock]} {
+	 			if {$maxwidth < [$it width]} {
+	 				set maxwidth [$it width]
+	 			}
+	 		}
+	 		if {[$it isa osys::rfg::Register]} {
+	 			set tmp 0
+	 			$it onEachField {
+	 				incr tmp [$it width]
+	 			}
+	 			if {$maxwidth < $tmp} {
+	 				set maxwidth $tmp
+	 			}
+	 		}
+	 		return true
+	 	}
+	 	return $maxwidth
+	} 
+
 	# function to get the address Bits for the register file 
 	proc getRFsize {registerfile} {
 		set size 0
@@ -608,14 +631,14 @@
 			set equal [expr [$ramBlock getAttributeValue software.osys::rfg::absolute_address]/([$ramBlock depth]*[$registerFile register_size]/8)]
 			if {[expr [getAddrBits $registerFile]-1] < [expr [ld [$ramBlock depth]]+3]} {
 				puts "			[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
-				puts "			[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "			[getName $ramBlock]_rf_wdata <= write_data\[[expr [$ramBlock width] -1]:0\];"
 				puts "			[getName $ramBlock]_rf_wen <= write_en;"
 				puts "			[getName $ramBlock]_rf_ren <= read_en;"
 			} else {
 				puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
 				puts "			begin"
 				puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
-				puts "				[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "				[getName $ramBlock]_rf_wdata <= write_data\[[expr [$ramBlock width] -1]:0\];"
 				puts "				[getName $ramBlock]_rf_wen <= write_en;"
 				puts "				[getName $ramBlock]_rf_ren <= read_en;"
 				puts "			end"
