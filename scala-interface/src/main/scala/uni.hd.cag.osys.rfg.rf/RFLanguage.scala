@@ -64,6 +64,16 @@ trait RFLanguage {
     }
 
   }
+  
+  /**
+   * Creates a Blocking Nested transaction and discards it at the end of the closure
+   */
+  def onBlocking(cl: => Any) = {
+    var nestedTransaction = Transaction()
+    Transaction.doBlocking {
+      cl
+    }
+  }
 
   // Poll Language
   // poll "valueable" until value for time

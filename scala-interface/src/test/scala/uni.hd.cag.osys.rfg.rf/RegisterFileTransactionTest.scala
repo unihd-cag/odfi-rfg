@@ -127,14 +127,14 @@ class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with G
       Then("Getting buffer value should return reset value from register")
 
       node.value.pull()
-      expectResult("100adfeabcd1a")(java.lang.Long.toHexString(node.value))
+      assertResult("100adfeabcd1a")(java.lang.Long.toHexString(node.value))
 
-      /*expectResult(None)(node.value.toString)
+      /*assertResult(None)(node.value.toString)
 
             And("Reading again should return buffered value from Transaction")
 
                  //node.value.pull()
-                 //expectResult("42")(node.value.toString)*/
+                 //assertResult("42")(node.value.toString)*/
 
     }
 
@@ -158,8 +158,8 @@ class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with G
       node.value.set(80)
       Transaction().commit
 
-      expectResult(1, "Write Count must be 1")(testDevice.writeCount)
-      expectResult(80)(testDevice.values(node.absoluteAddress))
+      assertResult(1, "Write Count must be 1")(testDevice.writeCount)
+      assertResult(80)(testDevice.values(node.absoluteAddress))
 
     }
 
@@ -182,13 +182,13 @@ class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with G
 
           var node = rf.register(nodeRegisterPath)
           node.pull
-        //expectResult()(node.)
+        //assertResult()(node.)
 
       }
 
       var res: Long = nodeObj.registerValue(nodeRegisterPath)
 
-      expectResult("100adfeabcd1a")(java.lang.Long.toHexString(res))
+      assertResult("100adfeabcd1a")(java.lang.Long.toHexString(res))
 
     }
 
@@ -214,8 +214,8 @@ class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with G
       }
 
       Then("Read Back values should return matching results")
-      expectResult(80)(node0Obj.registerValue(nodeRegisterPath))
-      expectResult(81)(node01Obj.registerValue(nodeRegisterPath))
+      assertResult(80)(node0Obj.registerValue(nodeRegisterPath))
+      assertResult(81)(node01Obj.registerValue(nodeRegisterPath))
 
     }
 
@@ -238,18 +238,18 @@ class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with G
 
           // Verify value change
           //----------------------------
-          expectResult("100adfeabcd1a")(java.lang.Long.toHexString(node.value))
+          assertResult("100adfeabcd1a")(java.lang.Long.toHexString(node.value))
 
           //-- Change id 
           nodeIdField.value = java.lang.Long.decode("0xADCE")
-          expectResult("100adceabcd1a")(java.lang.Long.toHexString(node.value))
-        //expectResult()(node.)
+          assertResult("100adceabcd1a")(java.lang.Long.toHexString(node.value))
+        //assertResult()(node.)
 
       }
 
       // Chec kagainst complete register
       var res: Long = nodeObj.registerValue(nodeRegisterPath)
-      expectResult("100adceabcd1a")(java.lang.Long.toHexString(res))
+      assertResult("100adceabcd1a")(java.lang.Long.toHexString(res))
 
     }
 
