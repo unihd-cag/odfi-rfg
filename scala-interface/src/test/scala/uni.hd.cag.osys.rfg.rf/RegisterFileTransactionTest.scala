@@ -12,24 +12,7 @@ import uni.hd.cag.osys.rfg.rf.device.simulation._
 
 import scala.language.implicitConversions
 
-class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfter with BeforeAndAfterEach {
-
-  var registerfile: RegisterFile = _
-
-  var nodeRegisterPath = "extoll_rf/info_rf/node"
-
-  before {
-    registerfile = RegisterFile(getClass().getClassLoader().getResource("extoll_rf.anot.xml"))
-  }
-
-  /**
-   * Clean transactions
-   */
-  override def beforeEach = {
-    Transaction.discardAll
-  }
-
-  // Test Purpose Implementation classes
+// Test Purpose Implementation classes
   //------------------
   class TestDevice extends Device {
 
@@ -67,6 +50,25 @@ class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with G
     }
 
   }
+
+class RegisterFileTransactionTest extends FeatureSpec with ShouldMatchers with GivenWhenThen with BeforeAndAfter with BeforeAndAfterEach {
+
+  var registerfile: RegisterFile = _
+
+  var nodeRegisterPath = "extoll_rf/info_rf/node"
+
+  before {
+    registerfile = RegisterFile(getClass().getClassLoader().getResource("extoll_rf.anot.xml"))
+  }
+
+  /**
+   * Clean transactions
+   */
+  override def beforeEach = {
+    Transaction.discardAll
+  }
+
+  
 
   class TestNode(rf: RegisterFile, nid: Short) extends DummyRegisterfileHost(id = nid, registerFile = rf) {
 
