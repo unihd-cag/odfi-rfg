@@ -28,7 +28,6 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>${scala.plugin.version}</version>
 				<configuration>
 					<useZincServer>true</useZincServer>
 					<addZincArgs>-no-color</addZincArgs>
