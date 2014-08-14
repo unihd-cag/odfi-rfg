@@ -13,10 +13,13 @@ package uni.hd.cag.osys.rfg.rf.device
 trait Device {
 
   /**
-   *
+   * Should throw an exception if the Device could not be opened
    */
   def open 
   
+  /**
+   * Frees resources
+   */
   def close
   
   /**

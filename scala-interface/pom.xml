@@ -3,14 +3,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>uni.hd.cag.rfg</groupId>
 	<artifactId>rf-interface</artifactId>
-	<version>1.0.0-SNAPSHOT</version>
+	<version>1.1.0-SNAPSHOT</version>
 
 	<!-- use OSI Scala Parent pom to have scala enabled -->
 	<!-- ################# -->
 	<parent>
 		<groupId>com.idyria.osi</groupId>
 		<artifactId>project-scala</artifactId>
-		<version>2.10.3.r2</version>
+		<version>2.11.2.r1</version>
 	</parent>
 
 
@@ -28,7 +28,6 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>${scala.plugin.version}</version>
 				<configuration>
 					<useZincServer>true</useZincServer>
 					<addZincArgs>-no-color</addZincArgs>
@@ -49,12 +48,12 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>3.0.1-SNAPSHOT</version>
+				<version>3.1.0-SNAPSHOT</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.idyria.osi.wsb</groupId>
 						<artifactId>wsb-core</artifactId>
-						<version>3.0.0-RC2-SNAPSHOT</version>
+						<version>3.1.0-SNAPSHOT</version>
 					</dependency>
 				</dependencies>
 				<executions>
@@ -224,28 +223,22 @@
 		<dependency>
 			<groupId>com.idyria.osi.aib</groupId>
 			<artifactId>aib-core</artifactId>
-			<version>3.0.0</version>
+			<version>3.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.idyria.osi.tea</groupId>
 			<artifactId>tea</artifactId>
-			<version>3.0.0</version>
+			<version>3.1.0</version>
 		</dependency>
 		<dependency>
 		  <groupId>com.idyria.osi.ooxoo</groupId>
 		  <artifactId>ooxoo-core</artifactId>
-		  <version>3.0.1-SNAPSHOT</version>
+		  <version>3.1.0-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.idyria.osi.wsb</groupId>
 			<artifactId>wsb-core</artifactId>
-			<version>3.0.0-RC2-SNAPSHOT</version>
-			<exclusions>
-				<exclusion>
-					<groupId>com.idyria.osi.aib</groupId>
-					<artifactId>aib-core</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>3.1.0-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 

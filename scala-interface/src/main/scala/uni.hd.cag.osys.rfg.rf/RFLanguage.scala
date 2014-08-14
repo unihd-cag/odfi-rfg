@@ -64,6 +64,40 @@ trait RFLanguage {
     }
 
   }
+  
+  /**
+   * Creates a Blocking Nested transaction and commits it at the end of the closure
+   */
+  def onBlocking(cl: => Any) = {
+    var nestedTransaction = Transaction()
+    Transaction.doBlocking {
+      cl
+    }
+  }
+  
+  /**
+   * Creates a Blocking Nested transaction and discards it at the end of the closure
+   */
+  def noIO(rf: RegisterFileHost)(cl: => Any) = {
+    rf.onRegisterFile {
+      rf =>
+        Transaction.doBlocking {
+          cl
+          Transaction.discard()
+        }
+    }
+  }
+  
+  /**
+   * Creates a Blocking Nested transaction and discards it at the end of the closure
+   */
+  def noIO(cl: => Any) = {
+    var nestedTransaction = Transaction()
+    Transaction.doBlocking {
+      cl
+      Transaction.discard()
+    }
+  }
 
   // Poll Language
   // poll "valueable" until value for time
