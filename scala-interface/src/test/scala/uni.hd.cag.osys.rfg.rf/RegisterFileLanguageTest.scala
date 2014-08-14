@@ -127,6 +127,8 @@ class RegisterFileLanguageTest extends FunSuite with ShouldMatchers with GivenWh
       assertResult(0)(testDevice.readCount)
       assertResult(0)(testDevice.writeCount)
 
+      
+      
     }
 
   }

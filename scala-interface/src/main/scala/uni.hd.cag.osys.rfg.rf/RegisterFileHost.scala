@@ -28,7 +28,7 @@ trait RegisterFileHost {
     */
     var id : Short
 
-    def onRegisterFile( closure : (RegisterFile => Unit)) = {
+    def onRegisterFile[T <: Any]( closure : (RegisterFile => T)) : T = {
 
 
         // Begin Transaction
@@ -38,12 +38,13 @@ trait RegisterFileHost {
         // Execute
         //--------------
         try {
-            closure(registerFile)
+            var res = closure(registerFile)
 
              // Commit
             //---------------
             Transaction().commit
 
+            res
 
         } catch {
 
