@@ -42,12 +42,12 @@ module counter_RF
 	///\defgroup rw_if
 	///@{ 
 	input wire[5:3] address,
-	output reg[63:0] read_data,
+	output reg[47:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
 	input wire read_en,
 	input wire write_en,
-	input wire[63:0] write_data,
+	input wire[47:0] write_data,
 	///}@ 
 	input wire[47:0] tsc_cnt_next,
 	output wire[47:0] tsc_cnt,
@@ -249,7 +249,7 @@ module counter_RF
 			invalid_address <= 1'b0;
 			access_complete <= 1'b0;
 			`ifdef ASIC
-			read_data   <= 64'b0;
+			read_data   <= 48'b0;
 			`endif
 
 		end
@@ -260,34 +260,24 @@ module counter_RF
 				3'h0:
 				begin
 					read_data[47:0] <= tsc_cnt;
-					read_data[63:48] <= 16'b0;
-					invalid_address <= 1'b0;
-					access_complete <= write_en || read_en;
-				end
-				3'h1:
-				begin
-					read_data[63:0] <= 64'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
 				3'h2:
 				begin
 					read_data[47:0] <= tsc2_cnt;
-					read_data[63:48] <= 16'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
 				3'h3:
 				begin
 					read_data[47:0] <= tsc3_cnt;
-					read_data[63:48] <= 16'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
 				3'h4:
 				begin
 					read_data[47:0] <= tsc4_cnt;
-					read_data[63:48] <= 16'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end

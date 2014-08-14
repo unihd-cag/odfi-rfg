@@ -41,7 +41,7 @@ trait RFLanguage {
   /**
    * Opens a transaction on a node, must be called before any operation using a RF language instance
    */
-  def on(rf: RegisterFileHost)(cl: => Any): Unit = {
+  def on[T <: Any](rf: RegisterFileHost)(cl: => T): T = {
 
     // currentHost = rf
     rf.onRegisterFile {
@@ -54,7 +54,7 @@ trait RFLanguage {
    * Opens a transaction on a node, must be called before any operation using a RF language instance
    * The transaction is running in blocking mode, which allows to use the registerfile without any device interaction
    */
-  def onBlocking(rf: RegisterFileHost)(cl: => Any) = {
+  def onBlocking[T <: Any](rf: RegisterFileHost)(cl: => T) : T = {
 
     rf.onRegisterFile {
       rf =>
@@ -63,6 +63,41 @@ trait RFLanguage {
         }
     }
 
+  }
+  
+  /**
+   * Creates a Blocking Nested transaction and commits it at the end of the closure
+   */
+  def onBlocking[T <: Any](cl: => T) : T = {
+    Transaction.doBlocking {
+      cl
+    }
+  }
+  
+  /**
+   * Creates a Blocking Nested transaction and discards it at the end of the closure
+   */
+  def noIO[T <: Any](rf: RegisterFileHost)(cl: => T) : T= {
+    
+    rf.onRegisterFile {
+      rf =>
+        Transaction.doBlocking {
+          var res = cl
+          Transaction.discard()
+          res
+        }
+    }
+  }
+  
+  /**
+   * Creates a Blocking Nested transaction and discards it at the end of the closure
+   */
+  def noIO[T <: Any](cl: => T) :T = {
+    Transaction.doBlocking {
+      var res = cl
+      Transaction.discard()
+      res
+    }
   }
 
   // Poll Language
@@ -260,6 +295,7 @@ trait RFLanguage {
   def search(s: String): Any = {
     currentHost.registerFile.search(s)
   }
+  
 
   // Explain
   //------------

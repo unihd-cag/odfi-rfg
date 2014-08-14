@@ -4,6 +4,30 @@
 	# logarithmus dualis function for address bit calculation
 	proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
 	
+	# function to getRFmaxWidth
+	proc getRFmaxWidth {registerfile} {
+	 	set maxwidth 0
+	 	##::puts "RegisterFile: $registerfile"
+	 	$registerfile walkDepthFirst {
+	 		if {[$it isa osys::rfg::RamBlock]} {
+	 			if {$maxwidth < [$it width]} {
+	 				set maxwidth [$it width]
+	 			}
+	 		}
+	 		if {[$it isa osys::rfg::Register]} {
+	 			set tmp 0
+	 			$it onEachField {
+	 				incr tmp [$it width]
+	 			}
+	 			if {$maxwidth < $tmp} {
+	 				set maxwidth $tmp
+	 			}
+	 		}
+	 		return true
+	 	}
+	 	return $maxwidth
+	} 
+
 	# function to get the address Bits for the register file 
 	proc getRFsize {registerfile} {
 		set size 0
@@ -608,14 +632,14 @@
 			set equal [expr [$ramBlock getAttributeValue software.osys::rfg::absolute_address]/([$ramBlock depth]*[$registerFile register_size]/8)]
 			if {[expr [getAddrBits $registerFile]-1] < [expr [ld [$ramBlock depth]]+3]} {
 				puts "			[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
-				puts "			[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "			[getName $ramBlock]_rf_wdata <= write_data\[[expr [$ramBlock width] -1]:0\];"
 				puts "			[getName $ramBlock]_rf_wen <= write_en;"
 				puts "			[getName $ramBlock]_rf_ren <= read_en;"
 			} else {
 				puts "			if (address\[[expr [getAddrBits $registerFile]-1]:[expr [ld [$ramBlock depth]]+3]\] == $equal)"
 				puts "			begin"
 				puts "				[getName $ramBlock]_rf_addr <= address\[[expr 2+[ld [$ramBlock depth]]]:3\];"
-				puts "				[getName $ramBlock]_rf_wdata <= write_data\[15:0\];"
+				puts "				[getName $ramBlock]_rf_wdata <= write_data\[[expr [$ramBlock width] -1]:0\];"
 				puts "				[getName $ramBlock]_rf_wen <= write_en;"
 				puts "				[getName $ramBlock]_rf_ren <= read_en;"
 				puts "			end"
@@ -860,7 +884,7 @@
 		puts "		end"
 		puts "		else"
 		puts "		begin"
-		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $subRF]*[$RF register_size]/8)]
+		set care [expr [$subRF getAttributeValue software.osys::rfg::absolute_address]>>[ld [getRFsize $subRF]]]
 		set care [format %x $care]
 		puts "			if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
 		puts "			begin"
@@ -977,14 +1001,14 @@
 				puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]]'h$care,[ld [$it depth]]'b$dontCare\}:"
 				puts "				begin"
 				puts "					read_data\[[expr "[$it width]-1"]:0\] <= [getName $it]_rf_rdata;"
-				if {[$it width] != [$registerFile register_size]} {
-					puts "					read_data\[[expr "[$registerFile register_size]-1"]:[$it width]\] <= [expr "[$registerFile register_size]-[$it width]"]'b0;"
+				if {[$it width] != [getRFmaxWidth $registerFile]} {
+					puts "					read_data\[[expr "[getRFmaxWidth $registerFile]-1"]:[$it width]\] <= [expr "[getRFmaxWidth $registerFile]-[$it width]"]'b0;"
 				}
 				puts "					invalid_address <= 1'b0;"
 				set delays 3
 				puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
 				puts "				end"
-			} elseif {[$it isa osys::rfg::Register]} {
+			} elseif {[$it isa osys::rfg::Register] && ![$it hasAttribute hardware.osys::rfg::rreinit_source]} {
 				if {[getAddrBits $registerFile] == [ld [expr [$registerFile register_size]/8]]} {
 					puts "				[expr [getAddrBits $registerFile]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8]]:"
 				} else {
@@ -999,8 +1023,8 @@
 					}
 					incr lowerBound [$it width]
 				}
-				if {$lowerBound !=[$registerFile register_size]} {
-					puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [$registerFile register_size]-$lowerBound]'b0;"
+				if {$lowerBound !=[getRFmaxWidth $registerFile]} {
+					puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [getRFmaxWidth $registerFile]-$lowerBound]'b0;"
 				}
 				puts "					invalid_address <= 1'b0;"
 				puts "					access_complete <= write_en || read_en;"
@@ -1008,7 +1032,11 @@
 			}
 			
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
-				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
+				##::puts "Absolute Address: [$it getAttributeValue software.osys::rfg::absolute_address]"
+				##::puts "Size in Bits: [ld [getRFsize $it]]"
+				##::puts "Shifted Result: [expr [$it getAttributeValue software.osys::rfg::absolute_address]>>[ld [getRFsize $it]]]"
+				set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]>>[ld [getRFsize $it]]]
+				##set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
 				set care [format %x $care]
 				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
 				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
@@ -1057,12 +1085,12 @@ module <%puts [$registerFile name]%>(
 	} else {
 		puts -nonewline "[expr [getAddrBits $registerFile]-1]"
 	}%>:<%puts -nonewline "[ld [expr [$registerFile register_size]/8]]"%>] address,
-	output reg[<% puts -nonewline "[expr [$registerFile register_size]-1]"%>:0] read_data,
+	output reg[<% puts -nonewline "[expr [getRFmaxWidth $registerFile]-1]"%>:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
 	input wire read_en,
 	input wire write_en,
-	input wire[<% puts -nonewline "[expr [$registerFile register_size]-1]"%>:0] write_data,
+	input wire[<% puts -nonewline "[expr [getRFmaxWidth $registerFile]-1]"%>:0] write_data,
 	///}@ 
 <% writeBlackbox $registerFile ""%>
 );
@@ -1079,7 +1107,7 @@ module <%puts [$registerFile name]%>(
 			invalid_address <= 1'b0;
 			access_complete <= 1'b0;
 			`ifdef ASIC
-			read_data   <= <%puts -nonewline "[$registerFile register_size]"%>'b0;
+			read_data   <= <%puts -nonewline "[getRFmaxWidth $registerFile]"%>'b0;
 			`endif
 <% RamBlockCheck $registerFile %>
 <% writeAddressControlReset $ramBlockCount $registerFile %>		end

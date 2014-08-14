@@ -199,6 +199,12 @@ object RegisterFile {
    * Create a RegisterFile from a File path
    */
   def apply(file: String): RegisterFile = this.apply(new File(file).toURI.toURL)
+  
+  /**
+   * Create a RegisterFile from a File path
+   */
+  def apply(file: File): RegisterFile = this.apply(file.toURI.toURL)
+
 }
 
 @xelement(name = "vendorsettings")

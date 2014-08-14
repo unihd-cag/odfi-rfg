@@ -111,7 +111,7 @@ foreach rf $rf_list {
 
 	 			## generate rfg verilog header file 
 	 			set rfgheader [::new osys::rfg::generator::rfgheader::Rfgheader #auto $result]
-	 			set destinationFile "${verilog_header_folder}rfg_v.h"
+	 			set destinationFile "${verilog_header_folder}rfs_v.h"
 	 			$rfgheader produceToFile $destinationFile 
 	 			puts ""
 		 		puts "generate header file:"
