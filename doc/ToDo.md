@@ -14,6 +14,7 @@
 - internal RFs
 - do not create empty Hardware registers in the description
 - fields for ramBlocks
+- provide helper_functions.tm instead of multiple proc definitions
 
 ### Unit Tests 
 
