@@ -310,12 +310,12 @@
 				} else {
 					lappend signalList "	output reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
 				}
-				lappend signalList "	input wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_read_data"
+				lappend signalList "	input wire\[[expr [getRFmaxWidth $registerfile] - 1]:0\] [getName $registerfile]_read_data"
 				lappend signalList "	input wire [getName $registerfile]_invalid_address"
 				lappend signalList "	input wire [getName $registerfile]_access_complete"
 				lappend signalList "	output reg [getName $registerfile]_read_en"
 				lappend signalList "	output reg [getName $registerfile]_write_en"
-				lappend signalList "	output reg\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_write_data"
+				lappend signalList "	output reg\[[expr [getRFmaxWidth $registerfile] - 1]:0\] [getName $registerfile]_write_data"
  				##writeBlackbox $it "[$registerfile name]_"
 				return false
 			} else {
@@ -1024,7 +1024,7 @@
 					incr lowerBound [$it width]
 				}
 				if {$lowerBound !=[getRFmaxWidth $registerFile]} {
-					puts "					read_data\[[expr [$object register_size]-1]:$lowerBound\] <= [expr [getRFmaxWidth $registerFile]-$lowerBound]'b0;"
+					puts "					read_data\[[expr [getRFmaxWidth $object]-1]:$lowerBound\] <= [expr [getRFmaxWidth $registerFile]-$lowerBound]'b0;"
 				}
 				puts "					invalid_address <= 1'b0;"
 				puts "					access_complete <= write_en || read_en;"
