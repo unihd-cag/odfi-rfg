@@ -45,12 +45,12 @@ module absAddrRAM
 	///\defgroup rw_if
 	///@{ 
 	input wire[9:3] address,
-	output reg[63:0] read_data,
+	output reg[15:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
 	input wire read_en,
 	input wire write_en,
-	input wire[63:0] write_data,
+	input wire[15:0] write_data,
 	///}@ 
 	input wire[4:0] RAM_addr,
 	input wire RAM_ren,
@@ -255,21 +255,18 @@ module absAddrRAM
 				{2'h0,5'bxxxxx}:
 				begin
 					read_data[15:0] <= RAM_rf_rdata;
-					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en_dly2;
 				end
 				{2'h1,5'bxxxxx}:
 				begin
 					read_data[15:0] <= RAM2_rf_rdata;
-					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en_dly2;
 				end
 				{2'h2,5'bxxxxx}:
 				begin
 					read_data[15:0] <= RAM3_rf_rdata;
-					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en_dly2;
 				end

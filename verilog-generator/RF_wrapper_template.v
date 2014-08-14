@@ -3,6 +3,30 @@
     # logarithmus dualis function for address bit calculation
     proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
     
+    # function to getRFmaxWidth
+    proc getRFmaxWidth {registerfile} {
+        set maxwidth 0
+        ##::puts "RegisterFile: $registerfile"
+        $registerfile walkDepthFirst {
+            if {[$it isa osys::rfg::RamBlock]} {
+                if {$maxwidth < [$it width]} {
+                    set maxwidth [$it width]
+                }
+            }
+            if {[$it isa osys::rfg::Register]} {
+                set tmp 0
+                $it onEachField {
+                    incr tmp [$it width]
+                }
+                if {$maxwidth < $tmp} {
+                    set maxwidth $tmp
+                }
+            }
+            return true
+        }
+        return $maxwidth
+    } 
+
     # function to get the address Bits for the register file 
     proc getRFsize {registerfile} {
         set size 0
@@ -274,12 +298,12 @@ proc writeBlackbox {object context} {
                 } else {
                     lappend signalList "    output wire\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
                 }
-                lappend signalList "    input wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_read_data"
+                lappend signalList "    input wire\[[expr [getRFmaxWidth $registerfile] - 1]:0\] [getName $registerfile]_read_data"
                 lappend signalList "    input wire [getName $registerfile]_invalid_address"
                 lappend signalList "    input wire [getName $registerfile]_access_complete"
                 lappend signalList "    output wire [getName $registerfile]_read_en"
                 lappend signalList "    output wire [getName $registerfile]_write_en"
-                lappend signalList "    output wire\[[expr [$registerFile register_size] - 1]:0\] [getName $registerfile]_write_data"
+                lappend signalList "    output wire\[[expr [getRFmaxWidth $registerfile] - 1]:0\] [getName $registerfile]_write_data"
                 ##writeBlackbox $it "[$registerfile name]_"
                 return false
             } else {
@@ -472,8 +496,8 @@ module RF_wrapper #(
     input wire rf_read_request,
     input wire rf_write_request,
     input wire[`RFS_AWIDTH-1:0] rf_address,
-    output wire[63:0] rf_read_data,
-    input wire[63:0] rf_write_data,
+    output wire[<% puts -nonewline "[expr [getRFmaxWidth $registerFile] -1]" %>:0] rf_read_data,
+    input wire[<% puts -nonewline "[expr [getRFmaxWidth $registerFile] -1]" %>:0] rf_write_data,
     output wire rf_access_complete,
     input wire snq_posted_empty,
     output wire snq_posted_shift_out,
@@ -493,8 +517,8 @@ module RF_wrapper #(
 
     HT_to_RF_converter #(
         .LG_NUM_REQS(LG_NUM_REQS),
-        .RF_DATA_WIDTH(64),
-        .RF_ADDR_WIDTH(20)
+        .RF_DATA_WIDTH(<% puts -nonewline [getRFmaxWidth $registerFile] %>),
+        .RF_ADDR_WIDTH(<% puts -nonewline [ld [getRFsize $registerFile]] %>)
     ) HT_to_RF_converter_I (
         .clk(clk),
         .res_n(res_n),

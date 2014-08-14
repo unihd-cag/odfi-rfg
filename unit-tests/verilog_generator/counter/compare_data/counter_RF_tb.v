@@ -7,12 +7,12 @@ module counter_RF_tb();
     reg res_n;
     reg clk=0;
     reg[5:3] address;
-    wire[63:0] read_data;
+    wire[47:0] read_data;
     wire invalid_address;
     wire access_complete;
     reg read_en;
     reg write_en;
-    reg[63:0] write_data;
+    reg[47:0] write_data;
 
     reg[47:0] tsc_cnt_next;
     wire[47:0] tsc_cnt;

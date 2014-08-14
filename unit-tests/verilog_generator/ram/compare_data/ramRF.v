@@ -33,12 +33,12 @@ module ramRF
 	///\defgroup rw_if
 	///@{ 
 	input wire[7:3] address,
-	output reg[63:0] read_data,
+	output reg[15:0] read_data,
 	output reg invalid_address,
 	output reg access_complete,
 	input wire read_en,
 	input wire write_en,
-	input wire[63:0] write_data,
+	input wire[15:0] write_data,
 	///}@ 
 	input wire[4:0] info_rf_TestRAM_addr,
 	input wire info_rf_TestRAM_ren,
@@ -109,7 +109,7 @@ module ramRF
 			invalid_address <= 1'b0;
 			access_complete <= 1'b0;
 			`ifdef ASIC
-			read_data   <= 64'b0;
+			read_data   <= 16'b0;
 			`endif
 
 			read_en_dly0 <= 1'b0;
@@ -126,7 +126,6 @@ module ramRF
 				{0'h0,5'bxxxxx}:
 				begin
 					read_data[15:0] <= info_rf_TestRAM_rf_rdata;
-					read_data[63:16] <= 48'b0;
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en_dly2;
 				end

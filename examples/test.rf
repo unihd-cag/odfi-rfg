@@ -1,0 +1,4 @@
+registerFile test {
+	external ExampleRF.rf Example1
+	external ExampleRF.rf Example2
+}
