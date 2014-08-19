@@ -43,10 +43,6 @@
         return [expr $size - $offset]
     }
 
-    proc getAddrBits {registerfile} {
-        return [ld [getRFsize $registerfile]]
-    }
-
     # function which returns the Name with all parents
     proc getAddrBits {registerfile} {
         return [ld [getRFsize $registerfile]]
