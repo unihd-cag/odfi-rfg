@@ -47,4 +47,3 @@
 ### Documentation/ Presentation
 
 - HowTo for developers
-- clean github repository

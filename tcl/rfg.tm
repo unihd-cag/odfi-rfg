@@ -127,10 +127,6 @@ namespace eval osys::rfg {
             ## Look for attribute 
             set groupName [lindex $components 0]
             set attributeName [join [lrange $components 1 end] .]
-
-            #puts "Has attribute $groupName $attributeName"
-
-            #puts "Available attributes: $attributes"
             
             set foundAttributes [lsearch -glob -inline $attributes *$groupName]
 
@@ -152,7 +148,7 @@ namespace eval osys::rfg {
 
         public method onAttributes {attributeList closure1 {keyword ""} {closure2 ""}} {
             set scoreList {}
-            #puts "OnAttributes"
+
             foreach element $attributeList {
                 if {[hasAttribute $element]} {
                     lappend scoreList "true"
@@ -213,23 +209,6 @@ namespace eval osys::rfg {
 
             foreach attrs $attributes {
                 odfi::closures::doClosure $closure 1
-            }
-            #odfi::list::each $attributes {
-
-            #    odfi::closures::doClosure $closure 1
-
-
-            #}
-        }
-
-        ## Execute closure on each Attributes, with variable name: $attrs
-        public method onEachAttributes2 closure {
-
-            odfi::list::each $attributes {
-
-               odfi::closures::doClosure $closure 1
-
-
             }
         }
 
@@ -330,23 +309,7 @@ namespace eval osys::rfg {
 
                 odfi::closures::doClosure $closure 1
             }
-            #odfi::list::each $attributes {
 
-            #    odfi::closures::doClosure $closure 1
-
-
-            #}
-        } 
-
-        ## Execute closure on each Attribute value, with variable names: $attr $value
-        public method onEachAttribute2 closure {
-
-            odfi::list::each $attr_list {
-
-                odfi::closures::doClosure $closure 1
-
-
-            }
         } 
 
 
@@ -501,16 +464,9 @@ namespace eval osys::rfg {
         ## @return the register instance
         public method register {rName closure} {
 
-        
-
-           # puts "$rName loc:  [odfi::common::findUserCodeLocation]"
-
             ## Create 
-            #set newRegister [::new [namespace parent]::Register $name.$rName $rName $closure]
             set newRegister [::new [namespace parent]::Register $this.$rName $rName $closure]
             
-            
-
             ## Add to list
             lappend components $newRegister 
  
@@ -547,24 +503,6 @@ namespace eval osys::rfg {
             if {$ramBlock_width > $register_size} {
                 error "The ramblock width $newRamBlock is $ramBlock_width wide and exceeds the allowed $register_size bits!"                           
             }
-            
-            ## calculate address
-            #if {[expr "$size%([$newRamBlock depth]*$register_size/8)"] != 0} {
-            #    set offset [expr "int(floor($size/([$newRamBlock depth]*$register_size/8)))*[$newRamBlock depth]* $register_size/8"]
-            #    set size [expr "[$newRamBlock depth]* $register_size/8 + $offset"]
-            #}
-            
-            #if {$size == 0} {
-             #   set offset [expr "int(floor($size/([$newRamBlock depth]*$register_size/8)))*[$newRamBlock depth]* $register_size/8"]
-            #    set size [expr "[$newRamBlock depth]* $register_size/8 + $offset"]
-            #}
-
-           # $newRamBlock address $size
-            #$newRamBlock size [expr "[$newRamBlock depth] * $register_size/8"]
-            ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
-            
-           # incr size [expr "[$newRamBlock depth] * $register_size/8"]       
-            ## + floor($size/[$newRamBlock depth])*[$newRamBlock depth]"] 
 
             ## Return 
             $newRamBlock parent $this
@@ -591,14 +529,6 @@ namespace eval osys::rfg {
             ## Prepare list : Pairs of Parent / node
             ##################
             set componentsFifo [list $this]
-
-            ## First call -> this with no parent 
-            #########
-            #set parent ""
-            #set node $this 
-            #odfi::closures::doClosure $closure 
-
-            #set parent $this
 
             ## Go on FIFO 
             ##################
@@ -632,14 +562,6 @@ namespace eval osys::rfg {
             ##################
             set componentsFifo [$this components]
 
-            ## First call -> this with no parent 
-            #########
-            #set parent ""
-            #set node $this 
-            #odfi::closures::doClosure $closure 
-
-            #set parent $this
-
             ## Go on FIFO 
             ##################
             while {[llength $componentsFifo]>0} {
@@ -647,12 +569,8 @@ namespace eval osys::rfg {
                 set it [lindex $componentsFifo 0]
                 set componentsFifo [lreplace $componentsFifo 0 0]
 
-
-                #puts "--> Element $it"
-
                 set res [odfi::closures::doClosure $closure 1]
 
-                #puts "---> Decision: $res"
 
                 ## If Decision is true and we have a group -> Go down the tree 
                 #################
@@ -660,16 +578,6 @@ namespace eval osys::rfg {
                     set componentsFifo [concat $componentsFifo [$it components]]
                 }
 
-                ## Group -> add all subgroups and registers as next possible Continue 
-                ##############
-                #if {[$item isa [namespace current]]} {
-                   
-                   #::puts "Gound gorupd"
-                #   set componentsFifo [concat $componentsFifo [$item components]]
-                   
-               # } elseif {[$item isa [namespace parent]::Register]} {
-               #     set componentsFifo [concat $componentsFifo [$item fields]]
-               # }
             }
         }
 
@@ -680,14 +588,6 @@ namespace eval osys::rfg {
             ## Prepare list : Pairs of Parent / node
             ##################
             set componentsFifo [$this components]
-
-            ## First call -> this with no parent 
-            #########
-            #set parent ""
-            #set node $this 
-            #odfi::closures::doClosure $closure 
-
-            #set parent $this
 
             ## Go on FIFO 
             ##################
@@ -709,16 +609,6 @@ namespace eval osys::rfg {
                     set componentsFifo [concat [$it components] $componentsFifo]
                 }
 
-                ## Group -> add all subgroups and registers as next possible Continue 
-                ##############
-                #if {[$item isa [namespace current]]} {
-                   
-                   #::puts "Gound gorupd"
-                #   set componentsFifo [concat $componentsFifo [$item components]]
-                   
-               # } elseif {[$item isa [namespace parent]::Register]} {
-               #     set componentsFifo [concat $componentsFifo [$item fields]]
-               # }
             }
         }
 
@@ -823,22 +713,6 @@ namespace eval osys::rfg {
 
         #puts "SIZE is now [size]"
     }
-
-    ###########################
-    ## Reserved
-    ###########################
-    # itcl::class Reserved {
-    #     inherit Field
-    #     ## Width Always in bits
-    #     odfi::common::classField public width 0
-
-    #     constructor {cName cClosure} {Common::constructor $cName} {
-
-    #         ## Execute closure 
-    #         odfi::closures::doClosure $cClosure
-    #     }
-    # }
-
     
 
     #####################
@@ -888,11 +762,6 @@ namespace eval osys::rfg {
         set category [string trimleft [uplevel namespace current] ::]
 
         set attributeName ${category}::$attributeName
-
-        ## If name is not categorized using xx.xxx.attributeName, set it to global.attributeName
-       # if {![string match *.* $attributeName]} {
-        #    set attributeName "global.$attributeName"
-       # }
 
         set res "proc $fname args {
             uplevel 1 addAttribute $attributeName \$args 

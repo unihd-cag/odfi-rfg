@@ -1,5 +1,5 @@
 source ../../../tcl/rfg.tm
-source ../../../verilog-generator/VerilogGenerator.tm
+source ../../../tcl/generator-verilog/VerilogGenerator.tm
 source ../../../tcl/address-hierarchical/address-hierarchical.tm
 
 catch {source counter.rf} result

@@ -1,5 +1,5 @@
 source ../../../tcl/rfg.tm
-source ../../../verilog-generator/VerilogGenerator.tm
+source ../../../tcl/generator-verilog/VerilogGenerator.tm
 source ../../../tcl/address-hierarchical/address-hierarchical.tm
 ##source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
 
