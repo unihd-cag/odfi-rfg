@@ -1,7 +1,7 @@
 source ../../../tcl/rfg.tm
-source ../../../verilog-generator/VerilogGenerator.tm
+source ../../../tcl/generator-verilog/VerilogGenerator.tm
 source ../../../tcl/address-hierarchical/address-hierarchical.tm
-source $::env(RFG_PATH)/tcl/generator-htmlbrowser/htmlbrowser.tm
+source ../../../tcl/generator-htmlbrowser/htmlbrowser.tm
 
 set rf_fileList [glob *.rf]
 foreach rf_file $rf_fileList {

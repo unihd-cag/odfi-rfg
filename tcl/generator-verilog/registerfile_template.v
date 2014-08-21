@@ -464,24 +464,136 @@
 
 	# write Ram Instance
 	proc writeRamModule {ramBlock} {
-		puts "	ram_2rw_1c #("
-		puts "		.DATASIZE([$ramBlock width]),"
-		puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
-		puts "		.PIPELINED(0)"
-		puts "	) [getName $ramBlock] (" 
-		puts "		.clk(clk),"
-		puts "		.wen_a([getName $ramBlock]_rf_wen),"
-		puts "		.ren_a([getName $ramBlock]_rf_ren),"
-		puts "		.addr_a([getName $ramBlock]_rf_addr),"
-		puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
-		puts "		.rdata_a([getName $ramBlock]_rf_rdata),"
-		puts "		.wen_b([getName $ramBlock]_wen),"
-		puts "		.ren_b([getName $ramBlock]_ren),"
-		puts "		.addr_b([getName $ramBlock]_addr),"
-		puts "		.wdata_b([getName $ramBlock]_wdata),"
-		puts "		.rdata_b([getName $ramBlock]_rdata)"
-		puts "	);"
-		puts ""
+		
+		## 2rw 2w1r
+		if {([$ramBlock hasAttribute hardware.osys::rfg::rw] && [$ramBlock hasAttribute software.osys::rfg::rw]) ||\
+			([$ramBlock hasAttribute hardware.osys::rfg::rw] && [$ramBlock hasAttribute software.osys::rfg::wo]) ||\
+			([$ramBlock hasAttribute hardware.osys::rfg::wo] && [$ramBlock hasAttribute software.osys::rfg::rw])} {
+			puts "	ram_2rw_1c #("
+			puts "		.DATASIZE([$ramBlock width]),"
+			puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
+			puts "		.PIPELINED(0)"
+			$ramBlock onAttributes {software.osys::rfg::wo} {
+				puts "	) [getName $ramBlock] (" 
+				puts "		.clk(clk),"
+				puts "		.wen_a([getName $ramBlock]_rf_wen),"
+				puts "		.addr_a([getName $ramBlock]_rf_addr),"
+				puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
+				puts "		.wen_b([getName $ramBlock]_wen),"
+				puts "		.ren_b([getName $ramBlock]_ren),"
+				puts "		.addr_b([getName $ramBlock]_addr),"
+				puts "		.wdata_b([getName $ramBlock]_wdata),"
+				puts "		.rdata_b([getName $ramBlock]_rdata)"
+				puts "	);"
+				puts ""
+			} otherwise {
+				$ramBlock onAttributes {hardware.osys::rfg::wo} {
+					puts "	) [getName $ramBlock] (" 
+					puts "		.clk(clk),"
+					puts "		.wen_a([getName $ramBlock]_rf_wen),"
+					puts "		.ren_a([getName $ramBlock]_rf_ren),"
+					puts "		.addr_a([getName $ramBlock]_rf_addr),"
+					puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
+					puts "		.rdata_a([getName $ramBlock]_rf_rdata),"
+					puts "		.wen_b([getName $ramBlock]_wen),"
+					puts "		.addr_b([getName $ramBlock]_addr),"
+					puts "		.wdata_b([getName $ramBlock]_wdata)"
+					puts "	);"
+					puts ""
+				} otherwise {
+					puts "	) [getName $ramBlock] (" 
+					puts "		.clk(clk),"
+					puts "		.wen_a([getName $ramBlock]_rf_wen),"
+					puts "		.ren_a([getName $ramBlock]_rf_ren),"
+					puts "		.addr_a([getName $ramBlock]_rf_addr),"
+					puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
+					puts "		.rdata_a([getName $ramBlock]_rf_rdata),"
+					puts "		.wen_b([getName $ramBlock]_wen),"
+					puts "		.ren_b([getName $ramBlock]_ren),"
+					puts "		.addr_b([getName $ramBlock]_addr),"
+					puts "		.wdata_b([getName $ramBlock]_wdata),"
+					puts "		.rdata_b([getName $ramBlock]_rdata)"
+					puts "	);"
+					puts ""
+				}
+			}
+
+		} else {
+		
+			## 2r1w
+			if {([$ramBlock hasAttribute hardware.osys::rfg::rw] && [$ramBlock hasAttribute software.osys::rfg::ro]) ||\
+				([$ramBlock hasAttribute hardware.osys::rfg::ro] && [$ramBlock hasAttribute software.osys::rfg::rw])} {
+				
+				$ramBlock onAttributes {software.osys::rfg::ro} {
+					puts "	ram_1w2r_1c #("
+					puts "		.DATASIZE([$ramBlock width]),"
+					puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
+					puts "		.INIT_RAM(1'b0),"
+					puts "		.PIPELINED(0)"
+					puts "	) [getName $ramBlock] ("
+					puts "		.clk(clk),"
+					puts "		.wen([getName $ramBlock]_wen),"
+					puts "		.waddr([getName $ramBlock]_addr),"
+					puts "		.wdata([getName	$ramBlock]_wdata),"
+					puts "		.ren1([getName $ramBlock]_ren),"
+					puts "		.raddr1([getName $ramBlock]_addr),"
+					puts "		.rdata1([getName $ramBlock]_rdata),"
+					puts "		.ren2([getName $ramBlock]_rf_ren),"
+					puts "		.raddr2([getName $ramBlock]_rf_addr),"
+					puts "		.rdata2([getName $ramBlock]_rf_rdata)"
+					puts "	);"
+					puts ""
+				}
+
+				$ramBlock onAttributes {hardware.osys::rfg::ro} {
+					puts "	ram_1w2r_1c #("
+					puts "		.DATASIZE([$ramBlock width]),"
+					puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
+					puts "		.INIT_RAM(1'b0),"
+					puts "		.PIPELINED(0)"
+					puts "	) [getName $ramBlock] ("
+					puts "		.clk(clk),"
+					puts "		.wen([getName $ramBlock]_rf_wen),"
+					puts "		.waddr([getName $ramBlock]_rf_addr),"
+					puts "		.wdata([getName	$ramBlock]_rf_wdata),"
+					puts "		.ren1([getName $ramBlock]_ren),"
+					puts "		.raddr1([getName $ramBlock]_addr),"
+					puts "		.rdata1([getName $ramBlock]_rdata),"
+					puts "		.ren2([getName $ramBlock]_rf_ren),"
+					puts "		.raddr2([getName $ramBlock]_rf_addr),"
+					puts "		.rdata2([getName $ramBlock]_rf_rdata)"
+					puts "	);"
+					puts ""					
+				}
+
+			} else {
+
+				## 1r1w
+				if {([$ramBlock hasAttribute hardware.osys::rfg::wo] && [$ramBlock hasAttribute software.osys::rfg::ro]) ||\
+					([$ramBlock hasAttribute hardware.osys::rfg::ro] && [$ramBlock hasAttribute software.osys::rfg::wo]) ||\
+					[$ramBlock hasAttribute hardware.osys::rfg::rw] || [$ramBlock hasAttribute software.osys::rfg::rw]} {
+
+					$ramBlock onAttributes {hardware.osys::rfg::wo} {
+
+					}
+
+					$ramBlock onAttributes {hardware.osys::rfg::ro} {
+
+					}
+
+					$ramBlock onAttributes {hardware.osys::rfg::rw} {
+
+					}
+
+					$ramBlock onAttributes {software.osys::rfg::rw} {
+						
+					}
+
+				}
+			}
+		}
+		
+
 	}
 
 	# write RF instance
