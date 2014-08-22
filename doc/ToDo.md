@@ -6,14 +6,15 @@
  - calculate with aligner attribute
 
 ### Verilog Generator 
-- different RAMs
-- RAM read/write rights
-- external RAM
+- different RAMs (...)
+- RAM read/write rights (...)
+- external RAM (...)
 - create ASIC dependent hardware on generation and not with defines in verilog
 - internal RFs
 - do not create empty Hardware registers in the description
 - fields for ramBlocks
 - provide helper_functions.tm instead of multiple proc definitions
+- provide instances.tm for a better code view
 
 ### Unit Tests 
 - add some unit-test for addressing 

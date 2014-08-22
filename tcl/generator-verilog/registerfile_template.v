@@ -477,6 +477,7 @@
 				puts "	) [getName $ramBlock] (" 
 				puts "		.clk(clk),"
 				puts "		.wen_a([getName $ramBlock]_rf_wen),"
+				puts "		.ren_a(1'b0),"
 				puts "		.addr_a([getName $ramBlock]_rf_addr),"
 				puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
 				puts "		.wen_b([getName $ramBlock]_wen),"
@@ -496,6 +497,7 @@
 					puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
 					puts "		.rdata_a([getName $ramBlock]_rf_rdata),"
 					puts "		.wen_b([getName $ramBlock]_wen),"
+					puts "		.ren_b(1'b0),"
 					puts "		.addr_b([getName $ramBlock]_addr),"
 					puts "		.wdata_b([getName $ramBlock]_wdata)"
 					puts "	);"
@@ -574,7 +576,23 @@
 					[$ramBlock hasAttribute hardware.osys::rfg::rw] || [$ramBlock hasAttribute software.osys::rfg::rw]} {
 
 					$ramBlock onAttributes {hardware.osys::rfg::wo} {
-
+						puts "	ram_1w1r_1c #(
+		parameter DATASIZE	= 78,	// Memory data word width
+		parameter ADDRSIZE	= 9,	// Number of memory address bits
+		parameter INIT_RAM	= 1'b0,	// Set this parameter to 1'b1 if a with 0 initialized ram is needed
+		parameter PIPELINED	= 0,
+		parameter REG_LIMIT	= 1280  // set this to a low value if don't want the reg based RAM
+	) (
+		input wire					clk,
+		input wire					wen,
+		input wire [DATASIZE-1:0]	wdata,
+		input wire [ADDRSIZE-1:0]	waddr,
+		input wire					ren,
+		input wire [ADDRSIZE-1:0]	raddr,
+		output wire [DATASIZE-1:0]	rdata,
+		output wire							sec,
+		output wire							ded
+	);
 					}
 
 					$ramBlock onAttributes {hardware.osys::rfg::ro} {
