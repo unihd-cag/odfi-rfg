@@ -44,6 +44,25 @@ trait NamedAddressed extends Named {
 
 }
 
+trait NamedAddressedValued extends NamedAddressed {
+
+  /**
+   * @group rf
+   */
+  var valueBuffer = RegisterTransactionBuffer(this)
+
+  def value = this.valueBuffer
+
+  /**
+   *
+   * Enables register.value = Long  syntax
+   *
+   * @group rf
+   */
+  def value_=(data: Long) = this.valueBuffer.set(data)
+
+}
+
 /**
  * This Buffer is used for sw="" hw="" hwreg read/write rights
  *
@@ -619,7 +638,7 @@ class RepeatGroup(var parent: Group) extends Group with NamedAddressed {
  *
  */
 @xelement(name = "reg64")
-class Register extends ElementBuffer with NamedAddressed with ListeningSupport {
+class Register extends ElementBuffer with NamedAddressedValued with ListeningSupport {
 
   // Attributes
   //-----------
@@ -707,7 +726,7 @@ class Register extends ElementBuffer with NamedAddressed with ListeningSupport {
 
   }
 
-  /**
+ /* /**
    * @group rf
    */
   var valueBuffer = RegisterTransactionBuffer(this)
@@ -720,7 +739,7 @@ class Register extends ElementBuffer with NamedAddressed with ListeningSupport {
    *
    * @group rf
    */
-  def value_=(data: Long) = this.valueBuffer.set(data)
+  def value_=(data: Long) = this.valueBuffer.set(data)*/
 
   // Search
   //--------------------
@@ -914,7 +933,7 @@ object RamBlock {
 /**
  * Represents a value entry in a RAM
  */
-class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddressed {
+class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddressedValued {
 
   // Resolve address from ramblock base address
   this.name = s"${ramBlock.name}[$index]"
@@ -922,7 +941,7 @@ class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddresse
   // Addresses are always 64 bits (8bytes) aligned
   this.absoluteAddress = ramBlock.absoluteAddress + (index.toLong * 8 )
   
-  /**
+  /*/**
    * @group rf
    */
   var valueBuffer = RegisterTransactionBuffer(this)
@@ -935,7 +954,7 @@ class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddresse
    *
    * @group rf
    */
-  def value_=(data: Long) = this.valueBuffer.set(data)
+  def value_=(data: Long) = this.valueBuffer.set(data)*/
   
   
   
