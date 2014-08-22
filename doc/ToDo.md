@@ -13,8 +13,6 @@
 - internal RFs
 - do not create empty Hardware registers in the description
 - fields for ramBlocks
-- provide helper_functions.tm instead of multiple proc definitions
-- provide instances.tm for a better code view
 
 ### Unit Tests 
 - add some unit-test for addressing 
