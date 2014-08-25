@@ -118,17 +118,31 @@ class RegisterFileLanguageTest extends FunSuite with ShouldMatchers with GivenWh
 
     new RFLanguage {
 
+      val value = 80
+      val registerPath = "extoll_rf/info_rf/node"
+      val ramPath = "extoll_rf/pflash_rf/buffer_data[0]"
       Given("A NO IO blocking transaction")
       noIO(rfHost) {
-        write(80) into "extoll_rf/info_rf/node"
+        write(value) into registerPath 
       }
 
       Then("No read or write should have reached the Device")
       assertResult(0)(testDevice.readCount)
       assertResult(0)(testDevice.writeCount)
+      
+      And("The value written should be read from the Device")
+      noIO(rfHost){
+        assertResult(value)(read(registerPath))
+      }
 
-      
-      
+      Given("A NO IO blocking transaction to a ram")
+      noIO(rfHost) {
+        write(value) into ramPath
+      }
+      Then("The value written should be read from the ram") 
+      noIO(rfHost){
+          assertResult(value)(read(ramPath))
+       }
     }
 
   }

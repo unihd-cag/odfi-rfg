@@ -328,8 +328,8 @@ class Group  extends DynamicSearchable with ElementBuffer with Named {
   def search(search: String): Any = {
 
     // Patterns
-    val ramEntry = """(.+)\[([0-9]+)]$""".r
-    val ramEntryField = """(.+)\[([0-9]+)]\.([\w]+)$""".r
+    val ramEntry = """(.+)\[([0-9]+)\]$""".r
+    val ramEntryField = """(.+)\[([0-9]+)\]\.([\w]+)$""".r
     val regField = """(.+)\.([\w]+)$""".r
     val reg = """(.+)$""".r
 
