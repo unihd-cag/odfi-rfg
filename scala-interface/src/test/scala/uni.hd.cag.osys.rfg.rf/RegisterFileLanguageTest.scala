@@ -139,9 +139,10 @@ class RegisterFileLanguageTest extends FunSuite with ShouldMatchers with GivenWh
       noIO(rfHost) {
         write(value) into ramPath
       }
-      Then("The value written should be read from the ram") 
+      Then("The value written should be read from the ram")
       noIO(rfHost){
-          assertResult(value)(read(ramPath))
+        val asdf = read(ramPath)
+          assertResult(value)(asdf)
        }
     }
 

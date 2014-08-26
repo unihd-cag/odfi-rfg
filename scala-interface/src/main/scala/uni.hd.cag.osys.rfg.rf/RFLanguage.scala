@@ -205,7 +205,7 @@ trait RFLanguage {
       case r: Register  => r.value
       case f: Field     => f.value
       case rf: RamField => rf.value
-      case re: RamEntry => re.value
+      case re: RamEntry => {println("read value "+re.value+" from "+str); re.value}
       case _            => throw new RuntimeException(s"unsupported path: $str")
     }
 
@@ -236,7 +236,7 @@ trait RFLanguage {
         case r: Register  => r.value = value
         case f: Field     => f.value = value
         case rf: RamField => rf.value = value
-        case re: RamEntry => re.value = value
+        case re: RamEntry => {re.value = value; println("wrote into ramfield "+destination+" value "+value.toString())}
         case _            => throw new RuntimeException(s"unsupported path: $destination")
       }
 

@@ -342,6 +342,7 @@ class Group  extends DynamicSearchable with ElementBuffer with Named {
       case ramEntry(path, entry)             =>
 
         var ram = this.ram(path)
+        println("searching for ram entry, path is "+path+" entry is "+ entry)
         return ram.entry(Integer.parseInt(entry))
         
         
@@ -832,6 +833,7 @@ object Register {
 @xelement(name = "ramblock")
 class RamBlock extends ElementBuffer with NamedAddressed {
 
+  var ramEntries = scala.collection.mutable.Map[Int, RamEntry]()
   // Attributes
   //-----------
 
@@ -885,7 +887,14 @@ class RamBlock extends ElementBuffer with NamedAddressed {
 
       // Out of range
       case i if (i < 0 || i > Math.pow(2.0, (this.addressSize).data.toDouble)) => throw new RuntimeException(s"""Could no get entry $i in ram ($name), must be 0 < index < ${this.addressSize.data.toDouble}""")
-      case i => new RamEntry(this, i)
+      case i => try {
+        ramEntries(i)
+      } catch {
+        case e: java.util.NoSuchElementException =>
+          var newEntry = new RamEntry(this, i)
+          ramEntries += (i -> newEntry)
+          newEntry
+      }
     }
 
   }
