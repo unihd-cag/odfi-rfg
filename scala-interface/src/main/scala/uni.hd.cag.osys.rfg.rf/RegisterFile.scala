@@ -342,7 +342,6 @@ class Group  extends DynamicSearchable with ElementBuffer with Named {
       case ramEntry(path, entry)             =>
 
         var ram = this.ram(path)
-        println("searching for ram entry, path is "+path+" entry is "+ entry)
         return ram.entry(Integer.parseInt(entry))
         
         
