@@ -832,7 +832,7 @@ object Register {
 @xelement(name = "ramblock")
 class RamBlock extends ElementBuffer with NamedAddressed {
 
-  var ramEntries = scala.collection.mutable.Map[Int, RamEntry]()
+  val ramEntries = scala.collection.mutable.WeakHashMap[Int, RamEntry]()
   // Attributes
   //-----------
 
@@ -886,14 +886,7 @@ class RamBlock extends ElementBuffer with NamedAddressed {
 
       // Out of range
       case i if (i < 0 || i > Math.pow(2.0, (this.addressSize).data.toDouble)) => throw new RuntimeException(s"""Could no get entry $i in ram ($name), must be 0 < index < ${this.addressSize.data.toDouble}""")
-      case i => try {
-        ramEntries(i)
-      } catch {
-        case e: java.util.NoSuchElementException =>
-          var newEntry = new RamEntry(this, i)
-          ramEntries += (i -> newEntry)
-          newEntry
-      }
+      case i => ramEntries.getOrElseUpdate(i, new RamEntry(this, i))
     }
 
   }
