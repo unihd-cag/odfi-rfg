@@ -10,3 +10,4 @@ package ifneeded osys::rfg::generator::rfgheader 1.0.0 [list source [file join $
 package ifneeded osys::rfg::address::linear 1.0.0        [list source [file join $dir address-linear address-linear.tm]]
 package ifneeded osys::rfg::address::hierarchical 1.0.0   [list source [file join $dir address-hierarchical address-hierarchical.tm]]
 package ifneeded osys::rfg::address::hierarchical-full 1.0.0   [list source [file join $dir address-hierarchical-full address-hierarchical-full.tm]]
+package ifneeded HelperFunctions 1.0.0 [list source [file join $dir generator-verilog HelperFunctions.tm]]
