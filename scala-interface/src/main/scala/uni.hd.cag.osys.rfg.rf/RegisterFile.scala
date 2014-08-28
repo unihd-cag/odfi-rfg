@@ -1,3 +1,23 @@
+/*
+
+RFG Register File Generator
+Copyright (C) 2014  University of Heidelberg - Computer Architecture Group
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+*/
 package uni.hd.cag.osys.rfg.rf
 
 import java.io._
@@ -41,6 +61,25 @@ trait NamedAddressed extends Named {
    */
   @xattribute(name = "_baseAddress")
   var baseAddress: LongBuffer = null
+
+}
+
+trait NamedAddressedValued extends NamedAddressed {
+
+  /**
+   * @group rf
+   */
+  var valueBuffer = RegisterTransactionBuffer(this)
+
+  def value = this.valueBuffer
+
+  /**
+   *
+   * Enables register.value = Long  syntax
+   *
+   * @group rf
+   */
+  def value_=(data: Long) = this.valueBuffer.set(data)
 
 }
 
@@ -309,8 +348,8 @@ class Group  extends DynamicSearchable with ElementBuffer with Named {
   def search(search: String): Any = {
 
     // Patterns
-    val ramEntry = """(.+)\[([0-9]+)]$""".r
-    val ramEntryField = """(.+)\[([0-9]+)]\.([\w]+)$""".r
+    val ramEntry = """(.+)\[([0-9]+)\]$""".r
+    val ramEntryField = """(.+)\[([0-9]+)\]\.([\w]+)$""".r
     val regField = """(.+)\.([\w]+)$""".r
     val reg = """(.+)$""".r
 
@@ -619,7 +658,7 @@ class RepeatGroup(var parent: Group) extends Group with NamedAddressed {
  *
  */
 @xelement(name = "reg64")
-class Register extends ElementBuffer with NamedAddressed with ListeningSupport {
+class Register extends ElementBuffer with NamedAddressedValued with ListeningSupport {
 
   // Attributes
   //-----------
@@ -707,7 +746,7 @@ class Register extends ElementBuffer with NamedAddressed with ListeningSupport {
 
   }
 
-  /**
+ /* /**
    * @group rf
    */
   var valueBuffer = RegisterTransactionBuffer(this)
@@ -720,7 +759,7 @@ class Register extends ElementBuffer with NamedAddressed with ListeningSupport {
    *
    * @group rf
    */
-  def value_=(data: Long) = this.valueBuffer.set(data)
+  def value_=(data: Long) = this.valueBuffer.set(data)*/
 
   // Search
   //--------------------
@@ -813,6 +852,7 @@ object Register {
 @xelement(name = "ramblock")
 class RamBlock extends ElementBuffer with NamedAddressed {
 
+  val ramEntries = scala.collection.mutable.WeakHashMap[Int, RamEntry]()
   // Attributes
   //-----------
 
@@ -866,7 +906,7 @@ class RamBlock extends ElementBuffer with NamedAddressed {
 
       // Out of range
       case i if (i < 0 || i > Math.pow(2.0, (this.addressSize).data.toDouble)) => throw new RuntimeException(s"""Could no get entry $i in ram ($name), must be 0 < index < ${this.addressSize.data.toDouble}""")
-      case i => new RamEntry(this, i)
+      case i => ramEntries.getOrElseUpdate(i, new RamEntry(this, i))
     }
 
   }
@@ -914,7 +954,7 @@ object RamBlock {
 /**
  * Represents a value entry in a RAM
  */
-class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddressed {
+class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddressedValued {
 
   // Resolve address from ramblock base address
   this.name = s"${ramBlock.name}[$index]"
@@ -922,7 +962,7 @@ class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddresse
   // Addresses are always 64 bits (8bytes) aligned
   this.absoluteAddress = ramBlock.absoluteAddress + (index.toLong * 8 )
   
-  /**
+  /*/**
    * @group rf
    */
   var valueBuffer = RegisterTransactionBuffer(this)
@@ -935,7 +975,7 @@ class RamEntry(var ramBlock: RamBlock, var index: Integer) extends NamedAddresse
    *
    * @group rf
    */
-  def value_=(data: Long) = this.valueBuffer.set(data)
+  def value_=(data: Long) = this.valueBuffer.set(data)*/
   
   
   
