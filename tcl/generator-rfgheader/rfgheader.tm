@@ -117,8 +117,8 @@ namespace eval osys::rfg::generator::rfgheader {
             $registerFile walkDepthFirst {
 
                 if {[$it isa osys::rfg::RegisterFile]} {
-                    if {[expr [getAddrBits $registerFile]-3] == 0} {
-                        odfi::common::println "`define RFS_[string toupper [$registerFile name]]_AWIDTH 1" $out
+                    if {[expr [getAddrBits $it]-3] == 0} {
+                        odfi::common::println "`define RFS_[string toupper [$it name]]_AWIDTH 1" $out
                     } else {
                         odfi::common::println "`define RFS_[string toupper [$it name]]_AWIDTH [expr [getAddrBits $it]-3]" $out
                     }
