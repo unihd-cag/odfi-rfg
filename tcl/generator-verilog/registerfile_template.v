@@ -642,9 +642,9 @@
 		puts "			`ifdef ASIC"
 		puts "			[getName $subRF]_write_data <= 64'b0;"
 		if {[expr [getAddrBits $subRF]-1] < [ld [expr [$subRF register_size]/8]]} {
-			puts "			[getName $subRF]_address  <= [getAddrBits $subRF]'b0;"
+			puts "			[getName $subRF]_address  <= [expr [getAddrBits $subRF]+1-[ld [expr [$subRF register_size]/8]]]'b0;"
 		} else {
-			puts "			[getName $subRF]_address  <= [expr [getAddrBits $subRF]-1]'b0;"
+			puts "			[getName $subRF]_address  <= [expr [getAddrBits $subRF]-[ld [expr [$subRF register_size]/8]]]'b0;"
 		}
 		
 		puts "			`endif"
@@ -655,8 +655,12 @@
 		set care [format %x $care]
 		puts "			if(address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care)"
 		puts "			begin"
-		puts "				[getName $subRF]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
-		puts "			end"
+        if {[expr [getAddrBits $subRF]-1] < [ld [expr [$subRF register_size]/8]]} {
+            puts "				[getName $subRF]_address <= address\[[expr [getAddrBits $subRF]]:[ld [expr [$subRF register_size]/8]]\];"    
+        } else {
+		    puts "				[getName $subRF]_address <= address\[[expr [getAddrBits $subRF]-1]:[ld [expr [$subRF register_size]/8]]\];"
+        }
+        puts "			end"
 		puts "			if( (address\[[expr [getAddrBits $RF]- 1]:[getAddrBits $subRF]\] == [expr [getAddrBits $RF]-[getAddrBits $subRF]]'h$care) && write_en)"
 		puts "			begin"
 		puts "				[getName $subRF]_write_data <= write_data\[63:0\];"
@@ -686,7 +690,7 @@
 			if {[$item isa osys::rfg::RamBlock]} {
 				writeRamBlockRegister $registerFile $item
 			} elseif {[$item isa osys::rfg::Register]} {
-				# Write always block
+                # Write always block
 				puts "	/* register [$item name] */"
 				puts "	`ifdef ASYNC_RES"
 				puts "	always @(posedge clk or negedge res_n) `else"
@@ -806,8 +810,12 @@
 				##set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
 				set care [format %x $care]
 				set dontCare [expr [getAddrBits $object] - 3 - ([getAddrBits $object] - [getAddrBits $it])]
-				puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
-				puts "				begin"
+				if {$dontCare == 0} {
+                    puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h$care}:"
+                } else { 
+                    puts "				{[expr [getAddrBits $object] - [getAddrBits $it]]'h${care},${dontCare}'b[string repeat x $dontCare]}:"
+                }
+                puts "				begin"
 				puts "					read_data <= [getName $it]_read_data;"
 				puts "					invalid_address <= [getName $it]_invalid_address;"
 				puts "					access_complete <= [getName $it]_access_complete;"
