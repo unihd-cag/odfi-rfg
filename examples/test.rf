@@ -1,4 +1,15 @@
 registerFile test {
-	external ExampleRF.rf Example1
-	external ExampleRF.rf Example2
+    register driver {
+
+        field ver {
+            width        32
+            reset        32'd18311
+            attributes software {
+                ro
+            }    
+            attributes hardware {
+            }
+        }
+
+    }
 }
