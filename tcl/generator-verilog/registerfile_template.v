@@ -18,12 +18,12 @@
 		}
 	}
 
-	# write the verilog template for an easy implementation in a higher level module 
-	proc writeTemplate {object context} {
+	## write the verilog template for an easy implementation in a higher level module 
+    proc writeTemplate {object context} {
 		set signalList {}
 		$object walkDepthFirst {
 			if {[$it isa osys::rfg::RamBlock]} {
-				
+	    			
 				$it onAttributes {hardware.osys::rfg::rw} { 
 					lappend signalList "	.${context}[getName $it]_addr()"
 					lappend signalList "	.${context}[getName $it]_ren()"
@@ -31,6 +31,18 @@
 					lappend signalList "	.${context}[getName $it]_wen()"
 					lappend signalList "	.${context}[getName $it]_wdata()"
 				}
+
+                $it onAttributes {hardware.osys::rfg::ro} {
+                    lappend signalList "    .${context}[getName $it]_addr()"
+                    lappend signalList "    .${context}[getName $it]_ren()"
+                    lappend signalList "    .${context}[getName $it]_rdata()"
+                }
+                
+                $it onAttributes {hardware.osys::rfg::wo} {
+                    lappend signalList "    .${context}[getName $it]_addr()"
+                    lappend signalList "    .${context}[getName $it]_wen()"
+                    lappend signalList "    .${context}[getName $it]_wdata()"
+                }
 
 			} elseif {[$it isa osys::rfg::Register]} {
 
@@ -130,6 +142,18 @@
 					lappend signalList "	input wire ${context}[getName $it]_wen"
 					lappend signalList "	input wire\[[expr [$it width]-1]:0\] ${context}[getName $it]_wdata"
 				}
+
+                $it onAttributes {hardware.osys::rfg::ro} {   
+					lappend signalList "	input wire\[[expr [ld [$it depth]]-1]:0\] ${context}[getName $it]_addr"
+					lappend signalList "	input wire ${context}[getName $it]_ren"
+					lappend signalList "	output wire\[[expr [$it width]-1]:0\] ${context}[getName $it]_rdata"
+                }
+
+                $it onAttributes {hardwre.osys::rfg::wo} {
+					lappend signalList "	input wire\[[expr [ld [$it depth]]-1]:0\] ${context}[getName $it]_addr"
+					lappend signalList "	input wire ${context}[getName $it]_wen"
+					lappend signalList "	input wire\[[expr [$it width]-1]:0\] ${context}[getName $it]_wdata"
+                }
 
 			} elseif {[$it isa osys::rfg::Register]} {
 				$it onEachField {
@@ -247,11 +271,12 @@
 	}
 
 	# write needed internal wires and regs
+	## rewrite for different ram permissions  
 	proc writeRegisternames {object} {
 		$object walkDepthFirst {
 			if {[$it isa osys::rfg::RamBlock]} {
 
-				$it onAttributes {hardware.osys::rfg::rw} {
+				$it onAttributes {software.osys::rfg::rw} {
 					puts "	reg\[[expr [ld [$it depth]]-1]:0\] [getName $it]_rf_addr;"
 					puts "	reg [getName $it]_rf_ren;"
 					puts "	wire\[[expr [$it width]-1]:0\] [getName $it]_rf_rdata;"
@@ -376,6 +401,7 @@
 		}
 	}
 
+	## rewrite for different ram permissions  
 	proc writeRamBlockRegister {registerFile ramBlock} {
 		
 		$ramBlock onAttributes {hardware.osys::rfg::rw} {
@@ -683,7 +709,7 @@
 		puts ""
 	}
 
-	# write the register function // rewrite this there is with if else constructs...
+	# write the register function
 	proc writeRegister {object} {
 		$object walkDepthFirst {
 			set item $it
@@ -762,6 +788,7 @@
 	}
 
 	#write the address logic for reading and invalid signal 
+	## rewrite for different ram permissions  
 	proc writeAddressControl {object} {
 
 		$object walkDepthFirst {
