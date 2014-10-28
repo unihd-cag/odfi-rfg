@@ -3,9 +3,11 @@
 - SNQ
 
 ### Addressing
- - calculate with aligner attribute
+
+- calculate with aligner attribute
 
 ### Verilog Generator 
+
 - different RAMs (...)
 - RAM read/write rights (...)
 - external RAM (...)
@@ -15,6 +17,7 @@
 - fields for ramBlocks
 
 ### Unit Tests 
+
 - add some unit-test for addressing 
 - add internal Registerfiles test to hierarchical unit-test
 - unit-test enviroment
@@ -22,17 +25,24 @@
 - unit-test for rfs_backport
 
 ### HTML Generator 
+
+- better overview
 - html-generator rreinit source register not working 
 
-### Generation Script 
+### Generation Script
+
 - program support for verilog defines
 
 ### RFG API 
+
 - repeat
 
 ### Parameter
+
 - external with optional, required
 - parameter.tm 
 
 ### Documentation/ Presentation
+
+- Documentation github.io
 - HowTo for developers
