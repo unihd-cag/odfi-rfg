@@ -5,3 +5,5 @@ target/
 unit-tests/verilog_generator/testing/
 example-design/
 *.nfs*
+*.swo
+*.swp
