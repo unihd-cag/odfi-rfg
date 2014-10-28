@@ -277,8 +277,6 @@ trait RFLanguage {
 
     }
 
-    def ->(destination: String): Destination = into(destination)
-
     def :->(destination: String): Destination = into(destination)
 
     def :->(destination: Destination): Destination = {
