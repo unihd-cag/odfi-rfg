@@ -1,5 +1,6 @@
-name: <% $module name %>
+module: osys-rfg
+name: Osys RFG
 markdown: redcarpet
-pygments: true
+highlighter: pygments
 odfi:
-    id: <% $module id %>
+    id: osys-rfg
