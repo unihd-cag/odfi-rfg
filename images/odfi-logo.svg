@@ -15,7 +15,7 @@
    id="svg2"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="New document 1">
+   sodipodi:docname="odfi-logo.svg">
   <defs
      id="defs4">
     <linearGradient
@@ -179,26 +179,32 @@
          x="327.24774"
          id="tspan3003"
          sodipodi:role="line">I</tspan></text>
-    <text
-       xml:space="preserve"
-       style="font-size:22px;font-style:normal;font-weight:500;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:TeX Gyre Chorus;-inkscape-font-specification:TeX Gyre Chorus Medium;font-stretch:normal;font-variant:normal"
-       x="194.28571"
-       y="462.36218"
-       id="text4609"
-       sodipodi:linespacing="125%"><tspan
-         sodipodi:role="line"
-         id="tspan4611"
+    <g
+       id="odfi-logo"
+       inkscape:label="#g4653"
+       inkscape:export-xdpi="142.49384"
+       inkscape:export-ydpi="142.49384">
+      <text
+         sodipodi:linespacing="125%"
+         id="text4609"
+         y="462.36218"
          x="194.28571"
-         y="462.36218">ODFI</tspan></text>
-    <path
-       style="fill:#aaaaaa;stroke:#888888;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-       d="m 196.22213,446.77573 49.49748,0"
-       id="path4613"
-       inkscape:connector-curvature="0" />
-    <path
-       inkscape:connector-curvature="0"
-       id="path4615"
-       d="m 196.22213,466.08592 49.49748,0"
-       style="color:#000000;fill:#aaaaaa;fill-opacity:1;fill-rule:nonzero;stroke:#888888;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate" />
+         style="font-size:22px;font-style:normal;font-weight:500;line-height:125%;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;font-family:TeX Gyre Chorus;-inkscape-font-specification:TeX Gyre Chorus Medium;font-stretch:normal;font-variant:normal"
+         xml:space="preserve"><tspan
+           y="462.36218"
+           x="194.28571"
+           id="tspan4611"
+           sodipodi:role="line">ODFI</tspan></text>
+      <path
+         inkscape:connector-curvature="0"
+         id="path4613"
+         d="m 196.22213,446.77573 49.49748,0"
+         style="fill:#aaaaaa;stroke:#888888;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1" />
+      <path
+         style="color:#000000;fill:#aaaaaa;fill-opacity:1;fill-rule:nonzero;stroke:#888888;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;stroke-dashoffset:0;marker:none;visibility:visible;display:inline;overflow:visible;enable-background:accumulate"
+         d="m 196.22213,466.08592 49.49748,0"
+         id="path4615"
+         inkscape:connector-curvature="0" />
+    </g>
   </g>
 </svg>
