@@ -1,31 +1,15 @@
 package uni.hd.cag.osys.rfg.rf
 
 trait RemoteRFLanguage extends RFLanguage {
+  val registerFileDefinition = "extoll_rf.anot.xml"
+  val registerFile = RegisterFile(getClass.getClassLoader().getResource(registerFileDefinition))
   
-def remoteWrite(rf: RegisterFileHost, nodeId: Int, path: String, value: Long) = {
-  var address: Long = 0
-  var converted_value: Long = 0
-  on(rf) {
-    noIO{
-      write(value) into path
-      converted_value = read(path)
-      address = search(path).asInstanceOf[NamedAddressedValued].absoluteAddress.toLong
-    }
-  }
+  val knownNodes = scala.collection.mutable.Map[Int, RegisterFileHost]()
   
-  //write the values via rma
-  
-  }
-def remoteRead(rf: RegisterFileHost, nodeId: Int, path: String): Long = {
-  var value: Long = 0
-  var address: Long = 0
-  on(rf) {
-    noIO{
-      address = search(path).asInstanceOf[NamedAddressedValued].absoluteAddress.toLong
-    }
-  }
-  
-  //read from address via rma
-  value
+  def onNode[T <: Any](nodeId: Short)(cl: => T): T = {
+    val rf = knownNodes.getOrElseUpdate(nodeId, new DummyRegisterfileHost(nodeId, registerFile))
+    on(rf) {
+      cl
+    } 
   }
 }
