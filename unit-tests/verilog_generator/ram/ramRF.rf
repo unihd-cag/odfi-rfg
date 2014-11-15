@@ -1,78 +1,78 @@
 ## Create Register File
 osys::rfg::registerFile ramRF {
     group info_rf {
-        
-        ramBlock TestRAM {
-            width 16
-            depth 32 
-            software rw
-            hardware rw
-        }
-
-        ramBlock TestRAM1 {
-            width 16
-            depth 32
-            software rw
-            hardware ro
-        }
-
-        ramBlock TestRAM2 {
-            width 16
-            depth 32
-            software rw
-            hardware wo
-        }
-
-        ramBlock TestRAM3 {
-            width 16
-            depth 32
-            software rw
-        }
-
-        ramBlock TestRAM4 {
-            width 16
-            depth 32
-            software ro
-            hardware rw
-        }
-
+       
+#        ramBlock TestRAM {
+#            width 16
+#            depth 32 
+#            software rw
+#            hardware rw
+#        }
+#
+#        ramBlock TestRAM1 {
+#            width 16
+#            depth 32
+#            software rw
+#            hardware ro
+#        }
+#
+#        ramBlock TestRAM2 {
+#            width 16
+#            depth 32
+#            software rw
+#            hardware wo
+#        }
+#
+#        ramBlock TestRAM3 {
+#            width 16
+#            depth 32
+#            software rw
+#        }
+#
+#        ramBlock TestRAM4 {
+#            width 16
+#            depth 32
+#            software ro
+#            hardware rw
+#       }
+#
         ramBlock TestRAM5 {
             width 16
             depth 32
             software wo
             hardware rw
         }
-        
-        ramBlock TestRAM6 {
-            width 16
-            depth 32
-            software rw
-            hardware rw
-        }
-        
-        ramBlock TestRAM7 {
-            width 16
-            depth 32
-            hardware wo
-        } 
-        
-        ramBlock TestRAM8 {
-            width 16
-            depth 32
-            hardware ro
-        }
-
-        ramBlock TestRAM9 {
-            width 16
-            depth 32
-            software ro
-        }
-
-        ramBlock TestRAM10 {
-            width 16
-            depth 32
-            software wo
-        }
+#        
+#        ramBlock TestRAM6 {
+#            width 16
+#            depth 32
+#            software rw
+#            hardware rw
+#        }
+#        
+#        ramBlock TestRAM7 {
+#            width 16
+#            depth 32
+#            hardware wo
+#        } 
+#        
+#        ramBlock TestRAM8 {
+#            width 16
+#            depth 32
+#            hardware ro
+#        }
+#
+#        ramBlock TestRAM9 {
+#            width 16
+#            depth 32
+#            software ro
+#        }
+#
+#        ramBlock TestRAM10 {
+#            width 16
+#            depth 32
+#            software wo
+#        }
 
     }
 }
