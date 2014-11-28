@@ -881,7 +881,21 @@
                     set delays 3
                     puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
                     puts "				end"
-			    }
+			    } elseif {[$it hasAttribute software.osys::rfg::wo]} {
+                    set dontCare [string repeat x [ld [$it depth]]]
+                    set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([$it depth]*[$registerFile register_size]/8)] 
+                    if {$care != 0} {
+                        set care [format %x $care]
+                        puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]]'h$care,[ld [$it depth]]'b$dontCare\}:"
+                    } else {
+                        puts "				[ld [$it depth]]'b$dontCare:"
+                    }
+                    puts "				begin"
+                    puts "                  invalid_address <= 1'b0;"
+                    set delays 3
+                    puts "                  access_complete <= write_en || read_en_dly[expr $delays-1];"
+                    puts "              end"
+                }
             } elseif {[$it isa osys::rfg::Register] && ![$it hasAttribute hardware.osys::rfg::rreinit_source]} {
 				if {[getAddrBits $registerFile] == [ld [expr [$registerFile register_size]/8]]} {
 					puts "				[expr [getAddrBits $registerFile]+1-[ld [expr [$registerFile register_size]/8]]]'h[format %x [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8]]:"
