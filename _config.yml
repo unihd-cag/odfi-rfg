@@ -3,4 +3,4 @@ name: Osys RFG
 markdown: redcarpet
 highlighter: pygments
 odfi:
-    id: osys-rfg
+    id: odfi-rfg
