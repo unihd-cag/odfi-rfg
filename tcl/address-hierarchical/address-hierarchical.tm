@@ -248,7 +248,7 @@ namespace eval osys::rfg::address::hierarchical {
                 ## Address assign 
                 set bla $it
                 $it attributes software {
-
+                    ::relative_address $baseAddress
                     ::absolute_address [expr $baseAddress | $blockAddress]
                 }
 

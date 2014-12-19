@@ -44,6 +44,7 @@ attributeFunction ::hardware_clear
 attributeFunction ::software_write_clear
 
 ## Addressing
+attributeFunction ::relative_address
 attributeFunction ::absolute_address
 attributeFunction ::absolute_start_address
 attributeFunction ::absolute_end_address
