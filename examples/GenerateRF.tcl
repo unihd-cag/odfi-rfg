@@ -10,6 +10,7 @@ package require osys::rfg::generator::rfgheader
 ## Output folders for the generated files
 #########################################################
 set verilog_folder "verilog/"
+set e_folder "e/"
 set doc_folder "doc/"
 set xml_folder "anot_xml/"
 set verilog_header_folder "../include/"
@@ -55,7 +56,7 @@ if {$argc == 1} {
 }
 catch {namespace inscope osys::rfg {source $rf_head}} rf_head
 
-file mkdir $verilog_folder $doc_folder $xml_folder $verilog_header_folder
+file mkdir $verilog_folder $e_folder $doc_folder $xml_folder $verilog_header_folder
 
 set rf_list {}
 set generated_list {}
@@ -99,6 +100,16 @@ foreach rf $rf_list {
 	  			puts "generate RF_Wrapper:"
 	  			puts "[$result name].rf > $destinationFile"
 	  			puts ""
+
+                ## generate e code
+                set egenerator [::new osys::rfg::generator::egenerator::EGenerator #auto $result]
+                set destinationFile "${e_folder}[$result name].e"
+                $egenerator produce_RegisterFile $destinationFile
+                puts $fp "[pwd]/$destinationFile"
+                puts ""
+                puts "generate e reference model:"
+                puts "[$result name].rf > $destinationFile"
+                puts ""
 
 	  			## generate annotated rfs xml file 
 	 			set rfsbackport [::new osys::rfg::generator::rfsbackport::Rfsbackport #auto $result]
