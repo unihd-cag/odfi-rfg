@@ -14,7 +14,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 ## Provides the generator API interface for OSYS Register File Generator
 
 package provide osys::generator 1.0.0
@@ -31,29 +30,34 @@ namespace eval osys::generator {
      
         odfi::common::classField public name ""
         odfi::common::classField public destinationFile ""
-        odfi::common::classField public generator ""
+        odfi::common::classField public gen ""
 
         constructor {cName cClosure} {
-            set name $cName
-            odfi::closures::doClosure $cClosure 1
-            generate 
+            name $cName
+            ::puts $name
+            odfi::closures::doClosure $cClosure
+            ##generate 
         }
 
-        public method generate {
-            set generator osys::rfg::getGenerator $name
-            $generator generate $desitinationFile          
+        public method generate {} {
+            osys::rfg::getGenerator $name $registerFile] produce $destinationFile          
         }   
 
     }
     
     ## Main factory
     proc generator {name closure} {
-        [::new Generator ::$name $name $closure]
+        return [::new Generator ::$name $name $closure]
     }
     
     ## Helper function for easy RFG read in
     proc readRF {inputFile} {
-        catch {namespace inscope osys::rfg {source $inputFile}} registerFile
+        set ::osys::rfg::inputFile $inputFile
+        catch {namespace inscope ::osys::rfg {
+                source $inputFile
+            }
+        } registerFile
+        ::puts "RegisterFile: $registerFile"
     }
     
 }
