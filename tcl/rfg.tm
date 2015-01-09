@@ -42,7 +42,7 @@ namespace eval osys::rfg {
             ## Not Found, try to load package 
             #########
             set packageName "osys::rfg::generator::[string tolower $name]"
-            set generatorName "::${packageName}::$name"
+            set generatorName "::${packageName}::[string toupper $name 0 0]"
             if {[catch "package require $packageName"]} {
                 
                 ## Error 

@@ -14,18 +14,18 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-package provide osys::rfg::generator::veriloggenerator 1.0.0
+package provide osys::rfg::generator::verilog 1.0.0
 package require osys::rfg
 package require Itcl 3.4
 package require odfi::common
 package require odfi::files 1.0.0
 package require odfi::list 2.0.0
 
-namespace eval osys::rfg::veriloggenerator {
+namespace eval osys::rfg::generator::verilog {
 
     variable location [file dirname [file normalize [info script]]]
 	
-	itcl::class VerilogGenerator {
+	itcl::class Verilog {
 		
 		public variable registerFile 
 
@@ -36,17 +36,17 @@ namespace eval osys::rfg::veriloggenerator {
             set registerFile $cRegisterFile
         }
 
-        public method produce_RegisterFile destinationFile {
+        public method produce destinationFile {
 
         	## Read and parse Verilog Template
-            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::veriloggenerator::location/registerfile_template.v]
+            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/registerfile_template.v]
             odfi::files::writeToFile $destinationFile $verilog
         }
 
         public method produce_RF_Wrapper destinationFile {
 
             ## Read and parse Verilog Template
-            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::veriloggenerator::location/RF_wrapper_template.v]
+            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/RF_wrapper_template.v]
             odfi::files::writeToFile $destinationFile $verilog
         }
 	}

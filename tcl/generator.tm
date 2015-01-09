@@ -1,4 +1,4 @@
-## RFG Register File Generator
+## RFG Register File Genertor
 ## Copyright (C) 2014  University of Heidelberg - Computer Architecture Group
 ## 
 ## This program is free software: you can redistribute it and/or modify
@@ -36,11 +36,13 @@ namespace eval osys::generator {
             name $cName
             ::puts $name
             odfi::closures::doClosure $cClosure
-            ##generate 
+            generate 
         }
 
         public method generate {} {
-            osys::rfg::getGenerator $name $registerFile] produce $destinationFile          
+            puts $destinationFile
+            ## add the function to address the register file here.
+            [osys::rfg::getGenerator $name $::osys::generator::registerFile] produce $destinationFile          
         }   
 
     }
@@ -53,11 +55,11 @@ namespace eval osys::generator {
     ## Helper function for easy RFG read in
     proc readRF {inputFile} {
         set ::osys::rfg::inputFile $inputFile
-        catch {namespace inscope ::osys::rfg {
+        catch {namespace eval ::osys::rfg {
                 source $inputFile
             }
-        } registerFile
-        ::puts "RegisterFile: $registerFile"
+        } ::osys::generator::registerFile
+        ::puts "RegisterFile: $::osys::generator::registerFile"
     }
     
 }
