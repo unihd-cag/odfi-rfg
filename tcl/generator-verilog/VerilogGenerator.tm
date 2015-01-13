@@ -36,11 +36,11 @@ namespace eval osys::rfg::generator::verilog {
             set registerFile $cRegisterFile
         }
 
-        public method produce destinationFile {
+        public method produce destinationPath {
 
         	## Read and parse Verilog Template
             set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/registerfile_template.v]
-            odfi::files::writeToFile $destinationFile $verilog
+            odfi::files::writeToFile ${destinationPath}/[$registerFile name].v $verilog
         }
 
         public method produce_RF_Wrapper destinationFile {
