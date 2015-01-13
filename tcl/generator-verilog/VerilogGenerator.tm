@@ -37,10 +37,28 @@ namespace eval osys::rfg::generator::verilog {
         }
 
         public method produce destinationPath {
+            
+            file mkdir $destinationPath
 
-        	## Read and parse Verilog Template
-            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/registerfile_template.v]
-            odfi::files::writeToFile ${destinationPath}/[$registerFile name].v $verilog
+            set registerfiles $registerFile
+           	## Read and parse Verilog Template
+
+            $registerFile walkDepthFirst {
+                if {[$it isa osys::rfg::RegisterFile]} {
+                    lappend registerfiles $it
+                }
+                return true
+            }
+            
+            foreach rf $registerfiles {
+                set registerFile $rf
+                
+                ::puts "VerilogGenerator processing: $rf > ${destinationPath}[$registerFile name].v"
+                
+                set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/registerfile_template.v]
+                odfi::files::writeToFile ${destinationPath}[$registerFile name].v $verilog
+            }
+
         }
 
         public method produce_RF_Wrapper destinationFile {
