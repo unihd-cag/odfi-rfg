@@ -34,17 +34,17 @@ namespace eval osys::generator {
         odfi::common::classField public gen ""
 
         constructor {cName cClosure} {
+
             name $cName
-            ::puts $name
             odfi::closures::doClosure $cClosure
             generate
+        
         }
 
         public method generate {} {
-            puts $destinationPath
-			osys::rfg::address::hierarchical::calculate $::osys::generator::registerFile
-            ## add the function to address the register file here.
+         
             [osys::rfg::getGenerator $name $::osys::generator::registerFile] produce $destinationPath          
+        
         }   
 
     }
@@ -56,12 +56,16 @@ proc generator {name closure} {
     
 ## Helper function for easy RFG read in
 proc readRF {inputFile} {
+    
     set ::osys::rfg::inputFile $inputFile
+    
     catch {namespace eval ::osys::rfg {
             source $inputFile
         }
     } ::osys::generator::registerFile
-    ::puts "RegisterFile: $::osys::generator::registerFile"
+	
+    osys::rfg::address::hierarchical::calculate $::osys::generator::registerFile
+
 }
     
 

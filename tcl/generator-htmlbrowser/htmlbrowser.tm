@@ -28,7 +28,7 @@ namespace eval osys::rfg::generator::htmlbrowser {
 
     variable location [file dirname [file normalize [info script]]]
 
-    itcl::class HTMLBrowser {
+    itcl::class Htmlbrowser {
 
         public variable registerFile 
 
@@ -47,23 +47,25 @@ namespace eval osys::rfg::generator::htmlbrowser {
 
         }
 
-        public method produceToFile destinationFile {
-
+        public method produce destinationPath {
+            
+            file mkdir $destinationPath
+            ::puts "Htmlbrowser processing $registerFile > ${destinationPath}[$registerFile name].html"
             set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html]
-            odfi::files::writeToFile $destinationFile $html
-            copyDependenciesTo [file dirname $destinationFile]
+            odfi::files::writeToFile ${destinationPath}[$registerFile name].html $html
+            copyDependenciesTo $destinationPath
 
         }
 
-        public method produce args {
-
-
-            ## Create Special Stream 
-            #set out [odfi::common::newStringChannel]
-
-            odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html
-
-        }
+#           public method produce args {
+#   
+#   
+#               ## Create Special Stream 
+#               #set out [odfi::common::newStringChannel]
+#   
+#               odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html
+#   
+#           }
 
 
     }
