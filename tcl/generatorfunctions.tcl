@@ -15,29 +15,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-proc attributeFunction {fname} {
+## Groups
+#####################
+attributeGroup ::extra
 
-    set attributeName [string trimleft $fname ::]
+attributeFunction ::reset
 
-    ## Category 
-    ##  1. Namespace of attributeFunction call location without leading ::
-    ##  2. Add :: to name
-    #################
-    set category [string trimleft [uplevel namespace current] ::]
-
-    set attributeName ${category}::$attributeName
-
-    set res "proc $fname args {
-        uplevel 1 addAttribute $attributeName \$args 
-    }"
-    uplevel 1 $res 
-
-}  
-
-proc attributeGroup {fname} {
-    set res "proc $fname args {
-        uplevel 1 attributes [string trimleft $fname ::] \$args
-    }"
-    uplevel 1 $res
-}
 

@@ -209,6 +209,7 @@ namespace eval osys::rfg {
                $foundAttributes apply $closure
 
             } else {
+                ::puts "Namespace Parent: [namespace parent]"
                 set foundAttributes [::new [namespace parent]::Attributes [lindex [split $this ::] end].$groupName $groupName $closure]
 
                 ## Add to list
@@ -768,32 +769,6 @@ namespace eval osys::rfg {
 
     }
 
-    proc attributeFunction {fname} {
-  
-        set attributeName [string trimleft $fname ::]
-
-        ## Category 
-        ##  1. Namespace of attributeFunction call location without leading ::
-        ##  2. Add :: to name
-        #################
-        set category [string trimleft [uplevel namespace current] ::]
-
-        set attributeName ${category}::$attributeName
-
-        set res "proc $fname args {
-            uplevel 1 addAttribute $attributeName \$args 
-        }"
-        uplevel 1 $res 
- 
-    }  
-
-    proc attributeGroup {fname} {
-        set res "proc $fname args {
-            uplevel 1 attributes [string trimleft $fname ::] \$args
-        }"
-        uplevel 1 $res
-    }
-
     itcl::class RegisterFile {
         inherit Group Region
         ## Constructor
@@ -808,6 +783,6 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $closure
         }
     }
-
     source [file dirname [info script]]/globalfunctions.tcl
+    source [file dirname [info script]]/rfgfunctions.tcl
 }

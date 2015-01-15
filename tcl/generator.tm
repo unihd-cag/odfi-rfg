@@ -28,21 +28,23 @@ namespace eval osys::generator {
     variable registerFile ""
 
     itcl::class Generator {
+        
+        inherit ::osys::rfg::Common
      
-        odfi::common::classField public name ""
         odfi::common::classField public destinationPath ""
         odfi::common::classField public gen ""
 
-        constructor {cName cClosure} {
+        constructor {cName cClosure} {::osys::rfg::Common::constructor $cName} {
 
             name $cName
             odfi::closures::doClosure $cClosure
+            puts $attributes
             generate
         
         }
 
         public method generate {} {
-         
+            
             [osys::rfg::getGenerator $name $::osys::generator::registerFile] produce $destinationPath          
         
         }   
@@ -51,7 +53,9 @@ namespace eval osys::generator {
 }    
 ## Main factory
 proc generator {name closure} {
+    
     return [::new ::osys::generator::Generator ::$name $name $closure]
+   
 }
     
 ## Helper function for easy RFG read in
@@ -67,5 +71,6 @@ proc readRF {inputFile} {
     osys::rfg::address::hierarchical::calculate $::osys::generator::registerFile
 
 }
-    
 
+source [file dirname [info script]]/globalfunctions.tcl
+source [file dirname [info script]]/generatorfunctions.tcl

@@ -7,27 +7,31 @@ generator verilog {
 
     destinationPath "verilog/"
 
+    extra {
+        reset async
+    }
+
 }
 
-generator Htmlbrowser {
+generator htmlbrowser {
 
     destinationPath "doc/"
 
 }
 
-generator Xmlgenerator {
+generator xmlgenerator {
 
     destinationPath "xml/"
 
 }
 
-generator Rfsbackport {
+generator rfsbackport {
 
     destinationPath "xml/"
 
 }
 
-generator Rfgheader {
+generator rfgheader {
 
     destinationPath "verilog_header/"
 
