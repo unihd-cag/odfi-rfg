@@ -5,6 +5,7 @@ package require osys::rfg::generator::veriloggenerator
 package require osys::rfg::generator::htmlbrowser
 package require osys::rfg::generator::rfsbackport
 package require osys::rfg::generator::rfgheader
+package require osys::rfg::generator::egenerator
 
 #########################################################
 ## Output folders for the generated files

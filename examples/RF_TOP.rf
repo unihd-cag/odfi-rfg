@@ -1,0 +1,80 @@
+registerFile RF_TOP {
+
+    register REG_0 {
+        field field_0 {
+            width        16
+            reset        16'h0
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+        field field_1 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+        field field_2 {
+            width        16
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+    }
+
+    register REG_1 {
+        field field_0 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+        field field_1 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+    }
+
+    external RF_BOTTOM.rf RF_BOTTOM
+
+    register REG_4 {
+        field field_0 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+        field field_1 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+    }
+
+    register REG_5 {
+        field field_0 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+        field field_1 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+    }
+}
