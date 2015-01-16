@@ -7,7 +7,7 @@ title: Osys RFG
 
 The CAG RegisterFile Generator (RFG) is a TCL-based register file hierarchy description language, which generates hardware (Verilog RTL) and software interfaces for control and status registers to be used in an FPGA or ASIC design.
 
-Example for a registerfile definition with the RFG:
+For example a register file definition with the RFG (Example_RF.rf):
 
     registerFile Example_RF {
     
@@ -35,7 +35,20 @@ Example for a registerfile definition with the RFG:
         }
     }
 
-Now the in the RFG available generators can be applied on the description to generate the verilog, xml, and documentation files.
+Now the in the RFG available generators can be applied on the description to generate the verilog, xml, and documentation files. For this a little generator script is written. For example to create a verilog description and a xml representation:
+
+    package require osys::rfg 1.0.0
+    package require osys::generator 1.0.0
+    
+    readRF "Example_RF.rf"
+    
+    generator verilog {
+        destinationPath "doc/"
+    }
+
+    generator xmlgenerator {
+        destinationPath "xml/"
+    }
 
 ## Available Generators
 
