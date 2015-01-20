@@ -8,8 +8,14 @@
 		$object walkDepthFirst {
             if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
 				set size [$it getAttributeValue software.osys::rfg::size]
-				puts "[getName $it]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
-			}
+                if {[expr [getAddrBits $registerFile]-1] < [ld [expr [$registerFile register_size]/8]]} {
+		            puts "[getName $it]: base\[[expr [getAddrBits $registerFile]]:3\] [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8] size: $size"
+	            } else {
+		            puts "[getName $it]: base\[[expr [getAddrBits $registerFile]-1]:3\] [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8] size: $size"
+
+			    }
+            }
+
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				return false	
 			} else {

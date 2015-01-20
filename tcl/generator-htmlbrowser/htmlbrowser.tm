@@ -51,7 +51,7 @@ namespace eval osys::rfg::generator::htmlbrowser {
             
             file mkdir $destinationPath
             ::puts "Htmlbrowser processing $registerFile > ${destinationPath}[$registerFile name].html"
-            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html]
+            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html.tcl]
             odfi::files::writeToFile ${destinationPath}[$registerFile name].html $html
             copyDependenciesTo $destinationPath
 

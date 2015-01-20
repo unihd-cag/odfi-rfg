@@ -43,7 +43,7 @@ namespace eval osys::rfg::generator::wrapper {
             ::puts "WrapperGenerator processing: $registerFile > ${destinationPath}RF_wrapper_template.v"
                 
             ## Read and parse Verilog Template
-            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::wrapper::location/RF_wrapper_template.v]
+            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::wrapper::location/RF_wrapper_template.v.tcl]
             odfi::files::writeToFile ${destinationPath}RF_wrapper_template.v $verilog
 
         }
