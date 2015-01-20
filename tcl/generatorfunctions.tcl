@@ -17,7 +17,7 @@
 
 ## Groups
 #####################
-attributeGroup ::extra
+attributeGroup ::options
 
 attributeFunction ::reset
 

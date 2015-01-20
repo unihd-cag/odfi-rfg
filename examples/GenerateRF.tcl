@@ -7,7 +7,7 @@ generator verilog {
 
     destinationPath "verilog/"
 
-    extra {
+    options {
         reset async
     }
 

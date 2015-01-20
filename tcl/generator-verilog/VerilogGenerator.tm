@@ -61,12 +61,6 @@ namespace eval osys::rfg::generator::verilog {
 
         }
 
-        public method produce_RF_Wrapper destinationFile {
-
-            ## Read and parse Verilog Template
-            set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/RF_wrapper_template.v]
-            odfi::files::writeToFile $destinationFile $verilog
-        }
-	}
+    }
 
 }
