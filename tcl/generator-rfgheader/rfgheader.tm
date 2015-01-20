@@ -49,9 +49,6 @@ proc getRFmaxWidth {registerfile} {
 
 namespace eval osys::rfg::generator::rfgheader {
 
-
-   
-
     ##############################
     ## Implementation of generator
     ##############################
@@ -66,18 +63,11 @@ namespace eval osys::rfg::generator::rfgheader {
             set registerFile $cRegisterFile
         }
 
-
-
-        public method produceToFile targetFile {
-            set res [produce ]
-            odfi::files::writeToFile $targetFile $res 
-        }
-
         public method ld  x {
             return [expr {int(ceil(log($x)/[expr log(2)]))}]
         }
 
-            # function to get the address Bits for the register file 
+        # function to get the address Bits for the register file 
         public method getRFsize {registerfile} {
             set size 0
             set offset [$registerfile getAttributeValue software.osys::rfg::absolute_address]
@@ -97,20 +87,24 @@ namespace eval osys::rfg::generator::rfgheader {
             return [ld [getRFsize $registerfile]]
         }
 
-        public method produce args {
+        public method produce {destinationPath} {
 
-
+            file mkdir $destinationPath 
+            puts "Rfgheader processing $registerFile > ${destinationPath}[$registerFile name].h"
+            
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
             
             odfi::common::println "`ifndef RFS_DEFINES" $out
             odfi::common::println "`define RFS_DEFINES" $out
             odfi::common::println "`define RFS_DATA_WIDTH [getRFmaxWidth $registerFile]" $out
+            
             if {[expr [getAddrBits $registerFile]-3] == 0} {
                 odfi::common::println "`define RFS_[string toupper [$registerFile name]]_AWIDTH 1" $out
             } else {
                 odfi::common::println "`define RFS_[string toupper [$registerFile name]]_AWIDTH [expr [getAddrBits $registerFile]-3]" $out
             }
+            
             odfi::common::println "`define RFS_[string toupper [$registerFile name]]_RWIDTH [getRFmaxWidth $registerFile]" $out
             odfi::common::println "`define RFS_[string toupper [$registerFile name]]_WWIDTH [getRFmaxWidth $registerFile]" $out
             
@@ -133,7 +127,7 @@ namespace eval osys::rfg::generator::rfgheader {
             flush $out
             set res [read $out]
             close $out
-            return $res
+            odfi::files::writeToFile ${destinationPath}[$registerFile name].h $res
         }
     }
 }

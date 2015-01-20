@@ -1,15 +1,21 @@
 <%
 	package require HelperFunctions 1.0.0
-	source ${osys::rfg::veriloggenerator::location}/Instances.tm
+	source ${osys::rfg::generator::verilog::location}/Instances.tm
 	
 	set ramBlockCount 0
 
 	proc writeAddressMap {object} {
 		$object walkDepthFirst {
-			if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
+            if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
 				set size [$it getAttributeValue software.osys::rfg::size]
-				puts "[getName $it]: base: 0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]] size: $size"
-			}
+                if {[expr [getAddrBits $registerFile]-1] < [ld [expr [$registerFile register_size]/8]]} {
+		            puts "[getName $it]: base\[[expr [getAddrBits $registerFile]]:3\] [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8] size: $size"
+	            } else {
+		            puts "[getName $it]: base\[[expr [getAddrBits $registerFile]-1]:3\] [expr [$it getAttributeValue software.osys::rfg::absolute_address]/8] size: $size"
+
+			    }
+            }
+
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				return false	
 			} else {

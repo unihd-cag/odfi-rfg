@@ -42,51 +42,47 @@ namespace eval osys::rfg::generator::rfsbackport {
             set registerFile $cRegisterFile
         }
 
+#        public method produceToFile targetFile {
+#            set res [produce ]
+#            odfi::files::writeToFile $targetFile $res 
+#        }
 
-
-        public method produceToFile targetFile {
-            set res [produce ]
-            odfi::files::writeToFile $targetFile $res 
-        }
-        public method produce args {
-
+        public method produce {destinationPath} {
 
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
 
             writeGroup $out $registerFile
-
+            
             flush $out
             set res [read $out]
-            close $out
-            return $res
+            close $out 
+            
+            file mkdir $destinationPath
+            ::puts "Rfsbackport processing ${destinationPath}[$registerFile name].anot.xml"
+            odfi::files::writeToFile ${destinationPath}[$registerFile name].anot.xml $res
 
-            odfi::common::println "<regroot name=\"[$registerFile name]\" >"  $out 
-            odfi::common::printlnIndent
-            writeDescription $out $registerFile
-
-            ## Write Components
-            $registerFile onEachComponent {
-                if {[$it isa osys::rfg::Group]} {
-                    writeGroup $out $it                
-                } else {
-                    writeRegister $out $it
-                }
-            }
- 
-            odfi::common::printlnOutdent
-            odfi::common::println "</regroot>"  $out 
-
-        
-
-            ## Read  form special stream and return 
-            flush $out
-            set res [read $out]
-            close $out
-            return $res
-
-
-
+#            odfi::common::println "<regroot name=\"[$registerFile name]\" >"  $out 
+#            odfi::common::printlnIndent
+#            writeDescription $out $registerFile
+#
+#            ## Write Components
+#            $registerFile onEachComponent {
+#                if {[$it isa osys::rfg::Group]} {
+#                    writeGroup $out $it                
+#                } else {
+#                    writeRegister $out $it
+#                }
+#            }
+# 
+#            odfi::common::printlnOutdent
+#            odfi::common::println "</regroot>"  $out 
+#
+#            ## Read  form special stream and return 
+#            flush $out
+#            set res [read $out]
+#            close $out
+                                
         }
 
         ##public method ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
@@ -152,7 +148,6 @@ namespace eval osys::rfg::generator::rfsbackport {
             } else {
                 odfi::common::println "</reg64>"  $out
             } 
-
 
         }
 
