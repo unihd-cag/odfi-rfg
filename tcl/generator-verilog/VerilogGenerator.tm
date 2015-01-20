@@ -52,11 +52,12 @@ namespace eval osys::rfg::generator::verilog {
             
             foreach rf $registerfiles {
                 set registerFile $rf
-                
-                ::puts "VerilogGenerator processing: $rf > ${destinationPath}[$registerFile name].v"
-                
-                set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/registerfile_template.v.tcl]
-                odfi::files::writeToFile ${destinationPath}[$registerFile name].v $verilog
+                if {[$registerFile parent] == "" || [$registerFile hasAttribute hardware.osys::rfg::external]} {
+                    ::puts "VerilogGenerator processing: $rf > ${destinationPath}[$registerFile name].v"
+                    
+                    set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/registerfile_template.v.tcl]
+                    odfi::files::writeToFile ${destinationPath}[$registerFile name].v $verilog
+                }
             }
 
         }

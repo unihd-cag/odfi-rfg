@@ -113,18 +113,27 @@
 					}
 				}
 			}
+            
+			if {[$it isa osys::rfg::RegisterFile]} {
+				
+                set registerfile $it
+                
+                $registerfile onAttributes {hardware.osys::rfg::external} {
+                    lappend signalList "	.${context}[getName $registerfile]_address()"
+                    lappend signalList "	.${context}[getName $registerfile]_read_data()"
+                    lappend signalList "	.${context}[getName $registerfile]_invalid_address()"
+                    lappend signalList "	.${context}[getName $registerfile]_access_complete()"
+                    lappend signalList "	.${context}[getName $registerfile]_read_en()"
+                    lappend signalList "	.${context}[getName $registerfile]_write_en()"
+                    lappend signalList "	.${context}[getName $registerfile]_write_data()"
+                }
 
-			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
-				set registerfile $it
-				lappend signalList "	.[getName $registerfile]_address()"
-				lappend signalList "	.[getName $registerfile]_read_data()"
-				lappend signalList "	.[getName $registerfile]_invalid_address()"
-				lappend signalList "	.[getName $registerfile]_access_complete()"
-				lappend signalList "	.[getName $registerfile]_read_en()"
-				lappend signalList "	.[getName $registerfile]_write_en()"
-				lappend signalList "	.[getName $registerfile]_write_data()"
- 				##writeTemplate $it "[$registerfile name]_"
-				return false
+                $registerfile onAttributes {hardware.osys::rfg::internal} {
+                    writeTemplate $registerfile "[$registerfile name]_"
+                }
+
+                return false
+
 			} else {
 				return true
 			}
