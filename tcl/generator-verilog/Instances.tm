@@ -209,11 +209,11 @@ proc writeRFModule {registerfile} {
 		if {[$it isa osys::rfg::RamBlock]} {
 			
 			$it onAttributes {hardware.osys::rfg::rw} { 
-				lappend signalList "		.[getName $it]_addr([$registerfile name]_[getName $it]_addr)"
-				lappend signalList "		.[getName $it]_ren([$registerfile name]_[getName $it]_ren)"
-				lappend signalList "		.[getName $it]_rdata([$registerfile name]_[getName $it]_rdata)"
-				lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
-				lappend signalList "		.[getName $it]_wdata([$registerfile name]_[getName $it]_wdata)"
+				lappend signalList "		.[getName $it]_addr([getName $it]_addr)"
+				lappend signalList "		.[getName $it]_ren([getName $it]_ren)"
+				lappend signalList "		.[getName $it]_rdata([getName $it]_rdata)"
+				lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
+				lappend signalList "		.[getName $it]_wdata([getName $it]_wdata)"
 			}
 
 		} elseif {[$it isa osys::rfg::Register]} {
@@ -223,51 +223,51 @@ proc writeRFModule {registerfile} {
 					$it onAttributes {hardware.osys::rfg::counter} {
 						
 						$it onAttributes {hardware.osys::rfg::rw} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
-							lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							lappend signalList "		.[getName $it]_next([getName $it]_next)"
+							lappend signalList "		.[getName $it]([getName $it])"
+							lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
 						}
 						
 						$it onAttributes {hardware.osys::rfg::wo} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
-							lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							lappend signalList "		.[getName $it]_next([getName $it]_next)"
+							lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							lappend signalList "		.[getName $it]([getName $it])"
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "		.[getName $it]_written([$registerfile name]_[getName $it]_written)"
+							lappend signalList "		.[getName $it]_written([getName $it]_written)"
 						}
 
-						lappend signalList "		.[getName $it]_countup([$registerfile name]_[getName $it]_countup)"
+						lappend signalList "		.[getName $it]_countup([getName $it]_countup)"
 
 					} otherwise {
 
 						$it onAttributes {hardware.osys::rfg::rw} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							lappend signalList "		.[getName $it]_next([getName $it]_next)"
+							lappend signalList "		.[getName $it]([getName $it])"
 							
 							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+								lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
 							}
 						}
 						
 						$it onAttributes {hardware.osys::rfg::wo} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
+							lappend signalList "		.[getName $it]_next([getName $it]_next)"
 							
 							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+								lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
 							}
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							lappend signalList "		.[getName $it]([getName $it])"
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "		.[getName $it]_written([$registerfile name]_[getName $it]_written)"
+							lappend signalList "		.[getName $it]_written([getName $it]_written)"
 						}
 
 					}

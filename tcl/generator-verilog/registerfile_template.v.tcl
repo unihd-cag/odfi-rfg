@@ -114,29 +114,23 @@
 				}
 			}
             
-			if {[$it isa osys::rfg::RegisterFile]} {
+			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
 				
-                set registerfile $it
-                
-                $registerfile onAttributes {hardware.osys::rfg::external} {
-                    lappend signalList "	.${context}[getName $registerfile]_address()"
-                    lappend signalList "	.${context}[getName $registerfile]_read_data()"
-                    lappend signalList "	.${context}[getName $registerfile]_invalid_address()"
-                    lappend signalList "	.${context}[getName $registerfile]_access_complete()"
-                    lappend signalList "	.${context}[getName $registerfile]_read_en()"
-                    lappend signalList "	.${context}[getName $registerfile]_write_en()"
-                    lappend signalList "	.${context}[getName $registerfile]_write_data()"
-                }
-
-                $registerfile onAttributes {hardware.osys::rfg::internal} {
-                    writeTemplate $registerfile "[$registerfile name]_"
-                }
-
+                lappend signalList "	.${context}[getName $registerfile]_address()"
+                lappend signalList "	.${context}[getName $registerfile]_read_data()"
+                lappend signalList "	.${context}[getName $registerfile]_invalid_address()"
+                lappend signalList "	.${context}[getName $registerfile]_access_complete()"
+                lappend signalList "	.${context}[getName $registerfile]_read_en()"
+                lappend signalList "	.${context}[getName $registerfile]_write_en()"
+                lappend signalList "	.${context}[getName $registerfile]_write_data()"
+                    
                 return false
 
 			} else {
+
 				return true
-			}
+			
+            }
 
 		}
 
@@ -263,7 +257,8 @@
 			}
 			## ToDo rewrite with wire and reg signals
 			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
-				set registerfile $it
+				
+                set registerfile $it
 				if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
 					lappend signalList "	output reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
 				} else {
@@ -275,9 +270,10 @@
 				lappend signalList "	output reg [getName $registerfile]_read_en"
 				lappend signalList "	output reg [getName $registerfile]_write_en"
 				lappend signalList "	output reg\[[expr [getRFmaxWidth $registerfile] - 1]:0\] [getName $registerfile]_write_data"
- 				##writeBlackbox $it "[$registerfile name]_"
-				return false
-			} else {
+				
+                return false
+			
+            } else {
 				return true
 			}
 
@@ -368,9 +364,27 @@
 				}
 			}
 			
-			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
-				return false
-			} else {
+			if {[$it isa osys::rfg::RegisterFile]} {
+                set registerfile $it
+				$registerfile onAttributes {hardware.osys::rfg::internal} {
+                    ::puts "WriteRegisterNames"
+                    if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
+                        puts "	reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
+                    } else {
+                        puts "	reg\[[expr [getAddrBits $registerfile]-1]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address"
+                    }
+                    puts "	wire\[[expr [getRFmaxWidth $registerfile] - 1]:0\] [getName $registerfile]_read_data"
+                    puts "	wire [getName $registerfile]_invalid_address"
+                    puts "	wire [getName $registerfile]_access_complete"
+                    puts "	reg [getName $registerfile]_read_en"
+                    puts "	reg [getName $registerfile]_write_en"
+                    puts "	reg\[[expr [getRFmaxWidth $registerfile] - 1]:0\] [getName $registerfile]_write_data"
+                
+                }
+                
+                return false
+			
+            } else {
 				return true
 			}
 
@@ -427,8 +441,10 @@
 				}
 			}
 
-			if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
-				##writeRFModule $it
+			if {[$it isa osys::rfg::RegisterFile]} {
+				$it onAttributes {hardware.osys::rfg::internal} {
+                    writeRFModule $it
+                }
 				return false
 			} else {
 				return true
@@ -824,7 +840,7 @@
 				puts ""	
 			}
 
-			if {[$item isa osys::rfg::RegisterFile] && [$item hasAttribute hardware.osys::rfg::external]} {
+			if {[$item isa osys::rfg::RegisterFile]} {
 				writeRegisterFile $object $item
 				return false
 			} else {
