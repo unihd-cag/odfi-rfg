@@ -350,12 +350,7 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
 
-        ## external Method
-        ####################
-        ## Sources an external RegisterFile 
-
-        public method external {rf_filename {name ""}} {
-            
+        public method sourceRF {rf_filename attribute name} {
             set RF_list_old {}
             set RF_list_new {}
 
@@ -405,11 +400,22 @@ namespace eval osys::rfg {
                         }
                         puts "WARNING: Automatic naming was used for [$RF name] in [$RF parent]"
                     }
-                    $RF attributes hardware {
-                        external
+               $RF attributes hardware {
+                        $attribute
                     }
                 }
             }
+        }
+
+        public method internal {rf_filename {name ""}} {
+           
+            sourceRF $rf_filename internal $name 
+        
+        }
+
+        public method external {rf_filename {name ""}} {
+
+            sourceRF $rf_filename external $name 
 
         }
 
