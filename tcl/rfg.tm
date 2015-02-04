@@ -209,7 +209,6 @@ namespace eval osys::rfg {
                $foundAttributes apply $closure
 
             } else {
-                ::puts "Namespace Parent: [namespace parent]"
                 set foundAttributes [::new [namespace parent]::Attributes [lindex [split $this ::] end].$groupName $groupName $closure]
 
                 ## Add to list
