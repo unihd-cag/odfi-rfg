@@ -369,11 +369,11 @@
                         $it onAttributes {hardware.osys::rfg::shared_bus} {
                             if {$shared_bus == 0} {
                                 set shared_bus 1
-                                puts "	reg\[[expr [getRFmaxWidth $registerFile]-1]:0\] write_data_reg;"
+                                puts "	reg\[[expr [$it width]-1]:0\] write_data_reg;"
                                 puts "  reg\[[expr [ld [$it depth]]-1]:3\] address_reg;"
                             }
                         } otherwise {
-                            puts "  reg\[[expr [getRFmaxWidth $registerFile]-1]:0\] [getName $it]_write_data_reg;"
+                            puts "  reg\[[expr [$it width]-1]:0\] [getName $it]_write_data_reg;"
                             puts "  reg\[[expr [ld [$it depth]]-1]:3\] [getName $it]_address_reg;"
                         }
                     } else {
@@ -473,7 +473,6 @@
 			if {[$it isa osys::rfg::RegisterFile]} {
                 set registerfile $it
 				$registerfile onAttributes {hardware.osys::rfg::internal} {
-                    ::puts "WriteRegisterNames"
                     if {[expr [getAddrBits $registerfile]-1] < [ld [expr [$registerfile register_size]/8]]} {
                         puts "	reg\[[getAddrBits $registerfile]:[ld [expr [$registerFile register_size]/8]]\] [getName $registerfile]_address;"
                     } else {
@@ -1052,20 +1051,22 @@
 
 	proc writeRamDelay {rb_count object} {
 
-#        $object walkDepthFirst {
-#            if {[$it isa osys::rfg::RamBlock]} {
-#                $it onAttributes {hardware.osys::rfg::external} {
-#                    $it onAttributes {hardware.osys::rfg::shared_bus} {
-#                        ## Not finished here...
-#                    } otherwise {
-#                        if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
-#					        puts "			write_data_reg\[\] <= write_data\[\];"
-#                        }
-#                            puts "          address_reg <= address_reg\[\];"
-#                    }
-#                }
-#            }
-#        }
+        $object walkDepthFirst {
+            if {[$it isa osys::rfg::RamBlock]} {
+                $it onAttributes {hardware.osys::rfg::external} {
+                    $it onAttributes {hardware.osys::rfg::shared_bus} {
+                        ## Not finished here...
+                        ::puts "Not finished feature!!!"
+                        return true
+                    } otherwise {
+                        if {[$it hasAttribute hardware.osys::rfg::wo] || [$it hasAttribute hardware.osys::rfg::rw]} {
+					        puts "			[getName $it]_write_data_reg <= write_data\[[expr [getRFmaxWidth $registerFile]-1]:0\];"
+                        }
+					        puts "			[getName $it]_address_reg <= address_reg\[[expr [ld [$it depth]]-1]:3\];"
+                    }
+                }
+            }
+        }
 
 		if {$rb_count != 0} {
 			set delays 3
@@ -1088,11 +1089,6 @@
 			    if {[$it hasAttribute software.osys::rfg::ro] || [$it hasAttribute software.osys::rfg::rw]} {
                     set dontCare [string repeat x [ld [$it depth]]]
                     set care [expr [$it getAttributeValue software.osys::rfg::relative_address]/([$it depth]*[$registerFile register_size]/8)]
-                    ::puts "----------------"
-                    ::puts "RAM: $it"
-                    ::puts "dontCare: $dontCare"
-                    ::puts "Care: $care"
-                    ::puts "----------------"
                     if {[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]] != 0} {
                         set care [format %x $care]
                         puts "				\{[expr [getAddrBits $registerFile]-[expr [ld [$it depth]]+3]]'h$care,[ld [$it depth]]'b$dontCare\}:"
@@ -1106,8 +1102,13 @@
                     }
                     puts "					invalid_address <= 1'b0;"
                     set delays 3
-                    puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
+                    if {[$it hasAttribute hardware.osys::rfg::external]} {
+                        puts "	                access_complete <= [getName $it]_rf_access_complete;"
+                    } else {
+                        puts "					access_complete <= write_en || read_en_dly[expr $delays-1];"
+                    }
                     puts "				end"
+
 			    } elseif {[$it hasAttribute software.osys::rfg::wo]} {
                     set dontCare [string repeat x [ld [$it depth]]]
                     set care [expr [$it getAttributeValue software.osys::rfg::relative_address]/([$it depth]*[$registerFile register_size]/8)] 
@@ -1120,7 +1121,11 @@
                     puts "				begin"
                     puts "                  invalid_address <= 1'b0;"
                     set delays 3
-                    puts "                  access_complete <= write_en || read_en_dly[expr $delays-1];"
+                    if {[$it hasAttribute hardware.osys::rfg::external]} {
+                        puts "	                access_complete <= [getName $it]_rf_access_complete;"
+                    } otherwise {
+                        puts "                  access_complete <= write_en || read_en_dly[expr $delays-1];"
+                    }
                     puts "              end"
                 }
             } elseif {[$it isa osys::rfg::Register] && ![$it hasAttribute hardware.osys::rfg::rreinit_source]} {
