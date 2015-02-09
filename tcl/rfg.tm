@@ -718,7 +718,9 @@ namespace eval osys::rfg {
         
 
         constructor {cName cClosure} {Common::constructor $cName} {
-
+            attributes software {
+                address_shift 0
+            }
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
@@ -750,7 +752,6 @@ namespace eval osys::rfg {
         odfi::common::classField public reset 0
         
         constructor {cName cClosure} {Common::constructor $cName} {
-
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
