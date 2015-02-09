@@ -107,8 +107,13 @@ namespace eval osys::rfg::address::hierarchical {
             } elseif {[$operator isa ::osys::rfg::Region] && ![$operator isa ::osys::rfg::Group]} {
 
                 ## Non grouping regions must have size set
-                #puts "NGR: [$operator size]"
-                return [expr [$operator size]/8]
+                ## puts "NGR: [$operator size]"
+                if {[$operator hasAttribute software.osys::rfg::address_shift]} {
+                    ::puts "Address Shift [$operator getAttributeValue software.osys::rfg::address_shift]"
+                    return [expr [$operator size]/8 << [$operator getAttributeValue software.osys::rfg::address_shift]]
+                } else {
+                    return [expr [$operator size]/8]
+                }
 
             } elseif {[$operator isa ::osys::rfg::Region]} {
 

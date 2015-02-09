@@ -43,6 +43,7 @@ attributeFunction ::external
 attributeFunction ::internal
 attributeFunction ::hardware_clear
 attributeFunction ::software_write_clear
+attributeFunction ::shared_bus
 
 ## Addressing
 attributeFunction ::relative_address
@@ -51,6 +52,7 @@ attributeFunction ::absolute_start_address
 attributeFunction ::absolute_end_address
 attributeFunction ::aligner
 attributeFunction ::size
+attributeFunction ::address_shift
 
 ## RFG 
 ############
