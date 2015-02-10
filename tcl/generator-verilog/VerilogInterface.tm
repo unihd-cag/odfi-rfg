@@ -25,9 +25,9 @@ namespace eval osys::verilogInterface {
         
         odfi::common::classField private in_out_list {}
 
-        constructor {cName cClosure} {Common::constructor $cName} {
+        constructor {cClosure} {
             odfi::closures::doClosure $cClosure
-            return [join in_out_list ","]
+           ## return [join in_out_list ","]
         }
         
         public method input {name type width {offset 0}} {
@@ -38,7 +38,7 @@ namespace eval osys::verilogInterface {
             }
         }
 
-        public method output {name type width} {
+        public method output {name type width {offset 0}} {
             ::if {$width == 1} {
                 lappend in_out_list "output $type $name"
             } else {
@@ -47,13 +47,17 @@ namespace eval osys::verilogInterface {
 
         }
 
-        public method inout {name type width} {
+        public method inout {name type width {offset 0}} {
             ::if {$width == 1} {
                 lappend in_out_list "inout $type $name"
             } else {
                 lappend in_out_list "inout $type\[[expr $width -1+$offset]:$offset\] $name"
             }
 
+        }
+
+        public method getResolve {} {
+            return [join $in_out_list ",\n    "]
         }
 
     }
@@ -64,24 +68,34 @@ namespace eval osys::verilogInterface {
 
     itcl::class Module {
         
-        odfi::common::classField private resolve ""
+        odfi::common::classField private resolve [odfi::common::newStringChannel]
 
-        constructor {cName cClosure1 cClosure2} {Common::constructor $cName} {
+        constructor {cName cClosure1 cClosure2} {
             ## Module Blackbox definitions start
             odfi::common::println "module $cName (" $resolve
             odfi::common::printlnIndent
-            odfi::common::println [::new ModuleBlackbox ::${cName}_Blackbox ${cName}_Blackbox $cClosure1] $resolve
-            odfi::common::printOutdent
-            odfi::common::println ");"
+            set moduleBlackbox [::new [namespace parent]::ModuleBlackbox ::{$cName}_Blackbox $cClosure1]
+            odfi::common::println [$moduleBlackbox getResolve] $resolve
+            odfi::common::printlnOutdent
+            odfi::common::println ");" $resolve
             ## Module Blackbox definitions end
             ## Module body start
             ## construct ModuleBody
             ## Module body end
-            return $resolve
+            ::puts [getResolve]
+        }
+
+        public method getResolve {} {
+            flush $resolve
+            return [read $resolve]
         }
     }
     
-    proc module {cName cClosure1 cClosure2} {
-        return [::new Module ::$cName $cName $cClosure1 $cClosure2]
+    proc module {cName cClosure1 keyword cClosure2} {
+        if {$keyword == "body"} {
+            return [::new Module ::$cName $cName $cClosure1 $cClosure2]
+        } else {
+            error "No body defined!"
+        }
     }
 }
