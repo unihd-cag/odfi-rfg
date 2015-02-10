@@ -27,7 +27,6 @@ namespace eval osys::verilogInterface {
 
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
-           ## return [join in_out_list ","]
         }
         
         public method input {name type width {offset 0}} {
@@ -62,8 +61,49 @@ namespace eval osys::verilogInterface {
 
     }
 
-    itcl::class ModuleBody {
+    itcl::class Always {
 
+        odfi::common::classField private resolve [odfi::common::newStringChannel]
+
+        constructor {cClosure} {
+            odfi::closures::doClosure $cClosure
+        }
+
+
+    }
+
+    itcl::class ModuleBody {
+        
+        odfi::common::classField private resolve [odfi::common::newStringChannel]
+
+        constructor {cClosure} {
+            odfi::closures::doClosure $cClosure
+        }
+
+        public method assign {$lvalue $rvalue} {
+            odfi::common::println "assign $lvalue = $rvalue;" $resolve
+        }
+
+        public method reg {name width {offset 0}} {
+            odfi::common::println "reg\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+        }
+
+        public method wire {name width {offset 0}} {
+            odfi::common::println "wire\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+        }
+
+        public method logic {name widht {offset 0}} {
+            odfi::common::println "logic\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+        }
+
+        public method always {condition closure} {
+            odfi::common::println "always" $resolve
+            odfi::common::println "begin" $resolve
+            odfi::common::printlnIndent
+            ## Create always object
+            odfi::common::printlnOutdent
+            odfi::common::println "end"
+        }
     }
 
     itcl::class Module {

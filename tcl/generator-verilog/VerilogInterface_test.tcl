@@ -7,10 +7,11 @@ source VerilogInterface.tm
 osys::verilogInterface::module TestModule {
     $rf walkDepthFirst {
         if {[$it isa osys::rfg::Register]} {
+            set reg $it
             $it onEachField {
                 $it onAttributes {hardware.osys::rfg::rw} {
-                    input [$it name]_next wire [$it width]
-                    output [$it name] reg [$it width]
+                    input [$reg name]_[$it name]_next wire [$it width]
+                    output [$reg name]_[$it name] reg [$it width]
                 }
             }
         }
