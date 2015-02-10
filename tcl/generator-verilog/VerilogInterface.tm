@@ -59,7 +59,7 @@ namespace eval osys::verilogInterface {
     }
 
     itcl::class ModuleBody {
-        
+
     }
 
     itcl::class Module {
@@ -70,15 +70,18 @@ namespace eval osys::verilogInterface {
             ## Module Blackbox definitions start
             odfi::common::println "module $cName (" $resolve
             odfi::common::printlnIndent
-            ## construct ModuleBlackbox
+            odfi::common::println [::new ModuleBlackbox ::${cName}_Blackbox ${cName}_Blackbox $cClosure1] $resolve
             odfi::common::printOutdent
             odfi::common::println ");"
             ## Module Blackbox definitions end
             ## Module body start
             ## construct ModuleBody
             ## Module body end
+            return $resolve
         }
     }
-
-
+    
+    proc module {cName cClosure1 cClosure2} {
+        return [::new Module ::$cName $cName $cClosure1 $cClosure2]
+    }
 }
