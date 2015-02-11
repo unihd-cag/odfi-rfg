@@ -21,7 +21,7 @@ package require odfi::list 2.0.0
 
 namespace eval osys::verilogInterface {
     
-    itcl::class ModuleBlackbox {
+    itcl::class ModuleInterface  {
         
         odfi::common::classField private in_out_list {}
 
@@ -60,28 +60,7 @@ namespace eval osys::verilogInterface {
         }
 
     }
-
-    itcl::class Case {
-        
-        inherit Always
-
-        odfi::common::classField private resolve [odfi::common::newStringChannel]
-
-        constructor {cClosure} {
-            odfi::closures::doClosure $cClosure
-        }
-        
-        public method case_select {condition body} {
-            odfi::common::println "$condition:" $resolve
-            odfi::common::println "begin" $resolve
-            odfi::common::printlnIndent
-            odfi::closures::doClosure $cClosure
-            odfi::common::printlnOutdent
-            odfi::common::println "end" $resolve
-        }
-
-    }
-
+    
     itcl::class Always {
 
         odfi::common::classField private resolve [odfi::common::newStringChannel]
@@ -109,12 +88,33 @@ namespace eval osys::verilogInterface {
         }
 
         public method case {selector closure} {
-            odfi::common::println "case($selector)"
+            odfi::common::println "casex($selector)"
             odfi::common::printlnIndent
             set case_object [::new [namespace parent]::Case #auto $closure]
             odfi::common::println [case_object getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println "endcase"
+        }
+
+    }
+    
+    itcl::class Case {
+        
+        inherit Always
+
+        odfi::common::classField private resolve [odfi::common::newStringChannel]
+
+        constructor {cClosure} {
+            odfi::closures::doClosure $cClosure
+        }
+        
+        public method case_select {condition body} {
+            odfi::common::println "$condition:" $resolve
+            odfi::common::println "begin" $resolve
+            odfi::common::printlnIndent
+            odfi::closures::doClosure $cClosure
+            odfi::common::printlnOutdent
+            odfi::common::println "end" $resolve
         }
 
     }
@@ -163,8 +163,8 @@ namespace eval osys::verilogInterface {
             ## Module Blackbox definitions start
             odfi::common::println "module $cName (" $resolve
             odfi::common::printlnIndent
-            set moduleBlackbox [::new [namespace parent]::ModuleBlackbox ::{$cName}_Blackbox $cClosure1]
-            odfi::common::println [$moduleBlackbox getResolve] $resolve
+            set module_interface [::new [namespace parent]::ModuleInterface ::{$cName}_Interface $cClosure1]
+            odfi::common::println [$module_interface getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println ");" $resolve
             ## Module Blackbox definitions end
@@ -184,7 +184,7 @@ namespace eval osys::verilogInterface {
         ::if {$keyword == "body"} {
             return [::new Module ::${cName}_Module $cName $cClosure1 $cClosure2]
         } else {
-            error "No body defined!"
+            error "No body defined!
         }
     }
 }
