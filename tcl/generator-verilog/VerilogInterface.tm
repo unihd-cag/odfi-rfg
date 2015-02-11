@@ -61,6 +61,27 @@ namespace eval osys::verilogInterface {
 
     }
 
+    itcl::class Case {
+        
+        inherit Always
+
+        odfi::common::classField private resolve [odfi::common::newStringChannel]
+
+        constructor {cClosure} {
+            odfi::closures::doClosure $cClosure
+        }
+        
+        public method case_select {condition body} {
+            odfi::common::println "$condition:" $resolve
+            odfi::common::println "begin" $resolve
+            odfi::common::printlnIndent
+            odfi::closures::doClosure $cClosure
+            odfi::common::printlnOutdent
+            odfi::common::println "end" $resolve
+        }
+
+    }
+
     itcl::class Always {
 
         odfi::common::classField private resolve [odfi::common::newStringChannel]
@@ -69,6 +90,32 @@ namespace eval osys::verilogInterface {
             odfi::closures::doClosure $cClosure
         }
 
+        public method if {condition body} {
+            odfi::common::println "if($condition)" $resolve
+            odfi::common::println "begin" $resolve
+            odfi::common::printlnIndent
+            odfi::closures::doClosure $body
+            odfi::common::printlnOutdent
+            odfi::common::println "end" $resolve
+        }
+
+        public method else {body} {
+            odfi::common::println "else" $resolve
+            odfi::common::println "begin" $resolve
+            odfi::common::printlnIndent
+            odff::closures::doClosure $body
+            odfi::common::printlnOutdent
+            odfi::common::println "end" $resolve
+        }
+
+        public method case {selector closure} {
+            odfi::common::println "case($selector)"
+            odfi::common::printlnIndent
+            set case_object [::new [namespace parent]::Case #auto $closure]
+            odfi::common::println [case_object getResolve] $resolve
+            odfi::common::printlnOutdent
+            odfi::common::println "endcase"
+        }
 
     }
 
@@ -101,6 +148,8 @@ namespace eval osys::verilogInterface {
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
             ## Create always object
+            set always_object [::new [namespace parent]::Always #auto $closure]
+            odfi::common::println [always_object getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println "end"
         }
@@ -132,8 +181,8 @@ namespace eval osys::verilogInterface {
     }
     
     proc module {cName cClosure1 keyword cClosure2} {
-        if {$keyword == "body"} {
-            return [::new Module ::$cName $cName $cClosure1 $cClosure2]
+        ::if {$keyword == "body"} {
+            return [::new Module ::${cName}_Module $cName $cClosure1 $cClosure2]
         } else {
             error "No body defined!"
         }
