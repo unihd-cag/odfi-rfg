@@ -3,6 +3,28 @@ package provide HelperFunctions 1.0.0
 # logarithmus dualis function for address bit calculation
 proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
 
+## this functions finds a parent registerfile which is a internal RF 
+## for this it uses an offset until which it searches
+proc find_internalRF {it offset} {
+    set val 0
+    set delete_index [lsearch [$it parents] $offset]
+    if {$delete_index >= 0} {
+        set parents_list [lreplace [$it parents] 0 $delete_index]
+    }
+    foreach parent $parents_list {
+        if {[$parent isa osys::rfg::RegisterFile]} {
+            $parent onAttributes {hardware.osys::rfg::internal} {
+                set val 1
+            }
+        }
+    }
+    if {$val == 0} {
+        return reg
+    } else {
+        return wire
+    }
+}
+
 # function to getRFmaxWidth
 proc getRFmaxWidth {registerfile} {
  	set maxwidth 0
