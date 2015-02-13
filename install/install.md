@@ -15,5 +15,5 @@ For the RFG you need the following packages installed on your system:
 
 After you installed the packages mentioned above, you download this [Makefile](https://raw.githubusercontent.com/unihd-cag/odfi-rfg/gh-pages/install/Makefile) and run it on your desired install path with:
 
-    sudo make all
+    make all
 
