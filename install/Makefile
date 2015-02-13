@@ -1,7 +1,7 @@
 
 ## Config
 SHELL=/bin/bash
-MODULES = integration-mbuild tcl-integration dev-tcl dev-tcl-scenegraph dev-hw rfg dev-hw
+MODULES = dev-tcl rfg
 
 ## Main Target
 all: odfi-manager/setup.linux.bash modules
