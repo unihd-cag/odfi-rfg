@@ -20,6 +20,17 @@ package require odfi::common
 package require odfi::list 2.0.0
 
 namespace eval osys::verilogInterface {
+
+    itcl::class Common {
+
+        odfi::common::classField private resolve [odfi::common::newStringChannel]
+        
+        public method getResolve {} {
+            flush $resolve
+            return [read $resolve]
+        }
+
+    }
     
     itcl::class ModuleInterface  {
         
@@ -62,8 +73,8 @@ namespace eval osys::verilogInterface {
     }
     
     itcl::class Always {
-
-        odfi::common::classField private resolve [odfi::common::newStringChannel]
+        
+        inherit Common
 
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
@@ -102,8 +113,6 @@ namespace eval osys::verilogInterface {
         
         inherit Always
 
-        odfi::common::classField private resolve [odfi::common::newStringChannel]
-
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
         }
@@ -121,7 +130,7 @@ namespace eval osys::verilogInterface {
 
     itcl::class ModuleBody {
         
-        odfi::common::classField private resolve [odfi::common::newStringChannel]
+        inherit Common
 
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
@@ -157,27 +166,26 @@ namespace eval osys::verilogInterface {
 
     itcl::class Module {
         
-        odfi::common::classField private resolve [odfi::common::newStringChannel]
+        inherit Common
 
         constructor {cName cClosure1 cClosure2} {
             ## Module Blackbox definitions start
             odfi::common::println "module $cName (" $resolve
             odfi::common::printlnIndent
-            set module_interface [::new [namespace parent]::ModuleInterface ::{$cName}_Interface $cClosure1]
+            set module_interface [::new [namespace parent]::ModuleInterface ::${cName}_Interface $cClosure1]
             odfi::common::println [$module_interface getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println ");" $resolve
             ## Module Blackbox definitions end
             ## Module body start
-            ## construct ModuleBody
+            odfi::common::printlnIndent
+            set module_body [::new [namespace parent]::ModuleBody ::${cName}_Body $cClosure2]
+            odfi::common::println [$module_body getResolve] $resolve
+            odfi::common::printlnOutdent
             ## Module body end
             ::puts [getResolve]
         }
 
-        public method getResolve {} {
-            flush $resolve
-            return [read $resolve]
-        }
     }
     
     proc module {cName cClosure1 keyword cClosure2} {
