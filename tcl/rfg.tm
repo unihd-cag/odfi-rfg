@@ -163,15 +163,23 @@ namespace eval osys::rfg {
 
         }
 
-        public method onRead {group closure} {
+        public method onRead {group closure1 {keyword ""} {clsoure2 ""}} {
             if {[hasAttribute ${group}.osys::rfg::ro] || [hasAttribute ${group}.osys::rfg::rw]} {
-                odfi::closures::doClosure $closure 1
+                odfi::closures::doClosure $closure1 1
+            } else {
+                if {$closure2 != ""} {
+                    odfi::closures::doClosure $closure2 1
+                }
             }
         }
 
-        public method onWrite {group closure} {
+        public method onWrite {group closure1 {keyword ""} {closure2 ""}} {
             if {[hasAttribute ${group}.osys::rfg::wo] || [hasAttribute ${group}.osys::rfg::rw]} {
-                odfi::closures::doClosure $closure 1
+                odfi::closures::doClosure $closure1 1
+            } else {
+                if {$closure2 != ""} {
+                    odfi::closures::doClosure $closure2 1
+                }
             }
         }
 

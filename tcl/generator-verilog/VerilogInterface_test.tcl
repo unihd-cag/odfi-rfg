@@ -18,6 +18,17 @@ proc getRFAddrWidth {object} {
     return [expr [getAddrBits $object]-[getRFAddrOffset $object]]
 }
 
+proc getFirstSharedBusObject {object} {
+    $object walkDepthFirst {
+        if {[$it isa osys::rfg::RamBlock]} {
+            $it onAttributes {hardware.osys::rfg::shared_bus} {
+                return $it
+            }
+        }
+        return ""
+    }
+}
+
 anonym_proc writeRamBlockInterface {it} {
     $it onAttributes {hardware.osys::rfg::external} {
                 
@@ -160,36 +171,45 @@ osys::verilogInterface::module [$rf name] {
                 $it onWrite {software} {
                     
                     $it onAttributes {hardware.osys::rfg::shared_bus} {
-                        
+                        if {$it == [getFirstSharedBusObject $rf]} {
+                            reg write_data_reg [$it width]
+                        }
                     } otherwise {
-
-                    }
-                
-                } otherwise {
-                    
-                    $it onAttributes {hardware.osys::rfg::shared_bus} {
-    
-                    } otherwise {
-                        
+                        reg [getName $it]_write_data_reg [$it width]
                     }
 
                 }
-            
+
+                $it onAttributes {hardware.osys::rfg::shared_bus} {
+                    if {$it == [getFirstSharedBusObject $rf]} {
+                        reg address_reg [ld [$it depth]]
+                    }
+                } otherwise {
+                    reg [getName $it]_address_reg [ld [$it depth]]        
+                }
+ 
             } otherwise {
 
-                $it onWrite {
-
+                if {[$it hasAttribute software.osys::rfg::ro] || \
+                    [$it hasAttribute software.osys::rfg::wo] || \
+                    [$it hasAttribute software.osys::rfg::rw]} {
+                    reg [getName $it]_rf_addr [ld [$it depth]]
+                }
+                $it onWrite {software} {
+                    reg [getName $it]_rf_wen
+                    reg [getName $it]_rf_wdata [$it width]
                 }
 
-                $it onRead {
-
+                $it onRead {software} {
+                    reg [getName $it]_rf_ren
+                    wire [getName $it]_rf_rdata [$it width]
                 }
             }
         }
 
         ::if {[$it isa osys::rfg::Register]} {
             $it onAttributes {hardware.osys::rfg::rreinit_source} {
-
+                reg rreinit
             } otherwise {
 
                 $it onEachField {
@@ -198,27 +218,29 @@ osys::verilogInterface::module [$rf name] {
                             
                             ## Check if this is equivilant
                             $it onWrite {hardware} {
-
+                                reg [getName $it]_load_enable
+                                reg [getName $it]_load_value [$it width]
                             } otherwise {
                                 $it onWrite {software} {
-
+                                    reg [getName $it]_load_enable
+                                    reg [getName $it]_load_value [$it width]
                                 }
                             }
 
-                            ::if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
-                                
+                            ::if {![$it hasAttribute hardware.osys::rfg::ro] && ![$it hasAttribute hardware.osys::rfg::rw]} {
+                                wire [getName $it] [$it width]
                             }
-                            
+                                
                         } otherwise {
                             
                             $it onAttributes {hardware.osys::rfg::software_written} {
                                 ::if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
-                                    
+                                    reg [getName $it]_res_in_last_cycle
                                 }
                             }
 
-                            if {![$it hasAttribute hardware.osys::rfg::ro] && ![$it hasAttribute hardware.osys::rfg::rw] } {
-                            
+                            ::if {![$it hasAttribute hardware.osys::rfg::ro] && ![$it hasAttribute hardware.osys::rfg::rw] } {
+                                reg [getName $it]
                             }
 
                         }
