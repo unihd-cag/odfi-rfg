@@ -152,5 +152,87 @@ osys::rfg::address::hierarchical::calculate $rf
 osys::verilogInterface::module [$rf name] {
     writeVModuleInterface $rf
 } body {
-   ::puts "I am in the body"
+    $rf walkDepthFirst {
+        
+        ::if {[$it isa osys::rfg::RamBlock]} {
+            $it onAttributes {hardware.osys::rfg::external} {
+                
+                $it onWrite {software} {
+                    
+                    $it onAttributes {hardware.osys::rfg::shared_bus} {
+                        
+                    } otherwise {
+
+                    }
+                
+                } otherwise {
+                    
+                    $it onAttributes {hardware.osys::rfg::shared_bus} {
+    
+                    } otherwise {
+                        
+                    }
+
+                }
+            
+            } otherwise {
+
+                $it onWrite {
+
+                }
+
+                $it onRead {
+
+                }
+            }
+        }
+
+        ::if {[$it isa osys::rfg::Register]} {
+            $it onAttributes {hardware.osys::rfg::rreinit_source} {
+
+            } otherwise {
+
+                $it onEachField {
+                    ::if {[$it name] != "Reserved"} {
+                        $it onAttributes {hardware.osys::rfg::counter} {
+                            
+                            ## Check if this is equivilant
+                            $it onWrite {hardware} {
+
+                            } otherwise {
+                                $it onWrite {software} {
+
+                                }
+                            }
+
+                            ::if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
+                                
+                            }
+                            
+                        } otherwise {
+                            
+                            $it onAttributes {hardware.osys::rfg::software_written} {
+                                ::if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
+                                    
+                                }
+                            }
+
+                            if {![$it hasAttribute hardware.osys::rfg::ro] && ![$it hasAttribute hardware.osys::rfg::rw] } {
+                            
+                            }
+
+                        }
+                    }
+                }
+            }
+        }
+
+        ::if {[$it isa osys::rfg::RegisterFile]} {
+            $it onAttributes {hardware.osys::rfg::internal} {
+
+            }
+        }
+
+    }
+    ::puts "I am in the body"
 }
