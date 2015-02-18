@@ -41,7 +41,7 @@ namespace eval osys::verilogInterface {
         }
         
         public method input {name type {width 1} {offset 0}} {
-            ::if {[expr $width] == 1} {
+            ::if {$width == 1} {
                 lappend in_out_list "input $type $name"
             } else {
                 lappend in_out_list "input $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -49,7 +49,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method output {name type {width 1} {offset 0}} {
-            ::if {[expr $width] == 1} {
+            ::if {$width == 1} {
                 lappend in_out_list "output $type $name"
             } else {
                 lappend in_out_list "output $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -58,7 +58,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method inout {name type {width 1} {offset 0}} {
-            ::if {[expr $width] == 1} {
+            ::if {$width == 1} {
                 lappend in_out_list "inout $type $name"
             } else {
                 lappend in_out_list "inout $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -140,16 +140,28 @@ namespace eval osys::verilogInterface {
             odfi::common::println "assign $lvalue = $rvalue;" $resolve
         }
 
-        public method reg {name width {offset 0}} {
-            odfi::common::println "reg\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+        public method reg {name {width 1} {offset 0}} {
+            if {$width == 1} { 
+                odfi::common::println "reg $name;" $resolve
+            } else {
+                odfi::common::println "reg\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+            }
         }
 
-        public method wire {name width {offset 0}} {
-            odfi::common::println "wire\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+        public method wire {name {width 1} {offset 0}} {
+            if {$width == 1} {
+                 odfi::common::println "wire $name;" $resolve
+            } else {
+                 odfi::common::println "wire\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+            }
         }
 
-        public method logic {name widht {offset 0}} {
-            odfi::common::println "logic\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+        public method logic {name {widht 1} {offset 0}} {
+            if {$width == 1} {
+                odfi::common::println "logic $name;" $resolve
+            } else {
+                odfi::common::println "logic\[[expr $width-1+$offset]:$offset\] $name;" $resolve
+            }
         }
 
         public method always {condition closure} {
@@ -192,7 +204,7 @@ namespace eval osys::verilogInterface {
         ::if {$keyword == "body"} {
             return [::new Module ::${cName}_Module $cName $cClosure1 $cClosure2]
         } else {
-            error "No body defined!
+            error "No body defined!"
         }
     }
 }
