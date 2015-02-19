@@ -591,7 +591,6 @@
                 }
                 set equal [expr ([$ramBlock getAttributeValue software.osys::rfg::relative_address]/([$ramBlock depth]*[$registerFile register_size]/8)) >> [$ramBlock getAttributeValue software.osys::rfg::address_shift]]
                 set compare_bit [expr [ld [$ramBlock depth]]+3+[$ramBlock getAttributeValue software.osys::rfg::address_shift]] 
-                
                 # Write always block
                 puts "	/* RamBlock [getName $ramBlock] */"
                 puts "	`ifdef ASYNC_RES"
@@ -1088,14 +1087,15 @@
 					    puts "			[getName $it]_address_reg <= address\[$upper:$lower\];"
                     }
                 }
-               	if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
-				    return false	
-			    } else {
-				    return true
-			    }
             }
-        }
+            
+            if {[$it isa osys::rfg::RegisterFile] && [$it hasAttribute hardware.osys::rfg::external]} {
+                return false	
+            } else {
+                return true
+            }
 
+        }
 		if {$rb_count != 0} {
 			set delays 3
 			for {set i 0} {$i < $delays} {incr i} {
@@ -1178,9 +1178,6 @@
 			}
 			
 			if {[$it isa osys::rfg::RegisterFile]} {
-				##::puts "Absolute Address: [$it getAttributeValue software.osys::rfg::absolute_address]"
-				##::puts "Size in Bits: [ld [getRFsize $it]]"
-				##::puts "Shifted Result: [expr [$it getAttributeValue software.osys::rfg::absolute_address]>>[ld [getRFsize $it]]]"
 				set care [expr [$it getAttributeValue software.osys::rfg::relative_address]>>[ld [getRFsize $it]]]
 				##set care [expr [$it getAttributeValue software.osys::rfg::absolute_address]/([getRFsize $it]*[$object register_size]/8)]
 				set care [format %x $care]
