@@ -163,10 +163,12 @@ namespace eval osys::rfg {
 
         }
 
-        public method onRead {group closure1 {keyword ""} {clsoure2 ""}} {
+        public method onRead {group closure1 {keyword ""} {closure2 ""}} {
+    
             if {[hasAttribute ${group}.osys::rfg::ro] || [hasAttribute ${group}.osys::rfg::rw]} {
                 odfi::closures::doClosure $closure1 1
             } else {
+
                 if {$closure2 != ""} {
                     odfi::closures::doClosure $closure2 1
                 }
