@@ -1,25 +1,274 @@
 registerFile Example_RF {
 
-    ::repeat 16 {
-        register GPR_$i {
-            field GPF {
-                description "General purpose field"
-                width 32
-                reset 32'h0
-                software rw
-                hardware {
-                    rw
-                    software_written 1
-                    hardware_wen
-                }
-            }
+    register test_0 {
+        field test_field {
+            width 32
+            reset 32'h0
+            software rw
+            hardware rw
         }
     }
 
-    ramBlock RAM {
-        width 16
-        depth 256 
-        software rw
-        hardware rw
+    register test_1 {
+        field test_field {
+            width 32
+            reset 32'h0
+            software ro
+            hardware rw
+        }
     }
+
+    register test_2 {
+        field test_field {
+            width 32
+            reset 32'h0
+            software rw
+            hardware ro
+        }
+    }
+
+    register test_3 {
+        field test_field {
+            width 32
+            reset 32'h0
+            software wo
+            hardware rw
+        }
+    }
+
+    register test_3s {
+        field test_field {
+            width 32
+            reset 32'h0
+            software rw
+            hardware wo
+        }
+    }
+
+    register test_3d {
+
+        field test_field {
+            width 32
+            reset 32'h0
+            software rw
+            hardware ro
+        }
+    }
+
+#    register test_4 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware wo
+#        }
+#    }
+#
+#    register test_5 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#        }
+#    }
+#
+#    register test_6 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            hardware rw
+#        }
+#    }
+#    
+#    register test_6 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software ro
+#            hardware ro
+##        }
+#    }
+#
+#    register test_7 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software ro
+#            hardware wo
+#        }
+#    }
+#
+#    register test_8 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software wo
+#            hardware ro
+#        }
+#    }
+#
+#    register test_9 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software ro
+#        }
+#    }
+#
+#    register test_10 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            hardware ro
+#        }
+#    }
+#
+#    register test_11 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware {
+#                rw
+#                hardware_wen
+#            }
+#        }
+#    }
+#
+#    register test_12 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware {
+#                rw
+#                software_written
+#            }
+#        }
+#    }
+#
+#    register test_13 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware {
+#                rw
+#                counter
+#            }
+#        }
+#    }
+#
+#    register test_14 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware {
+#                rw
+#                sticky
+#            }
+#        }
+#    }
+#
+#    register test_15 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware {
+#                rw
+#                software_write_xor
+#            }
+#        }
+#    }
+#
+#    register test_16 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware {
+#                rw
+#                hardware_clear
+#            }
+#        }
+#    }
+#
+#
+#    register test_17 {
+#        field test_field {
+#            width 32
+#            reset 32'h0
+#            software {
+#                software_write_clear
+#                rw
+#            }
+#            hardware rw
+#        }
+#    }
+#
+#    ramBlock test_ram {
+#        width 32
+#        depth 16
+#        software rw
+#        hardware rw
+#    }
+#
+#    register test_rreinit_0 {
+#        hardware {
+#            rreinit_source
+#        }
+#    }
+#
+#    register test_rreinit_1 {
+#        field cnt {
+#            width 32
+#            reset 32'h0
+#            software rw
+#            hardware {
+#                rw
+#                counter 
+#                rreinit
+#            }
+#        }
+#    }
+#
+#    ::repeat 16 {
+#        register GPR_$i {
+#            field GPF {
+#                description "General purpose field"
+#                width 32
+#                reset 32'h0
+#                software rw
+#                hardware {
+#                    rw
+#                    software_written 1
+#                    hardware_wen
+#                }
+#            }
+#        }
+#    }
+#
+#   ramBlock RAM1 {
+#       width 8
+#       depth 16 
+#       software rw
+#       hardware {
+#           rw
+#       }
+#   }
+#
+#   ramBlock RAM2 {
+#       width 16
+#       depth 16
+#       software {
+#           rw
+#           address_shift 4
+#       }
+#       hardware {
+#           rw
+#       }
+#   }
+
 }

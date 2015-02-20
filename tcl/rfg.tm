@@ -699,7 +699,6 @@ namespace eval osys::rfg {
         public method onEachField closure {
 
             odfi::list::each $fields {
-
                 odfi::closures::doClosure $closure 1
 
 

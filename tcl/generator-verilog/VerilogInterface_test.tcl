@@ -5,9 +5,9 @@ source VerilogInterface.tm
 
 proc anonym_proc {name args closure} {
     set res "proc $name $args {
-        uplevel 1 {$closure}
+        odfi::closures::doClosure {$closure} 1
     }"
-    uplevel 1 $res
+    odfi::closures::doClosure $res 1
 }
 
 proc getRFAddrOffset {object} {
@@ -83,7 +83,7 @@ anonym_proc writeRegisterInterface {it} {
     $it onEachField {
         if {[$it name] != "Reserved"} {
             $it onAttributes {hardware.osys::rfg::counter} {
-
+                ::puts "Counter In"
                 $it onRead {hardware} {
                     output [getName $it] wire [$it width]
                 }
@@ -100,11 +100,11 @@ anonym_proc writeRegisterInterface {it} {
                 input [getName $it]_countup wire 
 
             } otherwise {
-                
+
                 $it onRead {hardware} {
                     output [getName $it] [find_internalRF $it $rf] [$it width]
                 }
-
+                
                 $it onWrite {hardware} {
                     input [getName $it]_next wire [$it width]
                     
@@ -113,12 +113,14 @@ anonym_proc writeRegisterInterface {it} {
                     }
 
                 }
-
+                
                 $it onAttributes {hardware.osys::rfg::software_written} {
+                    ::puts "s_written"
                     output [getName $it]_written [find_internalRF $it $rf]
                 }
 
                 $it onAttributes {hardware.osys::rfg::hardware_clear} {
+                    ::puts "h_clear"
                     input [getName $it]_clear wire
                 }
             
@@ -148,14 +150,16 @@ anonym_proc writeVModuleInterface {rf} {
     output read_data reg [getRFmaxWidth $rf]
     input write_en wire
     input write_data wire [getRFmaxWidth $rf]
-
+    ::puts "Before Walk"
     $rf walkDepthFirst {
         if {[$it isa osys::rfg::RamBlock]} {
             writeRamBlockInterface $it
         }
 
         if {[$it isa osys::rfg::Register]} {
+            ::puts "RegInterface in"
             writeRegisterInterface $it
+            ::puts "RegInterface out"
         }
 
         if {[$it isa osys::rfg::RegisterFile] && \
@@ -168,127 +172,134 @@ anonym_proc writeVModuleInterface {rf} {
     }
 }
 
-catch {namespace eval osys::rfg:: {source ../../examples/ExampleRF.rf}} rf
+anonym_proc writeRamBlockInternalSigs {it} {
 
-osys::rfg::address::hierarchical::calculate $rf
-
-osys::verilogInterface::module [$rf name] {
-    writeVModuleInterface $rf
-} body {
-    $rf walkDepthFirst {
-        ::puts "walk"
-        ::if {[$it isa osys::rfg::RamBlock]} {
-            $it onAttributes {hardware.osys::rfg::external} {
-                
-                $it onWrite {software} {
-                    
-                    $it onAttributes {hardware.osys::rfg::shared_bus} {
-                        if {$it == [getFirstSharedBusObject $rf]} {
-                            reg write_data_reg [$it width]
-                        }
-                    } otherwise {
-                        reg [getName $it]_write_data_reg [$it width]
-                    }
-
+    $it onAttributes {hardware.osys::rfg::external} %%{
+        
+        $it onWrite {software} {
+            
+            $it onAttributes {hardware.osys::rfg::shared_bus} {
+                if {$it == [getFirstSharedBusObject $rf]} {
+                    reg write_data_reg [$it width]
                 }
-
-                $it onAttributes {hardware.osys::rfg::shared_bus} {
-                    ## Maybe with Offset
-                    if {$it == [getFirstSharedBusObject $rf]} {
-                        reg address_reg [ld [$it depth]]
-                    }
-                } otherwise {
-                    reg [getName $it]_address_reg [ld [$it depth]]        
-                }
- 
             } otherwise {
-                ::puts "RamBlock !external"
-                if {[$it hasAttribute software.osys::rfg::ro] || \
-                    [$it hasAttribute software.osys::rfg::wo] || \
-                    [$it hasAttribute software.osys::rfg::rw]} {
-                    ::puts "Any rights"
-                    reg [getName $it]_rf_addr [ld [$it depth]]
-                }
-
-                $it onWrite {software} {
-                    reg [getName $it]_rf_wen
-                    reg [getName $it]_rf_wdata [$it width]
-                }
-
-                $it onRead {software} {
-                    reg [getName $it]_rf_ren
-                    wire [getName $it]_rf_rdata [$it width]
-                }
-
-                ## Delays
-                ## Maybe with Offset
-                ::puts "Delay:"
-                ::puts $it
-                ::puts [needDelay $rf]
-                if {$it == [needDelay $rf]} {
-                    set delays 3
-                    for {set i 0} {$i < $delays} {incr i} {
-                        reg read_en_dly$i
-                    }
-                }
-
+                reg [getName $it]_write_data_reg [$it width]
             }
+
+        }
+
+        $it onAttributes {hardware.osys::rfg::shared_bus} {
+            ## Maybe with Offset
+            if {$it == [getFirstSharedBusObject $rf]} {
+                reg address_reg [ld [$it depth]]
+            }
+        } otherwise {
+            reg [getName $it]_address_reg [ld [$it depth]]        
+        }
+
+    } otherwise %{
+        if {[$it hasAttribute software.osys::rfg::ro] || \
+            [$it hasAttribute software.osys::rfg::wo] || \
+            [$it hasAttribute software.osys::rfg::rw]} {
+            reg [getName $it]_rf_addr [ld [$it depth]]
+        }
+
+        $it onWrite {software} {
+            reg [getName $it]_rf_wen
+            reg [getName $it]_rf_wdata [$it width]
+        }
+
+        $it onRead {software} {
+            reg [getName $it]_rf_ren
+            wire [getName $it]_rf_rdata [$it width]
+        }
+
+        ## Delays
+        ## Maybe with Offset
+        ::if {$it == [needDelay $rf]} {
+            set delays 3
+            for {set i 0} {$i < $delays} {incr i} {
+                reg read_en_dly$i
+            }
+        }
+
+    }
+
+}
+
+anonym_proc writeRegisterInternalSigs {it} {   
+
+    $it onAttributes {hardware.osys::rfg::rreinit_source} {
+        reg rreinit
+    } otherwise {
+
+        $it onEachField {
+            ::if {[$it name] != "Reserved"} {
+                $it onAttributes {hardware.osys::rfg::counter} {
+                    
+                    ## Check if this is equivilant
+                    $it onWrite {hardware} {
+                        reg [getName $it]_load_enable
+                        reg [getName $it]_load_value [$it width]
+                    } otherwise {
+                        $it onWrite {software} {
+                            reg [getName $it]_load_enable
+                            reg [getName $it]_load_value [$it width]
+                        }
+                    }
+
+                    ::if {![$it hasAttribute hardware.osys::rfg::ro] && \
+                        ![$it hasAttribute hardware.osys::rfg::rw]} {
+                        wire [getName $it] [$it width]
+                    }
+                        
+                } otherwise {
+                    
+                    $it onAttributes {hardware.osys::rfg::software_written} {
+                        ::if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
+                            reg [getName $it]_res_in_last_cycle
+                        }
+                    }
+
+                    ::if {![$it hasAttribute hardware.osys::rfg::ro] && \
+                        ![$it hasAttribute hardware.osys::rfg::rw] } {
+                        reg [getName $it]
+                    }
+
+                }
+            }
+        }
+    }
+
+}
+
+anonym_proc writeRegisterFileInternalSigs {rf} {
+            
+    $it onAttributes {hardware.osys::rfg::internal} {
+        reg [getName $it]_address [getRFAddrWidth $it] [getRFAddrOffset $it]
+        wire [getName $it]_invalid_address
+        wire [getName $it]_access_complete
+        reg [getName $it]_read_en
+        wire [getName $it]_read_data [getRFmaxWidth $it]
+        reg [getName $it]_write_en
+        reg [getName $it]_write_data [getRFmaxWidth $it]
+    }
+
+}
+
+anonym_proc writeInternalSigs {rf} {
+
+    $rf walkDepthFirst {
+        ::if {[$it isa osys::rfg::RamBlock]} {
+            writeRamBlockInternalSigs $it
         }
 
         ::if {[$it isa osys::rfg::Register]} {
-            $it onAttributes {hardware.osys::rfg::rreinit_source} {
-                reg rreinit
-            } otherwise {
-
-                $it onEachField {
-                    ::if {[$it name] != "Reserved"} {
-                        $it onAttributes {hardware.osys::rfg::counter} {
-                            
-                            ## Check if this is equivilant
-                            $it onWrite {hardware} {
-                                reg [getName $it]_load_enable
-                                reg [getName $it]_load_value [$it width]
-                            } otherwise {
-                                $it onWrite {software} {
-                                    reg [getName $it]_load_enable
-                                    reg [getName $it]_load_value [$it width]
-                                }
-                            }
-
-                            ::if {![$it hasAttribute hardware.osys::rfg::ro] && \
-                                ![$it hasAttribute hardware.osys::rfg::rw]} {
-                                wire [getName $it] [$it width]
-                            }
-                                
-                        } otherwise {
-                            
-                            $it onAttributes {hardware.osys::rfg::software_written} {
-                                ::if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
-                                    reg [getName $it]_res_in_last_cycle
-                                }
-                            }
-
-                            ::if {![$it hasAttribute hardware.osys::rfg::ro] && \
-                                ![$it hasAttribute hardware.osys::rfg::rw] } {
-                                reg [getName $it]
-                            }
-
-                        }
-                    }
-                }
-            }
+            writeRamBlockInternalSigs $it
         }
 
         ::if {[$it isa osys::rfg::RegisterFile]} {
-            $it onAttributes {hardware.osys::rfg::internal} {
-                reg [getName $it]_address [getRFAddrWidth $it] [getRFAddrOffset $it]
-                wire [getName $it]_invalid_address
-                wire [getName $it]_access_complete
-                reg [getName $it]_read_en
-                wire [getName $it]_read_data [getRFmaxWidth $it]
-                reg [getName $it]_write_en
-                reg [getName $it]_write_data [getRFmaxWidth $it]
-            }
+            writeRamBlockInternalSigs $it
 
             return false
         
@@ -299,4 +310,20 @@ osys::verilogInterface::module [$rf name] {
         }
 
     }
+
+}
+
+catch {namespace eval osys::rfg:: {source ../../examples/ExampleRF.rf}} rf
+
+osys::rfg::address::hierarchical::calculate $rf
+
+osys::verilogInterface::module [$rf name] {
+
+    writeVModuleInterface $rf
+    ::puts "WriteVModuleInterface"
+
+} body {
+
+    ##writeInternalSigs $rf                               
+
 }
