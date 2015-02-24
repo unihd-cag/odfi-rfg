@@ -1,0 +1,150 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{listings}
+\usepackage{graphicx}
+\begin{document}
+
+\title{Specification RFG V1.1}
+\author{Tobias Markus}
+\date{24.02.2015}
+
+\maketitle
+
+\tableofcontents
+\newpage
+
+\section{RFG Hardware Generation}
+
+\subsection{Overview}
+\newpage
+\subsection{Register}
+Registers are the smallest addressable elements in a registerfile. A register can consist of one ore more fields with different widths and attributes. These variants of generated hardware depending on the attributes is described in this subsection. 
+
+\begin{lstlisting}[linewidth=\textwidth,language=tcl,basicstyle=\small,tabsize=4]
+    ## A register with several fields and different attributes
+    register test {
+        field field_1 {
+            width 32
+            reset 32'h0
+            software ro
+            hardware wo
+        }
+        field field_2 {
+            width 16
+            reset 16'h0
+            software rw
+            hardware rw
+        }
+        field field_3 {
+            width 16
+            reset 16'h0
+            software rw
+        }
+
+    }
+\end{lstlisting}
+
+The size of a register can be set with an attribute in the registerfile (register\_size). The default size of a register is 64 bit.
+
+Each regiter in the following section is generated with the Gnerator script below:
+
+\lstinputlisting[linewidth=\textwidth,language=tcl,basicstyle=\small,tabsize=4]{specification_descriptions/GenerateRF.tcl}
+
+\newpage
+
+\subsubsection{hardware/software Permissions}
+
+The most common and important Attribute are the Permissions. A register has a software and a hardware interface. Each Interface can have read and/ or write permissions defined with the attributes shown in the table below:\\
+\\
+\begin{tabular}{ l | r }
+attribute name & description \\ \hline
+ro & read only \\ \hline
+wo & write only \\ \hline
+rw & read and write \\ \hline
+\end{tabular}
+\\
+\\
+In this example we describe a register which has one 32 bit field with a reset value of zero and hardware read and write and software read and write permissions.\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_hwen.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_hwen.png}
+\end{figure}
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_hwen.v}
+Depending on the permission attributes the verilog output is slightly different. 
+
+The always block from line 21 to line 38, represents the software write and hardware write functionallaty to one field. If the field have no software write permissions line 29 to line 32 are not generated. If the field has no hardware write permission line 33 to line 35 are not generated. If the field has neither a software write nor a hardware write only the reset logic is generated. If the field also does not have a reset attribute the always block is not generated. These descriptions without any hardware or software permissions are used to define reserved fields in a register.
+
+The hardware read is generated with the output reg on line 16 if there is no hardware read permission this signal is generated as internal reg.
+
+In the second always block the address decoder for the software read is generated. Depending on the read permission line 51 is generated or not.
+
+\newpage
+
+\subsubsection{no\_hardware\_wen}
+
+With the no\_hardware\_wen attribute the hardware generator will not generate the hardware write enable signal on the register hardware interface. Attention when you write something with the software the hardware will rewrite the register in the next clock cycle.\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_nhwen.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+\includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_nhwen.png}
+\end{figure}
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_nhwen.v}
+The difference in this Verilog output can be observed in line 33. Now there is no hardware write enable signal the register is written on each clock cycle. Keep this in mind if you write it via Software. The Hardware has then one cycle to react to it and then to rewrite the field.
+\newpage
+
+\subsubsection{software\_write\_clear}
+With the software\_write\_clear attribute the field is cleared on a software write operation.\\
+\\
+RFG Descpription:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_swrite_clear.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_swrite_clear.png}
+\end{figure}
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_swrite_clear.v}
+In line 30 we can see that now the register is cleared when the register is written from the software.
+\newpage
+
+\subsubsection{software\_written}
+With the software\_written signal an additional hardware output is generated which is high when the software writes the register and depending on its value also when the register is resetted. Otherwise the software\_written signal is low.\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_swritten.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_swritten.png}
+\end{figure}
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_swritten.v}
+In this verilog output an additional hardware output signal is added (line 17). It is set when the software interface writes the field, line 32 to 36. It is reset on every cycle in which the software interface does not do a write operation. In this example the software\_written attribute is configured to output a zero, when the register is resetted. It can also be configured to output a one.
+\newpage
+\subsubsection{sticky}
+
+\subsubsection{software\_write\_xor}
+
+\subsubsection{hardware\_clear}
+
+\subsubsection{counter}
+
+\subsubsection{rreinit\_source, rreinit}
+
+\subsection{RamBlock}
+
+\subsection{external/internal RegisterFiles}
+
+\end{document}

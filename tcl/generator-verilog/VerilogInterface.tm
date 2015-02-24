@@ -41,7 +41,7 @@ namespace eval osys::verilogInterface {
         }
         
         public method input {name type {width 1} {offset 0}} {
-            ::if {$width == 1} {
+            ::if {$width <= 1} {
                 lappend in_out_list "input $type $name"
             } else {
                 lappend in_out_list "input $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -49,7 +49,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method output {name type {width 1} {offset 0}} {
-            ::if {$width == 1} {
+            ::if {$width <= 1} {
                 lappend in_out_list "output $type $name"
             } else {
                 lappend in_out_list "output $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -58,7 +58,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method inout {name type {width 1} {offset 0}} {
-            ::if {$width == 1} {
+            ::if {$width <= 1} {
                 lappend in_out_list "inout $type $name"
             } else {
                 lappend in_out_list "inout $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -66,8 +66,16 @@ namespace eval osys::verilogInterface {
 
         }
 
-        public method getResolve {} {
+        public method getResolve 
             return [join $in_out_list ",\n    "]
+        }
+
+        public method getInstComment {
+            set inst_list {}
+            foreach element $in_out_list {
+                lappend inst_list ".[lindex [split $element " "] end]()"
+            }
+            return [join $inst_list ",\n	"]
         }
 
     }
@@ -80,7 +88,7 @@ namespace eval osys::verilogInterface {
             odfi::closures::doClosure $cClosure
         }
 
-        public method if {condition body} {
+        public method vif {condition body} {
             odfi::common::println "if($condition)" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
@@ -89,7 +97,7 @@ namespace eval osys::verilogInterface {
             odfi::common::println "end" $resolve
         }
 
-        public method else {body} {
+        public method velse {body} {
             odfi::common::println "else" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
@@ -141,7 +149,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method reg {name {width 1} {offset 0}} {
-            if {$width == 1} { 
+            if {$width <= 1} { 
                 odfi::common::println "reg $name;" $resolve
             } else {
                 odfi::common::println "reg\[[expr $width-1+$offset]:$offset\] $name;" $resolve
@@ -149,7 +157,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method wire {name {width 1} {offset 0}} {
-            if {$width == 1} {
+            if {$width <= 1} {
                  odfi::common::println "wire $name;" $resolve
             } else {
                  odfi::common::println "wire\[[expr $width-1+$offset]:$offset\] $name;" $resolve
@@ -157,7 +165,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method logic {name {widht 1} {offset 0}} {
-            if {$width == 1} {
+            if {$width <= 1} {
                 odfi::common::println "logic $name;" $resolve
             } else {
                 odfi::common::println "logic\[[expr $width-1+$offset]:$offset\] $name;" $resolve
