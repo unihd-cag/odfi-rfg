@@ -1,5 +1,6 @@
 \documentclass[12pt,a4paper]{article}
 \usepackage{listings}
+\usepackage{lstlinebgrd}
 \usepackage{graphicx}
 \begin{document}
 
@@ -17,7 +18,7 @@
 \subsection{Overview}
 \newpage
 \subsection{Register}
-Registers are the smallest addressable elements in a registerfile. A register can consist of one ore more fields with different widths and attributes. These variants of generated hardware depending on the attributes is described in this subsection. 
+Registers are the smallest addressable units in a registerfile. A register can consist of one ore more fields with different widths and attributes. These variants of generated hardware depending on the attributes is described in this subsection. 
 
 \begin{lstlisting}[linewidth=\textwidth,language=tcl,basicstyle=\small,tabsize=4]
     ## A register with several fields and different attributes
@@ -45,7 +46,7 @@ Registers are the smallest addressable elements in a registerfile. A register ca
 
 The size of a register can be set with an attribute in the registerfile (register\_size). The default size of a register is 64 bit.
 
-Each regiter in the following section is generated with the Gnerator script below:
+Each register in the following subsections are generated with the Generator script below:
 
 \lstinputlisting[linewidth=\textwidth,language=tcl,basicstyle=\small,tabsize=4]{specification_descriptions/GenerateRF.tcl}
 
@@ -134,13 +135,54 @@ Generated verilog from RFG description:
 In this verilog output an additional hardware output signal is added (line 17). It is set when the software interface writes the field, line 32 to 36. It is reset on every cycle in which the software interface does not do a write operation. In this example the software\_written attribute is configured to output a zero, when the register is resetted. It can also be configured to output a one.
 \newpage
 \subsubsection{sticky}
+With the sticky feature a field is generated in which the bits in the field can only be set from the hardware. The field can only be resetted from the software interface or with a reset.\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_sticky.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_sticky.png}
+\end{figure}
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/reg_hrw_srw_sticky.v}
+The diffirence in the verilog output with the sticky attribute is that the new hardware value is ored on write with the register value itself line 36 to line 37.
+\newpage
 
 \subsubsection{software\_write\_xor}
+The software\_write\_xor attributes writes on a software write the new value xored with the register value.\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_swrite_xor.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_swrite_xor.png}
+\end{figure}
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/reg_hrw_srw_swrite_xor.v}
+The software\_write\_xor attribute does also just do small change. When the register is written form the software interface it gets xored with itself line 32.
+\newpage
 
 \subsubsection{hardware\_clear}
+The hardware\_clear attribute adds an additional signal to the hardware interface. This signal clears the register when the hardware\_clear signal is asserted.\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_hclear.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_hclear.png}
+\end{figure}
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/reg_hrw_srw_hclear.v}
+\newpage
 
 \subsubsection{counter}
-
+The counter attribute transforms the internal register into a counter with count up signal for the hardware interface.
 \subsubsection{rreinit\_source, rreinit}
 
 \subsection{RamBlock}
