@@ -1,0 +1,21 @@
+registerFile reg_hrw_srw_rreinit_source {
+    
+    register counter_rreinit {
+        hardware {
+            rreinit_source
+        }
+    }
+    
+    register example {
+        field test_field {
+            width 32
+            reset 32'h0
+            software rw
+            hardware {
+                rw
+                counter
+                rreinit
+            }
+        }
+    }
+}
