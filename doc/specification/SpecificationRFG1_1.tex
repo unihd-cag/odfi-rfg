@@ -2,6 +2,7 @@
 \usepackage{listings}
 \usepackage{lstlinebgrd}
 \usepackage{graphicx}
+
 \begin{document}
 
 \title{Specification RFG V1.1}
@@ -78,7 +79,21 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_hwen.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=16
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}<36
+    \ifnum\value{lstnumber}>27
+        \color{yellow}
+    \fi
+\fi
+\ifnum\value{lstnumber}=52
+    \color{yellow}
+\fi}
+]
+{specification_descriptions/verilog/reg_hrw_srw_hwen.v}
 Depending on the permission attributes the verilog output is slightly different. 
 
 The always block from line 21 to line 38, represents the software write and hardware write functionality to one field. If the field have no software write permissions line 29 to line 32 are not generated. If the field has no hardware write permission line 33 to line 35 are not generated. If the field has neither a software write nor a hardware write only the reset logic is generated. If the field also does not have a reset attribute the always block is not generated. These descriptions without any hardware or software permissions are used to define reserved fields in a register.
@@ -102,7 +117,12 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_nhwen.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=33
+    \color{yellow}
+\fi}
+]{specification_descriptions/verilog/reg_hrw_srw_nhwen.v}
 The difference in this verilog output can be observed in line 33. Now there is no hardware write enable signal the register is written on each clock cycle. Keep this in mind if you write it via Software. The Hardware has then one cycle to react to it and then to rewrite the field.
 \newpage
 
@@ -118,7 +138,12 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_swrite_clear.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=30
+    \color{yellow}
+\fi}
+]{specification_descriptions/verilog/reg_hrw_srw_swrite_clear.v}
 In line 30 we can see that now the register is cleared when the register is written from the software.
 \newpage
 
@@ -134,7 +159,26 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left]{specification_descriptions/verilog/reg_hrw_srw_swritten.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=17
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}=27
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}=35
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}=40
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}<46
+    \ifnum\value{lstnumber}>41
+        \color{yellow}
+    \fi
+\fi}
+]{specification_descriptions/verilog/reg_hrw_srw_swritten.v}
 In this verilog output an additional hardware output signal is added (line 17). It is set when the software interface writes the field, line 32 to 36. It is reset on every cycle in which the software interface does not do a write operation. In this example the software\_written attribute is configured to output a zero, when the register is resetted. It can also be configured to output a one.
 \newpage
 \subsubsection{sticky}
@@ -149,7 +193,12 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/reg_hrw_srw_sticky.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=36
+    \color{yellow}
+\fi}
+]{specification_descriptions/verilog/reg_hrw_srw_sticky.v}
 The difference in the verilog output with the sticky attribute is that the new hardware value is ored on write with the register value itself line 36 to line 37.
 \newpage
 
@@ -165,7 +214,12 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/reg_hrw_srw_swrite_xor.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=32
+    \color{yellow}
+\fi}
+]{specification_descriptions/verilog/reg_hrw_srw_swrite_xor.v}
 The software\_write\_xor attribute does also just do small change. When the register is written form the software interface it gets xored with itself line 32.
 \newpage
 
@@ -181,7 +235,17 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/reg_hrw_srw_hclear.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=17
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}<38
+    \ifnum\value{lstnumber}>33
+        \color{yellow}
+    \fi
+\fi}
+]{specification_descriptions/verilog/reg_hrw_srw_hclear.v}
 \newpage
 
 \subsubsection{counter}
@@ -196,7 +260,35 @@ Block Diagramm:
 \end{figure}
 \newpage
 Generated verilog from RFG description:
-\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/reg_hrw_srw_counter.v}
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true,
+linebackgroundcolor={
+\ifnum\value{lstnumber}=17
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}<33
+    \ifnum\value{lstnumber}>19
+        \color{yellow}
+    \fi
+\fi
+\ifnum\value{lstnumber}=39
+    \color{yellow}
+\fi
+\ifnum\value{lstnumber}<48
+    \ifnum\value{lstnumber}>45
+        \color{yellow}
+    \fi
+\fi
+\ifnum\value{lstnumber}<53
+    \ifnum\value{lstnumber}>50
+        \color{yellow}
+    \fi
+\fi
+\ifnum\value{lstnumber}<58
+    \ifnum\value{lstnumber}>55
+        \color{yellow}
+    \fi
+\fi}
+]{specification_descriptions/verilog/reg_hrw_srw_counter.v}
 \newpage
 
 \subsubsection{rreinit\_source, rreinit}
