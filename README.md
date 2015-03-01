@@ -4,6 +4,8 @@ The CAG RegisterFile Generator (RFG) is a TCL-based register file hierarchy desc
 
 The full documentation can be found at http://unihd-cag.github.io/odfi-rfg/.
 
+For the documentation there is still **work in progress**.
+
 In the first step a register file definition is needed. Here an example (Example_RF.rf):
 
     registerFile Example_RF {
