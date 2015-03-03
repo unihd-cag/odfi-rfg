@@ -66,17 +66,17 @@ namespace eval osys::verilogInterface {
 
         }
 
-        public method getResolve 
+        public method getResolve {} {
             return [join $in_out_list ",\n    "]
         }
 
-        public method getInstComment {
-            set inst_list {}
-            foreach element $in_out_list {
-                lappend inst_list ".[lindex [split $element " "] end]()"
-            }
-            return [join $inst_list ",\n	"]
-        }
+#        public method getInstComment {
+#            set inst_list {}
+#            foreach element $in_out_list {
+#                lappend inst_list ".[lindex [split $element " "] end]()"
+#            }
+#            return [join $inst_list ",\n	"]
+#        }
 
     }
     
@@ -87,8 +87,14 @@ namespace eval osys::verilogInterface {
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
         }
+        
+        public method vputs {str} {
+            ::puts $str
+            odfi::common::println "$str;" $resolve    
+        }
 
         public method vif {condition body} {
+            ::puts $condition
             odfi::common::println "if($condition)" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
@@ -101,7 +107,7 @@ namespace eval osys::verilogInterface {
             odfi::common::println "else" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
-            odff::closures::doClosure $body
+            odfi::closures::doClosure $body
             odfi::common::printlnOutdent
             odfi::common::println "end" $resolve
         }
@@ -173,14 +179,15 @@ namespace eval osys::verilogInterface {
         }
 
         public method always {condition closure} {
-            odfi::common::println "always" $resolve
+            odfi::common::println "" $resolve
+            odfi::common::println "always @(${condition})" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
             ## Create always object
             set always_object [::new [namespace parent]::Always #auto $closure]
-            odfi::common::println [always_object getResolve] $resolve
+            odfi::common::println [$always_object getResolve] $resolve
             odfi::common::printlnOutdent
-            odfi::common::println "end"
+            odfi::common::println "end" $resolve
         }
     }
 
@@ -190,7 +197,7 @@ namespace eval osys::verilogInterface {
 
         constructor {cName cClosure1 cClosure2} {
             ## Module Blackbox definitions start
-            odfi::common::println "module $cName (" $resolve
+            odfi::common::println "\nmodule $cName (" $resolve
             odfi::common::printlnIndent
             set module_interface [::new [namespace parent]::ModuleInterface ::${cName}_Interface $cClosure1]
             odfi::common::println [$module_interface getResolve] $resolve

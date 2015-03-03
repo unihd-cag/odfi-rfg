@@ -3,7 +3,9 @@ target/
 *.iverilog
 *.vcd
 unit-tests/verilog_generator/testing/
-example-design/
 *.nfs*
 *.swo
 *.swp
+*.aux
+*.log
+*.toc

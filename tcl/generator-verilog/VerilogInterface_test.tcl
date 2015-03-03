@@ -53,26 +53,36 @@ proc needDelay {object} {
 }
 
 proc CheckForRegBlock {object} {
+    set return_value false
     $object onAttributes {hardware.osys::rfg::rreinit_source} {
         return true
     } otherwise {
         $object onEachField {
-            if {[$it reset] == ""} {
-                return true
+            if {[$it reset] != ""} {
+                set return_value true
             }
             $it onWrite {software} {
-                return true
+                set return_value true
             }
-
             $it onWrite {hardware} {
-                return true
+                set return_value true
             }
 
         }
     }
 
-    return false
+    return $return_value
 
+}
+
+proc hasReset {object} {
+    set return_value false
+    $object onEachField {
+       if {[$it reset] != ""} {
+            set return_value true 
+       }
+    }
+    return $return_value
 }
 
 odfi::closures::oproc writeRamBlockInterface {it} {
@@ -174,8 +184,8 @@ odfi::closures::oproc writeRegisterFileInterface {it} {
 
 odfi::closures::oproc writeVModuleInterface {rf} {
     
-    input res_n wire
     input clk wire
+    input res_n wire
     input address wire [getRFAddrWidth $rf] [getRFAddrOffset $rf]
     output invalid_address reg
     output access_complete reg
@@ -183,6 +193,7 @@ odfi::closures::oproc writeVModuleInterface {rf} {
     output read_data reg [getRFmaxWidth $rf]
     input write_en wire
     input write_data wire [getRFmaxWidth $rf]
+    
     $rf walkDepthFirst {
         if {[$it isa osys::rfg::RamBlock]} {
             writeRamBlockInterface $it
@@ -259,7 +270,7 @@ odfi::closures::oproc writeRamBlockInternalSigs {it} {
 }
 
 
-odfi::closures::oproc writeRegisterInternalSigs {it} {   
+odfi::closures::oproc writeRegisterInternalSigs {it} {  
 
     $it onAttributes {hardware.osys::rfg::rreinit_source} {
         reg rreinit
@@ -288,12 +299,12 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                 } otherwise {
                     
                     $it onAttributes {hardware.osys::rfg::software_written} {
-                        ::if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
+                        if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
                             reg [getName $it]_res_in_last_cycle
                         }
                     }
 
-                    ::if {![$it hasAttribute hardware.osys::rfg::ro] && \
+                    if {![$it hasAttribute hardware.osys::rfg::ro] && \
                         ![$it hasAttribute hardware.osys::rfg::rw] } {
                         reg [getName $it]
                     }
@@ -302,9 +313,8 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
             }
         }
     }
-;w
-}
 
+}
 
 odfi::closures::oproc writeRegisterFileInternalSigs {rf} {
             
@@ -320,19 +330,18 @@ odfi::closures::oproc writeRegisterFileInternalSigs {rf} {
 
 }
 
-
 odfi::closures::oproc writeInternalSigs {rf} {
 
     $rf walkDepthFirst {
-        ::if {[$it isa osys::rfg::RamBlock]} {
+        if {[$it isa osys::rfg::RamBlock]} {
             writeRamBlockInternalSigs $it
         }
 
-        ::if {[$it isa osys::rfg::Register]} {
+        if {[$it isa osys::rfg::Register]} {
             writeRamBlockInternalSigs $it
         }
 
-        ::if {[$it isa osys::rfg::RegisterFile]} {
+        if {[$it isa osys::rfg::RegisterFile]} {
             writeRamBlockInternalSigs $it
 
             return false
@@ -347,15 +356,52 @@ odfi::closures::oproc writeInternalSigs {rf} {
 
 }
 
-odfi::closures::oproc writeRegisterBlock {it} {
+odfi::closures::oproc writeFieldsSoftWrite {object} {
+
+    vif "(address\[\] == [$object getAttributeValue software.osys::rfg::relative_address] && write_en" {
+        $object onEachField {
+                vputs "[getName $it] <= write_data\[[$it width]:0\]"
+        }
+    }
+
+}
+
+odfi::closures::oproc writeRegisterSoftWrite {object} {
+    if {[hasReset $object] == true} {
+        velse {
+            writeFieldsSoftWrite $object
+        }
+    } else {
+        writeFieldsSoftWrite $object
+    }
+}
+
+odfi::closures::oproc writeRegisterReset {object} {
+    if {[hasReset $object] == true} {
+        vif "!res_n" {
+            $object onEachField {
+                vputs "[$it name] <= [$it reset]"
+            }
+        }
+    }
+}
+
+odfi::closures::oproc writeRegisterBlock {object} {
+
     ## check if anything is generated
-    if {[CheckForRegBlock $it]} {
+    if {[CheckForRegBlock $object] == true} {
+        always {posedge clk} {
+            ## write Reset
+            writeRegisterReset $object
+            ## write Software write
+            writeRegisterSoftWrite $object
+        }
         ## write Reset
-        writeRegisterReset $it
+        ##writeRegisterReset $it
         ## write Software write
-        writeRegisterSoftWrite $it
+        ##writeRegisterSoftWrite $it
         ## write Hardware write
-        writeRegisterHardWrite $it
+        ##writeRegisterHardWrite $it
     }
 }
 
@@ -371,26 +417,26 @@ osys::verilogInterface::module [$rf name] {
 
     writeInternalSigs $rf
 
-#    $rf walkDepthFirst {
+    $rf walkDepthFirst {
 #
 #        ::if {[$it isa osys::rfg::RamBlock]} {
 #                             
 #        }
 #
-#        ::if {[$it isa osys::rfg::Register]} {
-#            writeRegisterBlock $it
-#        }
-#
-#        ::if {[$it isa osys::rfg::RegisterFile]} {
-#            
-#            return false    
-#        
-#        } else {
-#
-#            return true
-#        
-#        }
-#
-#    }
+        ::if {[$it isa osys::rfg::Register]} {
+            writeRegisterBlock $it
+        }
+
+        ::if {[$it isa osys::rfg::RegisterFile]} {
+            
+            return false    
+        
+        } else {
+
+            return true
+        
+        }
+
+    }
 
 }
