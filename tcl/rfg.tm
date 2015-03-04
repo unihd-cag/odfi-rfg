@@ -676,8 +676,11 @@ namespace eval osys::rfg {
         public method field {fName closure} {
 
             ## Create 
-            set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
-
+            if {$fName == Reserved} {
+                set newField [::new [namespace parent]::Field $this.$fName.#auto $fName $closure]
+            } else {
+                set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
+            }
 
             ##puts "Created field: $newField"
 
@@ -695,7 +698,10 @@ namespace eval osys::rfg {
 
         public method reserved {reserved_width} {
 
-            field Reserved {width $reserved_width}
+            field Reserved {
+                name "Reserved"    
+                width $reserved_width
+            }
         }
 
         public method onEachField closure {
@@ -770,7 +776,7 @@ namespace eval osys::rfg {
         odfi::common::classField public width 0
 
         ## Reset value
-        odfi::common::classField public reset ""
+        odfi::common::classField public reset 0
         
         constructor {cName cClosure} {Common::constructor $cName} {
             ## Execute closure 
