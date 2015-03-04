@@ -89,12 +89,10 @@ namespace eval osys::verilogInterface {
         }
         
         public method vputs {str} {
-            ::puts $str
             odfi::common::println "$str;" $resolve    
         }
 
         public method vif {condition body} {
-            ::puts $condition
             odfi::common::println "if($condition)" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent

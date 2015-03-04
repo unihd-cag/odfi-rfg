@@ -55,7 +55,7 @@ proc needDelay {object} {
 proc CheckForRegBlock {object} {
     set return_value false
     $object onAttributes {hardware.osys::rfg::rreinit_source} {
-        return true
+        set return_value true
     } otherwise {
         $object onEachField {
             if {[$it reset] != ""} {
@@ -81,6 +81,20 @@ proc hasReset {object} {
        if {[$it reset] != ""} {
             set return_value true 
        }
+    }
+    return $return_value
+}
+
+proc getRelAddress {object} {
+    return [$object getAttributeValue software.osys::rfg::relative_address]
+}
+
+proc hasWrite {interface object} {
+    set return_value false
+    $object onEachField {
+        $it onWrite $interface {
+            set return_value true
+        }
     }
     return $return_value
 }
@@ -338,11 +352,11 @@ odfi::closures::oproc writeInternalSigs {rf} {
         }
 
         if {[$it isa osys::rfg::Register]} {
-            writeRamBlockInternalSigs $it
+            writeRegisterInternalSigs $it
         }
 
         if {[$it isa osys::rfg::RegisterFile]} {
-            writeRamBlockInternalSigs $it
+            writeRegisterFileInternalSigs $it
 
             return false
         
@@ -357,32 +371,68 @@ odfi::closures::oproc writeInternalSigs {rf} {
 }
 
 odfi::closures::oproc writeFieldsSoftWrite {object} {
-
-    vif "(address\[\] == [$object getAttributeValue software.osys::rfg::relative_address] && write_en" {
+    vif "(address\[[getRFAddrWidth $rf]:[getRFAddrOffset $rf]\] == [getRelAddress $object] && write_en" {
+        set offset 0
         $object onEachField {
-                vputs "[getName $it] <= write_data\[[$it width]:0\]"
+                $it onAttributes {software.osys::rfg::software_clear} {
+                    vputs "[getName $it] <= [$it width]'b0"
+                } otherwise {
+                    $it onAttributes {software.osys::rfg::software_write_xor} {
+                        vputs "[getName $it] <= write_data\[[expr [$it width] + $offset -1]:$offset\] ^ [getName $it]"
+                    } otherwise {
+                        vputs "[getName $it] <= write_data\[[expr [$it width] + $offset - 1]:$offset\]"
+                    }
+                }
+                $it onAttributes {software.osys::rfg::software_written} {
+                    vputs "[getName $it]_written <= 1'b1"
+                }
+                incr offset [$it width]
         }
     }
-
 }
 
 odfi::closures::oproc writeRegisterSoftWrite {object} {
-    if {[hasReset $object] == true} {
+    $object onAttributes {hardware.osys::rfg::rreinit_source} {
         velse {
-            writeFieldsSoftWrite $object
+            vif "(address\[[getRFAddrWidth $rf]:[getRFAddrOffset $rf]\] == [getRelAddress $object] && write_en" {
+                vputs "rreinit <= 1'b1"
+            }
         }
-    } else {
-        writeFieldsSoftWrite $object
+    } otherwise {
+        if {[hasWrite software $object] == true} {
+            if {[hasReset $object] == true} {
+                velse {
+                    writeFieldsSoftWrite $object
+                }
+            } else {
+                writeFieldsSoftWrite $object
+            }
+        }
     }
 }
 
 odfi::closures::oproc writeRegisterReset {object} {
-    if {[hasReset $object] == true} {
+    $object onAttributes {hardware.osys::rfg::rreinit_source} {
+        
         vif "!res_n" {
-            $object onEachField {
-                vputs "[$it name] <= [$it reset]"
+            vputs "rreinit <= 1'b0"    
+        }
+
+    } otherwise {
+        
+        if {[hasReset $object] == true} {
+            vif "!res_n" {
+                $object onEachField {
+                    if {[$it reset] != ""} {
+                        vputs "[getName $it] <= [$it reset]"
+                    }
+                    $it onAttributes {software.osys::rfg::software_written} {
+                        vputs "[getName $it]_written <= 1'b0"
+                    }
+                }
             }
         }
+
     }
 }
 

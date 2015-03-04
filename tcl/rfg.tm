@@ -770,7 +770,7 @@ namespace eval osys::rfg {
         odfi::common::classField public width 0
 
         ## Reset value
-        odfi::common::classField public reset 0
+        odfi::common::classField public reset ""
         
         constructor {cName cClosure} {Common::constructor $cName} {
             ## Execute closure 
