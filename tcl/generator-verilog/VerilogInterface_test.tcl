@@ -391,23 +391,44 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
     }
 }
 
-odfi::closures::oproc writeFieldHardWrite {it condition} {
+odfi::closures::oproc writeHardFieldFunction {it} {
+    $it onAttributes {hardware.osys::rfg::sticky} {
+        vputs "[getName $it] <= [getName $it]_next | [getName $it]"
+    } otherwise {
+        vputs "[getName $it] <= [getName $it]_next"
+    }
+}
+
+odfi::closures::oproc writeFieldHardWrite {object} { 
     if {$condition == "ifcond"} {
-        $object onAttributes {hardware.osys::rfg::hardware_no_wen} {
-            vputs "[getName $it] <= [getName $it]_next"       
+        $object onAttributes {hardware.osys::rfg::hardware_clear} {
+            vif "[getName $object]_clear" {
+                vputs "[getName $object] <= [$object width]'b0"
+            }
+            set condition "elsecond"
+        }
+    } else {
+        velseif "[getName $object]_clear" {
+            vputs "[getName $object] <= [$object width]'b0"
+        }
+    }
+
+    if {$condition == "ifcond"} {
+        $object onAttributes {hardware.osys::rfg::hardware_no_wen} { 
+            writeHardFieldFunction $object      
         } otherwise {
-            vif "[getName $it]_wen" {
-                vputs "[getName $it] <= [getName $it]_next"
+            vif "[getName $object]_wen" {
+                writeHardFieldFunction $object
             }
         }
     } else {
         $object onAttributes {hardware.osys::rfg::hardware_no_wen} {
             velse {
-                vputs "[getName $it] <= [getName $it]_next"
+                writeHardFieldFunction $object
             }
         } otherwise {
-            velseif "[getName $it]_wen" {
-                vputs "[getName $it] <= [getName $it]_next"
+            velseif "[getName $object]_wen" {
+                writeHardFieldFunction $object
             }
         }
     }
@@ -452,13 +473,15 @@ odfi::closures::oproc writeRegisterWrite {object} {
             $it onWrite {software} {
                     writeFieldSoftWrite $it $offset            
                 $it onWrite {hardware} {
-                    writeFieldHardWrite $it "elsecond"
+                    set condition "elsecond"
+                    writeFieldHardWrite $it
                 }
 
             } otherwise {
                 
                 $it onWrite {hardware} {
-                    writeFieldHardWrite $it "ifcond"
+                    set condition "ifcond"
+                    writeFieldHardWrite $it
                 }
 
             }
