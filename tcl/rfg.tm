@@ -676,7 +676,7 @@ namespace eval osys::rfg {
         public method field {fName closure} {
 
             ## Create 
-            if {$fName == Reserved} {
+            if {$fName == "Reserved"} {
                 set newField [::new [namespace parent]::Field $this.$fName.#auto $fName $closure]
             } else {
                 set newField [::new [namespace parent]::Field $this.$fName $fName $closure]

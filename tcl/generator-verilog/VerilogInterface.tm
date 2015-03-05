@@ -101,6 +101,15 @@ namespace eval osys::verilogInterface {
             odfi::common::println "end" $resolve
         }
 
+        public method velseif {condition body} {
+            odfi::common::println "else if($condition)" $resolve
+            odfi::common::println "begin" $resolve
+            odfi::common::printlnIndent
+            odfi::closures::doClosure $body
+            odfi::common::printlnOutdent
+            odfi::common::println "end" $resolve
+        }
+
         public method velse {body} {
             odfi::common::println "else" $resolve
             odfi::common::println "begin" $resolve
