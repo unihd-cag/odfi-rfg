@@ -392,24 +392,31 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
 }
 
 odfi::closures::oproc writeHardFieldFunction {it} {
+
     $it onAttributes {hardware.osys::rfg::sticky} {
         vputs "[getName $it] <= [getName $it]_next | [getName $it]"
     } otherwise {
         vputs "[getName $it] <= [getName $it]_next"
     }
+    
+    $it onAttributes {hardware.osys::rfg::software_written} {
+        vputs "[getName $it]_written <= 1'b1"
+    }
+
 }
 
 odfi::closures::oproc writeFieldHardWrite {object} { 
-    if {$condition == "ifcond"} {
-        $object onAttributes {hardware.osys::rfg::hardware_clear} {
+    
+    $object onAttributes {hardware.osys::rfg::hardware_clear} {
+        if {$condition == "ifcond"} {
             vif "[getName $object]_clear" {
                 vputs "[getName $object] <= [$object width]'b0"
             }
             set condition "elsecond"
-        }
-    } else {
-        velseif "[getName $object]_clear" {
-            vputs "[getName $object] <= [$object width]'b0"
+        } else {
+            velseif "[getName $object]_clear" {
+                vputs "[getName $object] <= [$object width]'b0"
+            }
         }
     }
 
@@ -417,9 +424,9 @@ odfi::closures::oproc writeFieldHardWrite {object} {
         $object onAttributes {hardware.osys::rfg::hardware_no_wen} { 
             writeHardFieldFunction $object      
         } otherwise {
-            vif "[getName $object]_wen" {
-                writeHardFieldFunction $object
-            }
+                vif "[getName $object]_wen" {
+                    writeHardFieldFunction $object
+                }
         }
     } else {
         $object onAttributes {hardware.osys::rfg::hardware_no_wen} {
@@ -429,6 +436,11 @@ odfi::closures::oproc writeFieldHardWrite {object} {
         } otherwise {
             velseif "[getName $object]_wen" {
                 writeHardFieldFunction $object
+            }
+            $object onAttributes {hardware.osys::rfg::software_written} {
+                velse {
+                    vputs "[getName $object]_written <= 1'b0"
+                }
             }
         }
     }
