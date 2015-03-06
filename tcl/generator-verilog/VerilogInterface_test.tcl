@@ -508,7 +508,7 @@ odfi::closures::oproc writeRegisterBlock {object} {
 
     ## check if anything is generated
     if {[CheckForRegBlock $object] == true} {
-        always {posedge clk} {
+        always "posedge clk" {
             ## write Reset
             writeRegisterReset $object
             ## write Software write
@@ -527,25 +527,13 @@ odfi::closures::oproc writeRegisterBlock {object} {
                     }
                 }
             }
-            ## write Hardware Write
-            ##writeRegisterHardWrite $object
         }
     }
 
 }
 
-catch {namespace eval osys::rfg:: {source ../../examples/ExampleRF.rf}} rf
-
-osys::rfg::address::hierarchical::calculate $rf
-
-osys::verilogInterface::module [$rf name] {
-
-    writeVModuleInterface $rf
-
-} body {
-
-    writeInternalSigs $rf
-
+odfi::closures::oproc writeWriteInterface {object} {
+    
     $rf walkDepthFirst {
 #
 #        ::if {[$it isa osys::rfg::RamBlock]} {
@@ -567,5 +555,70 @@ osys::verilogInterface::module [$rf name] {
         }
 
     }
+
+}
+
+odfi::closures::oproc writeRegisterSoftRead {object} {
+    case_select "[getRFAddrWidth $rf]'h[format %x [expr [$object getAttributeValue software.osys::rfg::relative_address] / ([$rf register_size]/8)]]" {
+        set offset 0
+        $object onEachField {
+            
+            $it onRead {software} {
+                vputs "read_data\[[expr [$it width] + $offset - 1]:$offset\] <= [getName $it]"
+            }
+            incr offset [$it width]
+            
+        } 
+        vputs "invalid_address <= 1'b0"
+        vputs "access_complete <= read_en || write_en"
+    }
+}
+
+odfi::closures::oproc writeSoftReadInterface {object} {
+    
+    always "posedge clk" { 
+        vif "!res_n" {
+            vputs "invalid_address <= 1'b0"
+            vputs "access_complete <= 1'b0"
+            vputs "read_data <= [getRFmaxWidth $rf]'b0"
+        }
+        case "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" {
+            $rf walkDepthFirst {
+                ##RamBlock
+                ##Register
+                if {[$it isa osys::rfg::Register]} {
+                    writeRegisterSoftRead $it            
+                }
+
+                if {[$it isa osys::rfg::RegisterFile]} {
+                    return false
+                } else {
+                    return true
+                }
+
+            }
+        
+        }
+    }
+
+}
+
+catch {namespace eval osys::rfg:: {source ../../examples/ExampleRF.rf}} rf
+
+osys::rfg::address::hierarchical::calculate $rf
+
+osys::verilogInterface::module [$rf name] {
+    
+    ## Write RegisterFile Signal Interface
+    writeVModuleInterface $rf
+
+} body {
+
+    ## Write Internal Signals
+    writeInternalSigs $rf
+    ## Write Hardware/Software Write Interface/Always Block
+    writeWriteInterface $rf
+    ## Writhe the Software Read Interface/ Address Decoder
+    writeSoftReadInterface $rf
 
 }

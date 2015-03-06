@@ -41,7 +41,7 @@ namespace eval osys::verilogInterface {
         }
         
         public method input {name type {width 1} {offset 0}} {
-            ::if {$width <= 1} {
+            if {$width <= 1} {
                 lappend in_out_list "input $type $name"
             } else {
                 lappend in_out_list "input $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -49,7 +49,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method output {name type {width 1} {offset 0}} {
-            ::if {$width <= 1} {
+            if {$width <= 1} {
                 lappend in_out_list "output $type $name"
             } else {
                 lappend in_out_list "output $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -58,7 +58,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method inout {name type {width 1} {offset 0}} {
-            ::if {$width <= 1} {
+            if {$width <= 1} {
                 lappend in_out_list "inout $type $name"
             } else {
                 lappend in_out_list "inout $type\[[expr $width -1+$offset]:$offset\] $name"
@@ -76,18 +76,14 @@ namespace eval osys::verilogInterface {
 #                lappend inst_list ".[lindex [split $element " "] end]()"
 #            }
 #            return [join $inst_list ",\n	"]
-#        }
-
+#   
+#       }
     }
     
-    itcl::class Always {
+    itcl::class CommonVDesc {
         
         inherit Common
 
-        constructor {cClosure} {
-            odfi::closures::doClosure $cClosure
-        }
-        
         public method vputs {str} {
             odfi::common::println "$str;" $resolve    
         }
@@ -119,20 +115,11 @@ namespace eval osys::verilogInterface {
             odfi::common::println "end" $resolve
         }
 
-        public method case {selector closure} {
-            odfi::common::println "casex($selector)"
-            odfi::common::printlnIndent
-            set case_object [::new [namespace parent]::Case #auto $closure]
-            odfi::common::println [case_object getResolve] $resolve
-            odfi::common::printlnOutdent
-            odfi::common::println "endcase"
-        }
-
     }
-    
+
     itcl::class Case {
         
-        inherit Always
+        inherit CommonVDesc
 
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
@@ -142,13 +129,32 @@ namespace eval osys::verilogInterface {
             odfi::common::println "$condition:" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
-            odfi::closures::doClosure $cClosure
+            odfi::closures::doClosure $body
             odfi::common::printlnOutdent
             odfi::common::println "end" $resolve
         }
 
     }
 
+    itcl::class Always {
+        
+        inherit CommonVDesc
+
+        constructor {cClosure} {
+            odfi::closures::doClosure $cClosure
+        }
+        
+        public method case {selector closure} {
+            odfi::common::println "casex($selector)" $resolve
+            odfi::common::printlnIndent
+            set case_object [::new [namespace parent]::Case #auto $closure]
+            odfi::common::println [$case_object getResolve] $resolve
+            odfi::common::printlnOutdent $resolve
+            odfi::common::println "endcase" $resolve
+        }
+
+    }
+    
     itcl::class ModuleBody {
         
         inherit Common
@@ -216,6 +222,7 @@ namespace eval osys::verilogInterface {
             set module_body [::new [namespace parent]::ModuleBody ::${cName}_Body $cClosure2]
             odfi::common::println [$module_body getResolve] $resolve
             odfi::common::printlnOutdent
+            odfi::common::println "endmodule" $resolve
             ## Module body end
             ::puts [getResolve]
         }
