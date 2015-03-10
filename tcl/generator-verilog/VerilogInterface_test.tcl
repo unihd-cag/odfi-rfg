@@ -6,9 +6,15 @@ source VerilogInterface.tm
 proc getRFAddrOffset {object} {
     return [ld [expr [$object register_size]/8]]
 }
+set AddrBits ""
 
 proc getRFAddrWidth {object} {
-    return [expr [getAddrBits $object]-[getRFAddrOffset $object]]
+    global AddrBits
+    if {$AddrBits == ""} {
+        set AddrBits [expr [getAddrBits $object]-[getRFAddrOffset $object]]
+    }
+    ##return [expr [getAddrBits $object]-[getRFAddrOffset $object]]
+    return $AddrBits
 }
 
 proc getFirstSharedBusObject {object} {
@@ -542,6 +548,7 @@ odfi::closures::oproc writeWriteInterface {object} {
 #
         ::if {[$it isa osys::rfg::Register]} {
             writeRegisterBlock $it
+            ::puts "Element: $it"
         }
 
         ::if {[$it isa osys::rfg::RegisterFile]} {
@@ -589,7 +596,7 @@ odfi::closures::oproc writeSoftReadInterface {object} {
                 if {[$it isa osys::rfg::Register]} {
                     writeRegisterSoftRead $it            
                 }
-
+                ::puts "Field $it"
                 if {[$it isa osys::rfg::RegisterFile]} {
                     return false
                 } else {
@@ -611,14 +618,18 @@ osys::verilogInterface::module [$rf name] {
     
     ## Write RegisterFile Signal Interface
     writeVModuleInterface $rf
+    ::puts "writeVModuleInterface done..."
 
 } body {
 
     ## Write Internal Signals
     writeInternalSigs $rf
+    ::puts "writeInternalSigs done..."
     ## Write Hardware/Software Write Interface/Always Block
     writeWriteInterface $rf
+    ::puts "writeWriteInterface done..."
     ## Writhe the Software Read Interface/ Address Decoder
     writeSoftReadInterface $rf
+    ::puts "writeSoftReadInterface done..."
 
 }

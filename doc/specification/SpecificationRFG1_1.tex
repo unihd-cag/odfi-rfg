@@ -13,10 +13,13 @@
 
 \tableofcontents
 \newpage
+\section{Introduction}
 \section{RFG API}
 \subsection{User perspective}
 \subsection{Developer perspective}
-\section{Generator Concept}
+\section{Generator API}
+\subsection{User perspective}
+\subsection{Developer perspective}
 \section{RFG Verilog Generator}
 
 \subsection{Overview}
@@ -302,7 +305,33 @@ Generated verilog from RFG description:
 \newpage
 
 \subsection{RamBlock}
-
+A RamBlock is a construct which implements an addressspace as RAM inside the hardware. In different to registers, the hardware interface has now also address, data, and control lines. Depending on the read/write Permissions different RAMs are used. See the table below. 1w\_1r\_1c means a Ram with one write, one read interface. and 2rw\_1c means a dual port Ram.\\
+\\
+\begin{tabular}{ l || c | c | c | c | r }
+    permissions & none & ro & wo & rw & hardware\\ \hline\hline
+    none & none & none & none & 1w\_1r\_1c \\ \cline{1-5}
+    ro & none & none & 1w\_1r\_1c& 2rw\_1c\\ \cline{1-5}
+    wo & none & 1w\_1r\_1c& none & 2rw\_1c\\ \cline{1-5}
+    rw & 1w\_1r\_1c& 2rw\_1c& 2rw\_1c & 2rw\_1c\\ \cline{1-5}
+    software \\
+\end{tabular}
+\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/RamBlock.rf} 
+\newpage
+Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/RamBlock.v}
+\newpage
+\subsubsection{attributes RamBlock}
+external attribute:\\
+\\
+With the external attribute there is just a RamBlock Interface generated to communicate with a RamBlock outside the registerfile.\\
+\\
+address\_shift attribute:\\
+\\
+The address\_shift attributes allows to address the Ram Block with a shift inside the registerfile address space. In example each ramblock entry each 4kB with (address\_shift 12)
+\newpage
 \subsection{external/internal RegisterFiles}
 
 \end{document}

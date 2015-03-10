@@ -89,6 +89,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method vif {condition body} {
+            odfi::common::println "" $resolve
             odfi::common::println "if($condition)" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
@@ -153,12 +154,18 @@ namespace eval osys::verilogInterface {
             odfi::common::println "endcase" $resolve
         }
 
+        public method do {cClosure} {
+            $this resolve [odfi::common::newStringChannel]
+            odfi::closures::doClosure $cClosure
+        }
+
     }
     
     itcl::class ModuleBody {
         
         inherit Common
-
+        odfi::common::classField private always_context ""        
+        
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
         }
@@ -196,9 +203,13 @@ namespace eval osys::verilogInterface {
             odfi::common::println "always @(${condition})" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
-            ## Create always object
-            set always_object [::new [namespace parent]::Always #auto $closure]
-            odfi::common::println [$always_object getResolve] $resolve
+            if {$always_context == ""} {
+                ## Create always object
+                $this always_context [::new [namespace parent]::Always #auto $closure]
+            } else {
+                $always_context do $closure
+            }
+            odfi::common::println [$always_context getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println "end" $resolve
         }
