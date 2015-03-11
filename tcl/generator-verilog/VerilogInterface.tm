@@ -107,6 +107,18 @@ namespace eval osys::verilogInterface {
             odfi::common::println "end" $resolve
         }
 
+        public method case {selector closure} {
+            ::puts "Inside Case"
+            ::puts "Selector: $selector"
+            ::puts "Closure: $closure"
+            odfi::common::println "casex($selector)" $resolve
+            odfi::common::printlnIndent
+            set case_object [::new [namespace parent]::Case #auto $closure]
+            odfi::common::println [$case_object getResolve] $resolve
+            odfi::common::printlnOutdent $resolve
+            odfi::common::println "endcase" $resolve
+        }
+
         public method velse {body} {
             odfi::common::println "else" $resolve
             odfi::common::println "begin" $resolve
@@ -145,15 +157,17 @@ namespace eval osys::verilogInterface {
             odfi::closures::doClosure $cClosure
         }
         
-        public method case {selector closure} {
-            odfi::common::println "casex($selector)" $resolve
-            odfi::common::printlnIndent
-            set case_object [::new [namespace parent]::Case #auto $closure]
-            odfi::common::println [$case_object getResolve] $resolve
-            #::puts "Case Resolve: [$case_object getResolve]"
-            odfi::common::printlnOutdent $resolve
-            odfi::common::println "endcase" $resolve
-        }
+      #  public method case {selector closure} {
+      #      ::puts "Inside Case"
+      #      ::puts "Selector: $selector"
+      #      ::puts "Closure: $closure"
+      #      odfi::common::println "casex($selector)" $resolve
+      #      odfi::common::printlnIndent
+      #      set case_object [::new [namespace parent]::Case #auto $closure]
+      #      odfi::common::println [$case_object getResolve] $resolve
+      #      odfi::common::printlnOutdent $resolve
+      #      odfi::common::println "endcase" $resolve
+      #  }
 
         public method do {cClosure} {
             #$this resolve [odfi::common::newStringChannel]

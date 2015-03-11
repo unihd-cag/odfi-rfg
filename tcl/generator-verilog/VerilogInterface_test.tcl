@@ -60,20 +60,31 @@ proc needDelay {object} {
 
 proc CheckForRegBlock {object} {
     set return_value false
-    $object onAttributes {hardware.osys::rfg::rreinit_source} {
-        set return_value true
-    } otherwise {
-        $object onEachField {
-            if {[$it reset] != ""} {
-                set return_value true
-            }
-            $it onWrite {software} {
-                set return_value true
-            }
-            $it onWrite {hardware} {
-                set return_value true
-            }
+    if {[$object isa osys::rfg::RamBlock]} {
+        $object onWrite {software} {
+            set return_value true
+        }
 
+        $object onWrite {hardware} {
+            set return_value true
+        }
+
+    } else {
+        $object onAttributes {hardware.osys::rfg::rreinit_source} {
+            set return_value true
+        } otherwise {
+            $object onEachField {
+                if {[$it reset] != ""} {
+                    set return_value true
+                }
+                $it onWrite {software} {
+                    set return_value true
+                }
+                $it onWrite {hardware} {
+                    set return_value true
+                }
+
+            }
         }
     }
 
@@ -538,19 +549,57 @@ odfi::closures::oproc writeRegisterBlock {object} {
 
 }
 
+odfi::closures::oproc writeRamBlockReset {object} {
+    vif "!res_n" {
+        vputs "[getName $object]_rf_addr <= [ld [$object depth]]'b0"
+        $object onWrite {hardware} {
+            vputs "[getName $object]_rf_wen <= 1'b0"
+            vputs "[getName $object]_rf_wdata <= [$object width]'b0"
+        }
+        $object onRead {hardware} {
+            vputs "[getName $object]_rf_ren <= 1'b0"
+        }
+    }
+}
+
+odfi::closures::oproc writeRamBlockWrite {object} {
+    set lower_identifier [expr [ld [$object depth]]+[getRFAddrOffset $rf]+[$object getAttributeValue software.osys::rfg::address_shift]]
+    ::puts "Relative Address: [$object getAttributeValue software.osys::rfg::relative_address]"
+    ::puts "RF_Offset: [getRFAddrOffset $rf]"
+    ::puts "Ram Depth: [$object depth]"
+    ::puts "Addr Shift: [$object getAttributeValue software.osys::rfg::address_shift]"
+
+    set equal [expr ([$object getAttributeValue software.osys::rfg::relative_address]/([$object depth]*[$rf register_size]/8)) >> [$object getAttributeValue software.osys::rfg::address_shift]]
+    vif "address\[[expr [getAddrBits $rf] - 1]:$lower_identifier\] == $equal" {
+        ::puts "Hello"
+    }
+}
+
+odfi::closures::oproc writeRamBlock {object} {
+    if {[CheckForRegBlock $object] == true} {
+        always "posedge clk" {
+            writeRamBlockReset $object
+            velse {
+                writeRamBlockWrite $object
+            }
+
+        }
+    }
+}
+
 odfi::closures::oproc writeWriteInterface {object} {
     
     $rf walkDepthFirst {
-#
-#        ::if {[$it isa osys::rfg::RamBlock]} {
-#                             
-#        }
-#
-        ::if {[$it isa osys::rfg::Register]} {
+
+        if {[$it isa osys::rfg::RamBlock]} {
+            writeRamBlock $it
+        }
+
+        if {[$it isa osys::rfg::Register]} {
             writeRegisterBlock $it
         }
 
-        ::if {[$it isa osys::rfg::RegisterFile]} {
+        if {[$it isa osys::rfg::RegisterFile]} {
             
             return false    
         
@@ -588,24 +637,26 @@ odfi::closures::oproc writeSoftReadInterface {object} {
             vputs "access_complete <= 1'b0"
             vputs "read_data <= [getRFmaxWidth $rf]'b0"
         }
-        case "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" {
-            $rf walkDepthFirst {
-                ##RamBlock
-                ##Register
-                if {[$it isa osys::rfg::Register]} {
-                    writeRegisterSoftRead $it            
-                }
-                if {[$it isa osys::rfg::RegisterFile]} {
-                    return false
-                } else {
-                    return true
+        velse {
+            case "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" {
+                $rf walkDepthFirst {
+                    ##RamBlock
+                    ##Register
+                    if {[$it isa osys::rfg::Register]} {
+                        writeRegisterSoftRead $it       
+                    }
+                    if {[$it isa osys::rfg::RegisterFile]} {
+                        return false
+                    } else {
+                        return true
+                    }
+
                 }
 
-            }
-
-            case_select "default" {
-                vputs "invalid_address <= read_en || write_en"
-                vputs "access_complete <= read_en || write_en"
+                case_select "default" {
+                    vputs "invalid_address <= read_en || write_en"
+                    vputs "access_complete <= read_en || write_en"
+                }
             }
         }
     }
