@@ -376,7 +376,7 @@ odfi::closures::oproc writeInternalSigs {rf} {
 }
 
 odfi::closures::oproc writeFieldSoftWrite {it offset} {
-    vif "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [getRelAddress [$it parent]] && write_en" {
+    vif "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress [$it parent]]/8] && write_en" {
         
         $it onAttributes {software.osys::rfg::software_clear} {
             vputs "[getName $it] <= [$it width]'b0"
@@ -479,7 +479,7 @@ odfi::closures::oproc writeRegisterReset {object} {
 
 odfi::closures::oproc writeRegisterWrite {object} {
     $object onAttributes {hardware.osys::rfg::rreinit_source} {
-        vif "(address\[[getRFAddrWidth $rf]:[getRFAddrOffset $rf]\] == [getRelAddress $object] && write_en" {
+        vif "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress $object]/8] && write_en" {
             vputs "rreinit <= 1'b1"   
         }
         velse {
@@ -548,7 +548,6 @@ odfi::closures::oproc writeWriteInterface {object} {
 #
         ::if {[$it isa osys::rfg::Register]} {
             writeRegisterBlock $it
-            ::puts "Element: $it"
         }
 
         ::if {[$it isa osys::rfg::RegisterFile]} {
@@ -596,7 +595,6 @@ odfi::closures::oproc writeSoftReadInterface {object} {
                 if {[$it isa osys::rfg::Register]} {
                     writeRegisterSoftRead $it            
                 }
-                ::puts "Field $it"
                 if {[$it isa osys::rfg::RegisterFile]} {
                     return false
                 } else {
@@ -604,7 +602,11 @@ odfi::closures::oproc writeSoftReadInterface {object} {
                 }
 
             }
-        
+
+            case_select "default" {
+                vputs "invalid_address <= read_en || write_en"
+                vputs "access_complete <= read_en || write_en"
+            }
         }
     }
 

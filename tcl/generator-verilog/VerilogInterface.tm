@@ -150,12 +150,13 @@ namespace eval osys::verilogInterface {
             odfi::common::printlnIndent
             set case_object [::new [namespace parent]::Case #auto $closure]
             odfi::common::println [$case_object getResolve] $resolve
+            #::puts "Case Resolve: [$case_object getResolve]"
             odfi::common::printlnOutdent $resolve
             odfi::common::println "endcase" $resolve
         }
 
         public method do {cClosure} {
-            $this resolve [odfi::common::newStringChannel]
+            #$this resolve [odfi::common::newStringChannel]
             odfi::closures::doClosure $cClosure
         }
 

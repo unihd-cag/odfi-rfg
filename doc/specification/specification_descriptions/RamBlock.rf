@@ -1,0 +1,15 @@
+registerFile RamBlock {
+    register test {
+        field test_field {
+            width 32
+            hardware rw
+            software rw
+        }
+    }
+    ramBlock test_ram {
+        depth 128
+        width 32
+        hardware rw
+        software rw
+    }
+}
