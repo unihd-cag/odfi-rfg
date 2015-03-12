@@ -2,6 +2,29 @@ package require osys::rfg
 package require HelperFunctions
 package require osys::rfg::address::hierarchical
 source VerilogInterface.tm
+source Instances_new.tm
+
+set rb_save ""
+proc hasRamBlock {rf} {
+    global rb_save 
+    if {$rb_save == ""} {
+        set rb_save false
+        $rf walkDepthFirst {
+            if {[$it isa osys::rfg::RamBlock]} {
+                set rb_save true
+            }
+
+            if {[$it isa osys::rfg::RegisterFile]} {
+                return false	
+            } else {
+                return true
+            }
+        }
+        return $rb_save
+    } else {
+        return $rb_save
+    }
+}
 
 proc getRBAddrssDecode {object rf} {
     set dontCare [string repeat x [expr [ld [$object depth]] + [$object getAttributeValue software.osys::rfg::address_shift]]]
@@ -683,6 +706,11 @@ odfi::closures::oproc writeSoftReadInterface {object} {
             vputs "read_data <= [getRFmaxWidth $rf]'b0"
         }
         velse {
+            if {[hasRamBlock $rf]} {
+                vputs "read_en_dly0 <= read_en"
+                vputs "read_en_dly1 <= read_en_dly0"
+                vputs "read_en_dly2 <= read_en_dly1"
+            }
             case "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" {
                 $rf walkDepthFirst {
                     ##RamBlock
@@ -711,6 +739,20 @@ odfi::closures::oproc writeSoftReadInterface {object} {
 
 }
 
+odfi::closures::oproc writeInstances {object} {
+    $object walkDepthFirst {
+        if {[$it isa osys::rfg::RamBlock]} {
+            writeRamModule $it
+        }
+        
+        if {[$it isa osys::rfg::RegisterFile]} {
+            return false
+        } else {
+            return true
+        }
+    }
+}
+
 catch {namespace eval osys::rfg:: {source ../../examples/ExampleRF.rf}} rf
 
 osys::rfg::address::hierarchical::calculate $rf
@@ -727,6 +769,8 @@ osys::verilogInterface::module [$rf name] {
     writeInternalSigs $rf
     ::puts "writeInternalSigs done..."
     ## Write Hardware/Software Write Interface/Always Block
+    writeInstances $rf
+    ::puts "writeInstances done"
     writeWriteInterface $rf
     ::puts "writeWriteInterface done..."
     ## Writhe the Software Read Interface/ Address Decoder
