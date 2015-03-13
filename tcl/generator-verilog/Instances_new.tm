@@ -1,33 +1,33 @@
 # write counter instance
 odfi::closures::oproc writeCounterModule {register field} {
 	odfi::common::println "" $resolve
-	odfi::common::println "	counter48 #(" $resolve
-	odfi::common::println "		.DATASIZE([$field width])" $resolve
-	odfi::common::println "	) [getName $register]_I (" $resolve
-	odfi::common::println "		.clk(clk)," $resolve
-	odfi::common::println "		.res_n(res_n)," $resolve
-	odfi::common::println "		.increment([getName $field]_countup)," $resolve
+	odfi::common::println "counter48 #(" $resolve
+	odfi::common::println "	.DATASIZE([$field width])" $resolve
+	odfi::common::println ") [getName $register]_I (" $resolve
+	odfi::common::println "	.clk(clk)," $resolve
+	odfi::common::println "	.res_n(res_n)," $resolve
+	odfi::common::println "	.increment([getName $field]_countup)," $resolve
 	if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
-		odfi::common::println "		.load([getName $field]_load_value)," $resolve
+		odfi::common::println "	.load([getName $field]_load_value)," $resolve
 	} else {
-		odfi::common::println " 		.load([$field width]'b0)," $resolve
+		odfi::common::println " .load([$field width]'b0)," $resolve
 	}
 	$field onAttributes {hardware.osys::rfg::rreinit} {
 		if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
-			odfi::common::println "		.load_enable(rreinit || [getName $field]_load_enable)," $resolve
+			odfi::common::println "	.load_enable(rreinit || [getName $field]_load_enable)," $resolve
 		} else {
-			odfi::common::println "		.load_enable(rreinit)," $resolve
+			odfi::common::println "	.load_enable(rreinit)," $resolve
 		}				
 	} otherwise {
 		if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
-			odfi::common::println "		.load_enable([getName $field]_load_enable)," $resolve
+			odfi::common::println "	.load_enable([getName $field]_load_enable)," $resolve
 		} else {
-			odfi::common::println "		.load_enable(1'b0)," $resolve
+			odfi::common::println "	.load_enable(1'b0)," $resolve
 		}
 		
 	}
-	odfi::common::println "		.value([getName $field])" $resolve
-	odfi::common::println "	);" $resolve
+	odfi::common::println "	.value([getName $field])" $resolve
+	odfi::common::println ");" $resolve
 	odfi::common::println "" $resolve
 }
 

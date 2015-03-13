@@ -108,9 +108,7 @@ namespace eval osys::verilogInterface {
         }
 
         public method case {selector closure} {
-            ::puts "Inside Case"
-            ::puts "Selector: $selector"
-            ::puts "Closure: $closure"
+            odfi::common::println "" $resolve
             odfi::common::println "casex($selector)" $resolve
             odfi::common::printlnIndent
             set case_object [::new [namespace parent]::Case #auto $closure]
@@ -185,7 +183,7 @@ namespace eval osys::verilogInterface {
             odfi::closures::doClosure $cClosure
         }
 
-        public method assign {$lvalue $rvalue} {
+        public method assign {lvalue rvalue} {
             odfi::common::println "assign $lvalue = $rvalue;" $resolve
         }
 
