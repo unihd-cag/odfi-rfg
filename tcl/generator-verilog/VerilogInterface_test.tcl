@@ -45,11 +45,16 @@ proc getRFAddrOffset {object} {
     return [ld [expr [$object register_size]/8]]
 }
 set AddrBits ""
+set addr_object ""
 
 proc getRFAddrWidth {object} {
     global AddrBits
-    if {$AddrBits == ""} {
+    global addr_object
+    ::puts "Object in: $object"
+    if {$AddrBits == "" || $addr_object != $object} {
+        ::puts "Objekt: $object"
         set AddrBits [expr [getAddrBits $object]-[getRFAddrOffset $object]]
+        set addr_object $object
     }
     return $AddrBits
 }
@@ -253,6 +258,8 @@ odfi::closures::oproc writeVModuleInterface {rf} {
     
     input clk wire
     input res_n wire
+    ::puts "$rf"
+    ::puts "Addr Width: [getRFAddrWidth $rf]"
     input address wire [getRFAddrWidth $rf] [getRFAddrOffset $rf]
     output invalid_address reg
     output access_complete reg
@@ -722,6 +729,40 @@ odfi::closures::oproc writeRamBlock {object} {
     }
 }
 
+odfi::closures::oproc writeRFBlock {object} {
+    always "posedge clk" {
+        vif "!res_n" {
+            vputs "[getName $object]_write_en <= 1'b0"
+            vputs "[getName $object]_read_en <= 1'b0"
+            vputs "[getName $object]_write_data <= [getRFmaxWidth $object]'b0"
+            vputs "[getName $object]_address <= [getRFAddrWidth $object]'b0"
+        }
+        velse {
+            set upper [expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]
+            set lower [expr [getRFAddrWidth $object] + [getRFAddrOffset $object]]
+            set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> [getRFAddrOffset $object]]
+            set care [format %x $care]
+            set care_width [expr [getRFAddrWidth $rf] - [getRFAddrWidth $object]]
+            vif "address\[$upper:$lower\] == $care_width'h$care" {
+                vputs "subRF0_address <= address\[[expr [getRFAddrWidth $object] + [getRFAddrOffset $object] - 1]:[getRFAddrOffset $object]\]"
+            }
+            vif "(address\[$upper:$lower\] == $care_width'h$care) && write_en" {
+                vputs "[getName $object]_write_data <= write_data\[[expr [getRFmaxWidth $object] - 1]:0\]"
+                vputs "[getName $object]_write_en <= 1'b1"
+            }
+            velse {
+                vputs "[getName $object]_write_en <= 1'b0"
+            }
+            vif "(address\[$upper:$lower\] == $care_width'h$care) && read_en" {
+                vputs "[getName $object]_read_en <= 1'b1"
+            }
+            velse {
+                vputs "[getName $object]_read_en <= 1'b0"
+            }
+        }
+    }
+}
+
 odfi::closures::oproc writeWriteInterface {object} {
     
     $rf walkDepthFirst {
@@ -735,7 +776,9 @@ odfi::closures::oproc writeWriteInterface {object} {
         }
 
         if {[$it isa osys::rfg::RegisterFile]} {
-            
+            $it onAttributes {hardware.osys::rfg::external} {
+                writeRFBlock $it
+            }
             return false    
         
         } else {
@@ -758,7 +801,10 @@ odfi::closures::oproc writeRegisterSoftRead {object} {
             }
             incr offset [$it width]
             
-        } 
+        }
+        if {$offset != [getRFmaxWidth $rf]} {
+            vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:$offset\] <= [expr [getRFmaxWidth $rf] - $offset]'b0"
+        }
         vputs "invalid_address <= 1'b0"
         vputs "access_complete <= read_en || write_en"
     }
@@ -773,6 +819,9 @@ odfi::closures::oproc writeRamBlockSoftRead {object} {
     case_select "\{[getRBAddrssDecode $object $rf]\}" {
         $object onRead {software} {
             vputs "read_data\[[expr [$object width]-1]:0\] <= [getName $object]_rf_rdata"
+        }
+        if {[$object width] != [getRFmaxWidth $rf]} {
+            vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:[$object width]\] <= [expr [getRFmaxWidth $rf] - [$object width]]'b0"
         }
         vputs "invalid_address <= 1'b0"
         vputs "access_complete <= write_en || read_en_dly2"
@@ -810,6 +859,22 @@ odfi::closures::oproc writeExternalRamSignals {object} {
     }
 }
 
+odfi::closures::oproc writeRFSoftRead {object} {
+    set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> [getRFAddrOffset $object]]
+    set care [format %x $care]
+    set care_width [expr [getRFAddrWidth $rf] - [getRFAddrWidth $object]]
+    set dontCare_width [getRFAddrWidth $object]
+    set dontCare [string repeat x [getRFAddrWidth $object]]
+    case_select "\{$care_width'h$care,$dontCare_width'b$dontCare\}" {
+        vputs "read_data\[[expr [getRFmaxWidth $object] - 1]:0\] <= [getName $object]_read_data"
+        if {[getRFmaxWidth $object] != [getRFmaxWidth $rf]} {
+            vputs "read_data\[[expr [getRFmaxWidth $rf] -1]:[getRFmaxWidth $object]\] <= [expr [getRFmaxWidth $rf] -  [getRFmaxWidth $object]]'b0"
+        }
+        vputs "invalid_address <= [getName $object]_invalid_address"
+        vputs "access_complete <= [getName $object]_access_complete"
+    }
+}
+
 odfi::closures::oproc writeSoftReadInterface {object} {
     
     always "posedge clk" { 
@@ -838,6 +903,7 @@ odfi::closures::oproc writeSoftReadInterface {object} {
                         writeRegisterSoftRead $it       
                     }
                     if {[$it isa osys::rfg::RegisterFile]} {
+                        writeRFSoftRead $it
                         return false
                     } else {
                         return true
