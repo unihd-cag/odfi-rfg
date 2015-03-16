@@ -70,7 +70,6 @@ proc getFirstSharedBusObject {object} {
         }
 
     }
-
     return $obj
 
 }
@@ -697,11 +696,21 @@ odfi::closures::oproc writeRamBlock {object} {
     if {[CheckForRegBlock $object] == true} {
         $object onAttributes {hardware.osys::rfg::external} {
             odfi::common::println "" $resolve
-            $object onWrite {hardware} {
-                assign [getName $object]_rf_wdata [getName $object]_write_data_reg
+            $object onAttributes {hardware.osys::rfg::shared_bus} {
+                $object onWrite {software} {
+                    assign [getName $object]_rf_wdata "write_data_reg\[[expr [$object width]-1]:0\]"
+                }
+                set higher [expr [ld [$object depth]] - 1 + [expr [getRFAddrOffset $rf]]  + [$object getAttributeValue software.osys::rfg::address_shift]]
+                set lower [expr [getRFAddrOffset $rf] + [$object getAttributeValue software.osys::rfg::address_shift]]
+                assign [getName $object]_rf_addr "address_reg\[$higher:$lower\]"
+            } otherwise {
+                $object onWrite {software} {
+                    assign [getName $object]_rf_wdata [getName $object]_write_data_reg
+                }
+                assign [getName $object]_rf_addr [getName $object]_address_reg
             }
-            assign [getName $object]_rf_addr [getName $object]_address_reg
         }
+
         always "posedge clk" {
             writeRamBlockReset $object
             velse {
@@ -709,6 +718,7 @@ odfi::closures::oproc writeRamBlock {object} {
             }
 
         }
+
     }
 }
 
@@ -771,15 +781,23 @@ odfi::closures::oproc writeRamBlockSoftRead {object} {
 
 odfi::closures::oproc writeExternalRamSignals {object} {
     $object walkDepthFirst {
-        
         if {[$it isa osys::rfg::RamBlock]} {
             $it onAttributes {hardware.osys::rfg::external} {
-                $it onWrite {software} {
-                    vputs "[getName $it]_write_data_reg <= write_data\[[expr [$it width]-1]:0\]"
+                $it onAttributes {hardware.osys::rfg::shared_bus} {
+                    if {[getFirstSharedBusObject $rf] == $it} {
+                        $it onWrite {software} {
+                            vputs "write_data_reg <= write_data"
+                        }
+                        vputs "address_reg <= address"
+                    }
+                } otherwise {
+                    $it onWrite {software} {
+                        vputs "[getName $it]_write_data_reg <= write_data\[[expr [$it width]-1]:0\]"
+                    }
+                    set lower_addr [expr [getRFAddrOffset $rf] + [$it getAttributeValue software.osys::rfg::address_shift]]
+                    set higher_addr [expr [ld [$it depth]] -1 + [$it getAttributeValue software.osys::rfg::address_shift] + [getRFAddrOffset $rf]]
+                    vputs "[getName $it]_address_reg <= address\[$higher_addr:$lower_addr\]"
                 }
-                set lower_addr [expr [getRFAddrOffset $rf] + [$it getAttributeValue software.osys::rfg::address_shift]]
-                set higher_addr [expr [ld [$it depth]] -1 + [$it getAttributeValue software.osys::rfg::address_shift] + [getRFAddrOffset $rf]]
-                vputs "[getName $it]_address_reg <= address\[$higher_addr:$lower_addr\]"
             }
         }
 
