@@ -776,9 +776,7 @@ odfi::closures::oproc writeWriteInterface {object} {
         }
 
         if {[$it isa osys::rfg::RegisterFile]} {
-            $it onAttributes {hardware.osys::rfg::external} {
-                writeRFBlock $it
-            }
+            writeRFBlock $it
             return false    
         
         } else {
@@ -938,6 +936,9 @@ odfi::closures::oproc writeInstances {object} {
         }
         
         if {[$it isa osys::rfg::RegisterFile]} {
+            $it onAttributes {hardware.osys::rfg::internal} {
+                writeRFModule $it
+            }
             return false
         } else {
             return true

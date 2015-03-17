@@ -195,27 +195,28 @@ odfi::closures::oproc writeRamModule {ramBlock} {
 
 # write RF instance
 odfi::closures::oproc writeRFModule {registerfile} {
-	puts "	[$registerfile name] [$registerfile name]_I ("
-	puts "		.res_n(res_n),"
-	puts "		.clk(clk),"
-	puts "		.address([$registerfile name]_address),"
-	puts "		.read_data([$registerfile name]_read_data),"
-	puts "		.invalid_address([$registerfile name]_invalid_address),"
-	puts "		.access_complete([$registerfile name]_access_complete),"
-	puts "		.read_en([$registerfile name]_read_en),"
-	puts "		.write_en([$registerfile name]_write_en),"
-	puts "		.write_data([$registerfile name]_write_data),"
+    odfi::common::println "" $resolve
+	odfi::common::println "[$registerfile name] [$registerfile name]_I (" $resolve
+	odfi::common::println "	.res_n(res_n)," $resolve
+	odfi::common::println "	.clk(clk)," $resolve
+	odfi::common::println "	.address([$registerfile name]_address)," $resolve
+	odfi::common::println "	.read_data([$registerfile name]_read_data)," $resolve
+	odfi::common::println "	.invalid_address([$registerfile name]_invalid_address)," $resolve
+	odfi::common::println "	.access_complete([$registerfile name]_access_complete)," $resolve
+	odfi::common::println "	.read_en([$registerfile name]_read_en)," $resolve
+	odfi::common::println "	.write_en([$registerfile name]_write_en)," $resolve
+	odfi::common::println "	.write_data([$registerfile name]_write_data)," $resolve
 
-		set signalList {}
+	set signalList {}
 	$registerfile walkDepthFirst {
 		if {[$it isa osys::rfg::RamBlock]} {
 			
 			$it onAttributes {hardware.osys::rfg::rw} { 
-				lappend signalList "		.[getName $it]_addr([getName $it]_addr)"
-				lappend signalList "		.[getName $it]_ren([getName $it]_ren)"
-				lappend signalList "		.[getName $it]_rdata([getName $it]_rdata)"
-				lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
-				lappend signalList "		.[getName $it]_wdata([getName $it]_wdata)"
+				lappend signalList "	.[getName $it]_addr([getName $it]_addr)"
+				lappend signalList "	.[getName $it]_ren([getName $it]_ren)"
+				lappend signalList "	.[getName $it]_rdata([getName $it]_rdata)"
+				lappend signalList "	.[getName $it]_wen([getName $it]_wen)"
+				lappend signalList "	.[getName $it]_wdata([getName $it]_wdata)"
 			}
 
 		} elseif {[$it isa osys::rfg::Register]} {
@@ -225,51 +226,51 @@ odfi::closures::oproc writeRFModule {registerfile} {
 					$it onAttributes {hardware.osys::rfg::counter} {
 						
 						$it onAttributes {hardware.osys::rfg::rw} {
-							lappend signalList "		.[getName $it]_next([getName $it]_next)"
-							lappend signalList "		.[getName $it]([getName $it])"
-							lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
+							lappend signalList "	.[getName $it]_next([getName $it]_next)"
+							lappend signalList "	.[getName $it]([getName $it])"
+							lappend signalList "	.[getName $it]_wen([getName $it]_wen)"
 						}
 						
 						$it onAttributes {hardware.osys::rfg::wo} {
-							lappend signalList "		.[getName $it]_next([getName $it]_next)"
-							lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
+							lappend signalList "	.[getName $it]_next([getName $it]_next)"
+							lappend signalList "	.[getName $it]_wen([getName $it]_wen)"
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
-							lappend signalList "		.[getName $it]([getName $it])"
+							lappend signalList "	.[getName $it]([getName $it])"
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "		.[getName $it]_written([getName $it]_written)"
+							lappend signalList "	.[getName $it]_written([getName $it]_written)"
 						}
 
-						lappend signalList "		.[getName $it]_countup([getName $it]_countup)"
+						lappend signalList "	.[getName $it]_countup([getName $it]_countup)"
 
 					} otherwise {
 
 						$it onAttributes {hardware.osys::rfg::rw} {
-							lappend signalList "		.[getName $it]_next([getName $it]_next)"
-							lappend signalList "		.[getName $it]([getName $it])"
+							lappend signalList "	.[getName $it]_next([getName $it]_next)"
+							lappend signalList "	.[getName $it]([getName $it])"
 							
 							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
+								lappend signalList "	.[getName $it]_wen([getName $it]_wen)"
 							}
 						}
 						
 						$it onAttributes {hardware.osys::rfg::wo} {
-							lappend signalList "		.[getName $it]_next([getName $it]_next)"
+							lappend signalList "	.[getName $it]_next([getName $it]_next)"
 							
 							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "		.[getName $it]_wen([getName $it]_wen)"
+								lappend signalList "	.[getName $it]_wen([getName $it]_wen)"
 							}
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
-							lappend signalList "		.[getName $it]([getName $it])"
+							lappend signalList "	.[getName $it]([getName $it])"
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "		.[getName $it]_written([getName $it]_written)"
+							lappend signalList "	.[getName $it]_written([getName $it]_written)"
 						}
 
 					}
@@ -286,8 +287,7 @@ odfi::closures::oproc writeRFModule {registerfile} {
 
 	}
 
-	puts [join $signalList ",\n"]
-
-		puts "	);"
-	puts ""
+	odfi::common::println [join $signalList ",\n"] $resolve
+	odfi::common::println ");" $resolve
+	odfi::common::println "" $resolve
 }
