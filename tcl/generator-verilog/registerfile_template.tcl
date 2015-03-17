@@ -1,8 +1,8 @@
 package require osys::rfg
 package require HelperFunctions
 package require osys::rfg::address::hierarchical
-source VerilogInterface.tm
-source Instances_new.tm
+#source ${::osys::rfg::generator::verilog::location}/VerilogInterface.tm
+source ${::osys::rfg::generator::verilog::location}/Instances.tm
 
 set rb_save ""
 proc hasRamBlock {rf} {
@@ -50,9 +50,7 @@ set addr_object ""
 proc getRFAddrWidth {object} {
     global AddrBits
     global addr_object
-    ::puts "Object in: $object"
     if {$AddrBits == "" || $addr_object != $object} {
-        ::puts "Objekt: $object"
         set AddrBits [expr [getAddrBits $object]-[getRFAddrOffset $object]]
         set addr_object $object
     }
@@ -258,8 +256,6 @@ odfi::closures::oproc writeVModuleInterface {rf} {
     
     input clk wire
     input res_n wire
-    ::puts "$rf"
-    ::puts "Addr Width: [getRFAddrWidth $rf]"
     input address wire [getRFAddrWidth $rf] [getRFAddrOffset $rf]
     output invalid_address reg
     output access_complete reg
@@ -945,10 +941,6 @@ odfi::closures::oproc writeInstances {object} {
         }
     }
 }
-
-catch {namespace eval osys::rfg:: {source ../../examples/test.rf}} rf
-
-osys::rfg::address::hierarchical::calculate $rf
 
 osys::verilogInterface::module [$rf name] {
 

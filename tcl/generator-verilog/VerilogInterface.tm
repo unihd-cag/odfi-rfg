@@ -248,7 +248,10 @@ namespace eval osys::verilogInterface {
             odfi::common::printlnOutdent
             odfi::common::println "endmodule" $resolve
             ## Module body end
-            ::puts [getResolve]
+        }
+
+        public method generate {destination} {
+            odfi::files::writeToFile ${destination} [$this getResolve]
         }
 
     }
