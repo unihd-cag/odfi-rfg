@@ -609,7 +609,7 @@ odfi::closures::oproc writeRegisterBlock {object} {
 
     ## check if anything is generated
     if {[CheckForRegBlock $object] == true} {
-        always "posedge clk" {
+        always $always_content {
             ## write Reset
             writeRegisterReset $object
             ## write Software write
@@ -714,7 +714,7 @@ odfi::closures::oproc writeRamBlock {object} {
             }
         }
 
-        always "posedge clk" {
+        always $always_content {
             writeRamBlockReset $object
             velse {
                 writeRamBlockWrite $object
@@ -726,7 +726,7 @@ odfi::closures::oproc writeRamBlock {object} {
 }
 
 odfi::closures::oproc writeRFBlock {object} {
-    always "posedge clk" {
+    always $always_content {
         vif "!res_n" {
             vputs "[getName $object]_write_en <= 1'b0"
             vputs "[getName $object]_read_en <= 1'b0"
@@ -871,7 +871,7 @@ odfi::closures::oproc writeRFSoftRead {object} {
 
 odfi::closures::oproc writeSoftReadInterface {object} {
     
-    always "posedge clk" { 
+    always $always_content { 
         vif "!res_n" {
             vputs "invalid_address <= 1'b0"
             vputs "access_complete <= 1'b0"
@@ -948,7 +948,12 @@ osys::verilogInterface::module [$rf name] {
     writeVModuleInterface $rf
 
 } body {
-
+    set always_content "posedge clk"
+    $options onAttributes {options.::reset} {
+        if {[$options getAttributeValue options.::reset] != "sync"} {
+            set always_content "posedge clk or negedge res_n"    
+        }
+    }
     ## Write Internal Signals
     writeInternalSigs $rf
 
