@@ -37,6 +37,7 @@ attributeFunction ::rreinit
 attributeFunction ::rreinit_source
 attributeFunction ::software_written
 attributeFunction ::hardware_wen
+attributeFunction ::hardware_no_wen
 attributeFunction ::sticky
 attributeFunction ::software_write_xor
 attributeFunction ::external

@@ -35,9 +35,9 @@ proc getRBAddrssDecode {object rf} {
     set care [format %x $care]
     set care_width [expr [getAddrBits $rf] - [ld [$object depth]] - 3 - [$object getAttributeValue software.osys::rfg::address_shift]]
     if {$care_width == 0} {
-        return "$dontCare_width'h$dontCare"
+        return "$dontCare_width'b$dontCare"
     } else {
-        return "$care_width'h$care,$dontCare_width'h$dontCare"
+        return "$care_width'h$care,$dontCare_width'b$dontCare"
     }
 }
 
@@ -221,7 +221,7 @@ odfi::closures::oproc writeRegisterInterface {it} {
                 $it onWrite {hardware} {
                     input [getName $it]_next wire [$it width]
                     
-                    $it onAttributes {hardware.osys::rfg::hardware_wen} {
+                    if {![$it hasAttribute hardware.osys::rfg::hardware_no_wen]} {
                         input [getName $it]_wen wire    
                     }
 
@@ -426,7 +426,12 @@ odfi::closures::oproc writeInternalSigs {rf} {
 }
 
 odfi::closures::oproc writeFieldSoftWrite {it offset} {
-    vif "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress [$it parent]]/8]) && write_en" {
+    if {[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1] < [getRFAddrOffset $rf]} {
+        set if_cond "(address == [expr [getRelAddress [$it parent]]/8]) && write_en"     
+    } else {
+        set if_cond "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress [$it parent]]/8]) && write_en"
+    }
+    vif $if_cond {
         $it onAttributes {hardware.osys::rfg::counter} {
             vputs "[getName $it]_load_enable <= 1'b1"
             vputs "[getName $it]_load_value <= write_data\[[expr [$it width] + $offset -1]:$offset\]"
@@ -442,7 +447,7 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
                 }
 
             }
-     
+    
             $it onAttributes {software.osys::rfg::software_written} {
                 vputs "[getName $it]_written <= 1'b1"
             }
@@ -664,7 +669,7 @@ odfi::closures::oproc writeRamBlockWrite {object} {
         
         $object onWrite {software} {
             if {![$object hasAttribute hardware.osys::rfg::external]} {
-                vputs "[getName $object]_wdata <= write_data\[[expr [$object width]-1]:0\]"
+                vputs "[getName $object]_rf_wdata <= write_data\[[expr [$object width]-1]:0\]"
             }
             vputs "[getName $object]_rf_wen <= write_en"
         }
@@ -742,7 +747,7 @@ odfi::closures::oproc writeRFBlock {object} {
             set care [format %x $care]
             set care_width [expr [getRFAddrWidth $rf] - [getRFAddrWidth $object]]
             vif "address\[$upper:$lower\] == $care_width'h$care" {
-                vputs "subRF0_address <= address\[[expr [getRFAddrWidth $object] + [getRFAddrOffset $object] - 1]:[getRFAddrOffset $object]\]"
+                vputs "[getName $object]_address <= address\[[expr [getRFAddrWidth $object] + [getRFAddrOffset $object] - 1]:[getRFAddrOffset $object]\]"
             }
             vif "(address\[$upper:$lower\] == $care_width'h$care) && write_en" {
                 vputs "[getName $object]_write_data <= write_data\[[expr [getRFmaxWidth $object] - 1]:0\]"
@@ -788,7 +793,12 @@ odfi::closures::oproc writeWriteInterface {object} {
 }
 
 odfi::closures::oproc writeRegisterSoftRead {object} {
-    case_select "[getRFAddrWidth $rf]'h[format %x [expr [$object getAttributeValue software.osys::rfg::relative_address] / ([$rf register_size]/8)]]" {
+    if {[getRFAddrWidth $rf] == 0} {
+        set width 1
+    } else {
+        set width [getRFAddrWidth $rf]
+    }
+    case_select "$width'h[format %x [expr [$object getAttributeValue software.osys::rfg::relative_address] / ([$rf register_size]/8)]]" {
         set offset 0
         $object onEachField {
             
@@ -887,8 +897,12 @@ odfi::closures::oproc writeSoftReadInterface {object} {
             }
             
             writeExternalRamSignals $rf
-
-            case "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" {
+                if {[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1] < [getRFAddrOffset $rf]} {
+                    set case_cond "address"     
+                } else {
+                    set case_cond "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" 
+                }
+            case $case_cond {
                 $rf walkDepthFirst {
                     ##RamBlock
                     if {[$it isa osys::rfg::RamBlock]} {

@@ -13,7 +13,10 @@ registerFile hierarchicalRF {
         register r1 {
             field f1 {
                 width 64
-                hardware rw
+                hardware {
+                    rw
+                    hardware_no_wen
+                }
                 software rw
             }
         }
@@ -23,7 +26,10 @@ registerFile hierarchicalRF {
         register r2 {
             field f1 {
                 width 64
-                hardware rw
+                hardware {
+                    rw
+                    hardware_no_wen
+                }
                 software rw
             }
         }

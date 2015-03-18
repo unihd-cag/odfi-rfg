@@ -7,7 +7,7 @@ file delete SimpleRF.iverilog
 file delete SimpleRF.vcd
 file delete compare_data/SimpleRF.v
 cd ../
-namespace delete ::osys::rfg
+##namespace delete ::osys::rfg
 puts "##################"
 puts "counter Unit Test:"
 puts "##################"
@@ -17,7 +17,7 @@ file delete counter_RF.iverilog
 file delete counter_RF.vcd
 file delete compare_data/counter_RF.v
 cd ../
-namespace delete ::osys::rfg
+##namespace delete ::osys::rfg
 puts "################"
 puts "ramRF Unit Test:"
 puts "################"
@@ -27,7 +27,7 @@ file delete ramRF.iverilog
 file delete ramRF.vcd
 file delete compare_data/ramRF.v
 cd ../
-namespace delete ::osys::rfg
+##namespace delete ::osys::rfg
 puts "#######################"
 puts "hierarchical Unit Test:"
 puts "#######################"
@@ -37,7 +37,7 @@ file delete hierarchicalRF.iverilog
 file delete hierarchicalRF.vcd
 file delete compare_data/hierarchicalRF.v
 cd ../
-namespace delete ::osys::rfg
+##namespace delete ::osys::rfg
 puts "#########################"
 puts "SingleRegister Unit Test:"
 puts "#########################"
