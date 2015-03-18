@@ -30,6 +30,11 @@ namespace eval osys::verilogInterface {
             return [read $resolve]
         }
 
+        public method comment {str} {
+            odfi::common::println "" $resolve
+            odfi::common::println "//$str" $resolve
+        }
+
     }
     
     itcl::class ModuleInterface  {
@@ -70,14 +75,14 @@ namespace eval osys::verilogInterface {
             return [join $in_out_list ",\n    "]
         }
 
-#        public method getInstComment {
-#            set inst_list {}
-#            foreach element $in_out_list {
-#                lappend inst_list ".[lindex [split $element " "] end]()"
-#            }
-#            return [join $inst_list ",\n	"]
-#   
-#       }
+        public method getInstComment {} {
+            set inst_list {}
+            foreach element $in_out_list {
+                lappend inst_list "\t.[lindex [split $element " "] end]()"
+            }
+            return [join $inst_list ",\n"]
+   
+       }
     }
     
     itcl::class CommonVDesc {
@@ -155,18 +160,6 @@ namespace eval osys::verilogInterface {
             odfi::closures::doClosure $cClosure
         }
         
-      #  public method case {selector closure} {
-      #      ::puts "Inside Case"
-      #      ::puts "Selector: $selector"
-      #      ::puts "Closure: $closure"
-      #      odfi::common::println "casex($selector)" $resolve
-      #      odfi::common::printlnIndent
-      #      set case_object [::new [namespace parent]::Case #auto $closure]
-      #      odfi::common::println [$case_object getResolve] $resolve
-      #      odfi::common::printlnOutdent $resolve
-      #      odfi::common::println "endcase" $resolve
-      #  }
-
         public method do {cClosure} {
             #$this resolve [odfi::common::newStringChannel]
             odfi::closures::doClosure $cClosure
@@ -212,7 +205,6 @@ namespace eval osys::verilogInterface {
         }
 
         public method always {condition closure} {
-            odfi::common::println "" $resolve
             odfi::common::println "always @(${condition})" $resolve
             odfi::common::println "begin" $resolve
             odfi::common::printlnIndent
@@ -233,21 +225,28 @@ namespace eval osys::verilogInterface {
         inherit Common
 
         constructor {cName cClosure1 cClosure2} {
-            ## Module Blackbox definitions start
+            set module_interface [::new [namespace parent]::ModuleInterface ::${cName}_Interface $cClosure1]
+            ## Verilog Comment Block
+            odfi::common::println "" $resolve
+            odfi::common::println "/*" $resolve
+            odfi::common::println "$cName ${cName}_I (" $resolve
+            odfi::common::println [$module_interface getInstComment] $resolve
+            odfi::common::println ");" $resolve
+            odfi::common::println "*/" $resolve
+            
+            ## Module Interface definitions 
             odfi::common::println "\nmodule $cName (" $resolve
             odfi::common::printlnIndent
-            set module_interface [::new [namespace parent]::ModuleInterface ::${cName}_Interface $cClosure1]
             odfi::common::println [$module_interface getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println ");" $resolve
-            ## Module Blackbox definitions end
-            ## Module body start
+            
+            ## Module body 
             odfi::common::printlnIndent
             set module_body [::new [namespace parent]::ModuleBody ::${cName}_Body $cClosure2]
             odfi::common::println [$module_body getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println "endmodule" $resolve
-            ## Module body end
         }
 
         public method generate {destination} {

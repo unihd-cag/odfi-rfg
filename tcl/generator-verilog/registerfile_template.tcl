@@ -609,6 +609,7 @@ odfi::closures::oproc writeRegisterBlock {object} {
 
     ## check if anything is generated
     if {[CheckForRegBlock $object] == true} {
+        comment "Register: [getName $object]"
         always $always_content {
             ## write Reset
             writeRegisterReset $object
@@ -713,7 +714,7 @@ odfi::closures::oproc writeRamBlock {object} {
                 assign [getName $object]_rf_addr [getName $object]_address_reg
             }
         }
-
+        comment "RamBlock: [getName $object]"
         always $always_content {
             writeRamBlockReset $object
             velse {
@@ -726,6 +727,7 @@ odfi::closures::oproc writeRamBlock {object} {
 }
 
 odfi::closures::oproc writeRFBlock {object} {
+    comment "RegisterFile: [getName $object]"
     always $always_content {
         vif "!res_n" {
             vputs "[getName $object]_write_en <= 1'b0"
@@ -870,7 +872,7 @@ odfi::closures::oproc writeRFSoftRead {object} {
 }
 
 odfi::closures::oproc writeSoftReadInterface {object} {
-    
+    comment "Address Decoder Software Read:"
     always $always_content { 
         vif "!res_n" {
             vputs "invalid_address <= 1'b0"
