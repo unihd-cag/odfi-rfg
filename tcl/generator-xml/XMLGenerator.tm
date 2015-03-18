@@ -43,7 +43,7 @@ namespace eval osys::rfg::generator::xmlgenerator {
             }
         }
 
-        public method produce {destinationPath} {
+        public method produce {destinationPath {generator ""}} {
 
 
             ## Create Special Stream 

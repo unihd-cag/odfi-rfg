@@ -47,7 +47,7 @@ namespace eval osys::rfg::generator::rfsbackport {
 #            odfi::files::writeToFile $targetFile $res 
 #        }
 
-        public method produce {destinationPath} {
+        public method produce {destinationPath {generator ""}} {
 
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
@@ -95,7 +95,7 @@ namespace eval osys::rfg::generator::rfsbackport {
                 odfi::common::println "<regfile>" $out
             } 
 
-            odfi::common::println "<regroot _baseAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" _absoluteAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" $name desc=\"[$group description]\">"  $out
+            odfi::common::println "<regroot $name desc=\"[$group description]\">"  $out
             
             odfi::common::printlnIndent
             
