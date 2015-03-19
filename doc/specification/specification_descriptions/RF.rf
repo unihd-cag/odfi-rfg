@@ -1,0 +1,4 @@
+registerFile RF {
+    external RamBlock.rf RamBlockRF_external
+    internal RamBlock.rf RamBlockRF_internal
+}
