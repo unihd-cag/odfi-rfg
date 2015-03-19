@@ -810,8 +810,23 @@ odfi::closures::oproc writeInstances {object} {
     }
 }
 
-osys::verilogInterface::module [$rf name] {
+odfi::closures::oproc writeAddrComment {object} {
+    set str {}
+    $object walkDepthFirst {
+        if {![$it isa osys::rfg::Group] || [$it isa osys::rfg::RegisterFile]} {
+            lappend str "[getName $it]: relative Address([getAddrBits $object]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
+        }
+        if {[$it isa osys::rfg::RegisterFile]} {
+            return false
+        } else {
+            return true
+        }
+    }
+    setCommentHeader [join $str "\n"]
+}
 
+osys::verilogInterface::module [$rf name] {
+    writeAddrComment $rf
     ## Write RegisterFile Signal Interface
     writeVModuleInterface $rf
 

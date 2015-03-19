@@ -40,6 +40,7 @@ namespace eval osys::verilogInterface {
     itcl::class ModuleInterface  {
         
         odfi::common::classField private in_out_list {}
+        odfi::common::classField private commentHeader ""
 
         constructor {cClosure} {
             odfi::closures::doClosure $cClosure
@@ -82,7 +83,16 @@ namespace eval osys::verilogInterface {
             }
             return [join $inst_list ",\n"]
    
-       }
+        }
+
+        public method setCommentHeader {str} {
+            commentHeader $str
+        }
+
+        public method writeCommentHeader {} {
+            return $commentHeader
+        }
+
     }
     
     itcl::class CommonVDesc {
@@ -229,6 +239,8 @@ namespace eval osys::verilogInterface {
             ## Verilog Comment Block
             odfi::common::println "" $resolve
             odfi::common::println "/*" $resolve
+            odfi::common::println [$module_interface writeCommentHeader] $resolve
+            odfi::common::println "" $resolve
             odfi::common::println "$cName ${cName}_I (" $resolve
             odfi::common::println [$module_interface getInstComment] $resolve
             odfi::common::println ");" $resolve
