@@ -354,6 +354,17 @@ namespace eval osys::rfg {
 
     }
 
+    itcl::class Aligner {
+        inherit Common
+        
+        odfi::common::classField public aligment 0
+
+        constructor {cName bits} {Common::constructor $cName} {
+            aligment [expr 2**$bits]
+        }
+
+    }
+
     ######################
     ## Group 
     ######################
@@ -466,25 +477,19 @@ namespace eval osys::rfg {
  
             ## Add to list
             lappend components $newGroup
-            ## calculate size
-            set size_int 0
             $newGroup parent $this                           
             ## Return
             return $newGroup 
 
         }
+
         public method aligner {bits} {
-            set size [expr "2**$bits"]
+            set newAligner [::new [namespace $name.aligner.#auto aligner $bits]
+            lappend components $newAligner
+            $aligner parent $this
+            return $newAligner
         } 
 
-        public method checker {bits closure} {
-            set start_address $size
-            odfi::closures::doClosure $closure 1
-            set end_address $size
-            if {[expr "$end_address-$start_address"]>[expr "2**$bits"]} {
-                error "The addresspan within the checker in $this is [expr "$end_address-$start_address"] but only [expr "2**$bits"] addresses are allowed!"
-            }  
-        }
         public method onEachComponent closure {
             foreach it $components {
                 odfi::closures::doClosure $closure 1

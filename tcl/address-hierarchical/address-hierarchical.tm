@@ -93,50 +93,42 @@ namespace eval osys::rfg::address::hierarchical {
 
 
         proc sizeOf operator {
+            
             odfi::closures::doClosure {
 
 
-            if {[string is integer "$operator"]} {
-                return $operator
-            } elseif {[$operator isa ::osys::rfg::Register]} {
+                if {[string is integer "$operator"]} {
+                    return $operator
+                } elseif {[$operator isa ::osys::rfg::Register]} {
+                    ## ToDo: Fix this it is not always 8
+                    return [expr $::osys::rfg::registerSize/8] 
 
+                } elseif {[$operator isa ::osys::rfg::Region] && ![$operator isa ::osys::rfg::Group]} {
 
+                    ## Non grouping regions must have size set
+                    ## puts "NGR: [$operator size]"
+                    if {[$operator hasAttribute software.osys::rfg::address_shift]} {
+                        ## ToDo: Fix this it is not always 8
+                        return [expr [$operator size]/8 << [$operator getAttributeValue software.osys::rfg::address_shift]]
+                    
+                    } else {
+                    
+                        ## ToDo: Fix this it is not always 8
+                        return [expr [$operator size]/8]
+                    
+                    }
 
-                return [expr $::osys::rfg::registerSize/8]
+                } elseif {[$operator isa ::osys::rfg::Region]} {
 
-            } elseif {[$operator isa ::osys::rfg::Region] && ![$operator isa ::osys::rfg::Group]} {
+                    ## Search in map (size already in bytes)
+                    set size [odfi::list::arrayGet $sizeMap $operator]
 
-                ## Non grouping regions must have size set
-                ## puts "NGR: [$operator size]"
-                if {[$operator hasAttribute software.osys::rfg::address_shift]} {
-                    ::puts "Address Shift [$operator getAttributeValue software.osys::rfg::address_shift]"
-                    return [expr [$operator size]/8 << [$operator getAttributeValue software.osys::rfg::address_shift]]
+                    return $size
+
                 } else {
-                    return [expr [$operator size]/8]
+
+                    return 0
                 }
-
-            } elseif {[$operator isa ::osys::rfg::Region]} {
-
-                ## Search in map (size already in bytes)
-                set size [odfi::list::arrayGet $sizeMap $operator]
-
-                return $size
-
-                ## Regions must have the size as attribute
-                #$operator onAttributes hardware.size {
-
-                #    return [expr int([$operator a])]
-
-               # } otherwise {
-
-        #
-
-                #}
-                ## Ramblocks can 
-
-            } else {
-                return 0
-            }
 
             }
 
@@ -208,20 +200,18 @@ namespace eval osys::rfg::address::hierarchical {
         ###################
         ## Go Map top down 
         ######################
-       
+        ::puts "Debug $map"
         odfi::list::arrayEach $map {
+            
             puts "Address Distribution on : $key"
-
             set start_address 0 
             set ad 0
-             set cumulated 0 
+            set cumulated 0 
+
             if {[$key hasAttribute software.osys::rfg::absolute_address]} {
                 set start_address [$key getAttributeValue software.osys::rfg::absolute_address]
                 set ad $start_address
-            } else {
-                ##[$key setA software.osys::rfg::absolute_address]
-
-            }
+            } 
 
             $key attributes software {
                 ::absolute_address $start_address
@@ -232,6 +222,8 @@ namespace eval osys::rfg::address::hierarchical {
             set blockAddress 0
             foreach it $value {
 
+                ::puts "Debug Addressing: [$it name]"
+                ::puts "current: $currentAddress"
                 if {$it==$key} {
                     continue
                 }
@@ -245,8 +237,6 @@ namespace eval osys::rfg::address::hierarchical {
                 ## The address of current element is:
                 ##   - The current address + the size of the block 
                 set blockAddress [expr (($currentAddress+$blockSize-1)/$blockSize)*$blockSize]
-                #set blockAddress [expr (($currentAddress+ ($blockSize-1))/$blockSize)*$blockSize]
-                #set blockAddress [expr (($currentAddress+ ($blockSize-1))/$blockSize)*$blockSize]
                
                 #puts "[$it name] Block address [format %0-20b $blockAddress], bs=$$blockSize Current Address = $currentAddress, bloc ksize -1:  [format %0-20b [expr $blockSize-1]]"
 
@@ -256,7 +246,6 @@ namespace eval osys::rfg::address::hierarchical {
                     ::relative_address $blockAddress
                     ::absolute_address [expr $baseAddress | $blockAddress]
                 }
-
                 ## The next current address is the block address + the size of this block
                 set currentAddress [expr $blockAddress+$blockSize]
                  
@@ -307,7 +296,7 @@ puts "Name,Address"
         }
 %>
 }]
-    odfi::files::writeToFile  $file $r
+    odfi::files::writeToFile  $file $rf
 
 
     }
@@ -333,7 +322,7 @@ puts "Name,Address"
 </table>
 }]
 
-        puts $r
+        puts $rf
         return
 
    
