@@ -199,7 +199,7 @@ namespace eval osys::rfg::generator::rfsbackport {
                 lappend attributes "rreinit=\"1\""
             }
 
-            $field onAttributes {hardware.osys::rfg::hardware_wen} {
+            if {![$field hasAttribute hardware.osys::rfg::no_wen]} {
                 lappend attributes "hw_wen=\"1\""
             }
 
@@ -207,7 +207,7 @@ namespace eval osys::rfg::generator::rfsbackport {
                 lappend attributes "sw_written=\"[$it getAttributeValue hardware.osys::rfg::software_written]\""
             }
 
-            $field onAttributes {hardware.osys::rfg::hardware_clear} {
+            $field onAttributes {hardware.osys::rfg::clear} {
                 lappend attributes "hw_clr=\"1\"" 
             }
 
@@ -215,11 +215,11 @@ namespace eval osys::rfg::generator::rfsbackport {
                 lappend attributes "sticky=\"1\""
             }
 
-            $field onAttributes {hardware.osys::rfg::software_write_xor} {
+            $field onAttributes {software.osys::rfg::write_xor} {
                 lappend attributes "sw_write_xor=\"1\""
             }
 
-            $field onAttributes {software.osys::rfg::software_write_clear} {
+            $field onAttributes {software.osys::rfg::write_clear} {
                 lappend attributes "sw_write_clr=\"1\""
             }
 

@@ -85,7 +85,6 @@ registerFile subRF {
                 software rw
                 hardware {
                     rw
-                    hardware_wen
                 }
             
             }

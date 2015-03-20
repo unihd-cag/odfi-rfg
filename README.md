@@ -18,7 +18,6 @@ In the first step a register file definition is needed. Here an example (Example
                     hardware {
                         rw
                         software_written 1
-                        hardware_wen
                     }
                 }
             }

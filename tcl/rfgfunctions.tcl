@@ -36,14 +36,14 @@ attributeFunction ::counter
 attributeFunction ::rreinit
 attributeFunction ::rreinit_source
 attributeFunction ::software_written
-attributeFunction ::hardware_wen
-attributeFunction ::hardware_no_wen
+attributeFunction ::wen
+attributeFunction ::no_wen
 attributeFunction ::sticky
-attributeFunction ::software_write_xor
+attributeFunction ::write_xor
 attributeFunction ::external
 attributeFunction ::internal
-attributeFunction ::hardware_clear
-attributeFunction ::software_write_clear
+attributeFunction ::clear
+attributeFunction ::write_clear
 attributeFunction ::shared_bus
 
 ## Addressing

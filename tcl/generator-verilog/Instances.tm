@@ -253,7 +253,7 @@ odfi::closures::oproc writeRFModule {registerfile} {
 							lappend signalList "	    .[getName $it]_next([getName $it]_next)"
 							lappend signalList "	    .[getName $it]([getName $it])"
 							
-							$it onAttributes {hardware.osys::rfg::hardware_wen} {
+							if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
 								lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
 							}
 						}
@@ -261,7 +261,7 @@ odfi::closures::oproc writeRFModule {registerfile} {
 						$it onAttributes {hardware.osys::rfg::wo} {
 							lappend signalList "	    .[getName $it]_next([getName $it]_next)"
 							
-							$it onAttributes {hardware.osys::rfg::hardware_wen} {
+							if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
 								lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
 							}
 						}
@@ -273,6 +273,10 @@ odfi::closures::oproc writeRFModule {registerfile} {
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							lappend signalList "	    .[getName $it]_written([getName $it]_written)"
 						}
+
+                        $it onAttributes {hardware.osys::rfg::clear} {
+                            lappend signalList "        .[getName $it]_clear([getName $it]_clear)"
+                        }
 
 					}
 

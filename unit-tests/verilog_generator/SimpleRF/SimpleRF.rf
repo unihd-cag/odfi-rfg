@@ -36,7 +36,7 @@ osys::rfg::registerFile SimpleRF {
                 software ro
                 hardware {
                     wo
-                    hardware_no_wen
+                    no_wen
                 }
             
             }
@@ -58,7 +58,7 @@ osys::rfg::registerFile SimpleRF {
                 software rw
                 hardware {
                     rw
-                    hardware_no_wen
+                    no_wen
                 }
             
             }
@@ -70,7 +70,7 @@ osys::rfg::registerFile SimpleRF {
                 hardware {
                     rw
                     software_written 1
-                    hardware_no_wen
+                    no_wen
                 }
             
             }
@@ -82,7 +82,7 @@ osys::rfg::registerFile SimpleRF {
                 hardware {
                     rw
                     software_written 2
-                    hardware_no_wen
+                    no_wen
                 }
             
             }
@@ -93,7 +93,6 @@ osys::rfg::registerFile SimpleRF {
                 software rw
                 hardware {
                     rw
-                    hardware_wen
                 }
             
             }
@@ -102,7 +101,6 @@ osys::rfg::registerFile SimpleRF {
            #      width 8
            #      software rw
            #      hardware {
-           #          hardware_clear
            #      }
             
            #  }
@@ -111,7 +109,6 @@ osys::rfg::registerFile SimpleRF {
            #      width 8
            #      software {
            #             rw
-           #             software_write_clear
            #      }
            #      hardware rw
            #  }

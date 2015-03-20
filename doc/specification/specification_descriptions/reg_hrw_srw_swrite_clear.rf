@@ -5,7 +5,7 @@ registerFile reg_hrw_srw_swrite_clear {
             reset 32'h0
             software {
                 rw
-                software_write_clear
+                write_clear
             }
             hardware rw
         }

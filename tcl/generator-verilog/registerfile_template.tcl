@@ -73,7 +73,7 @@ odfi::closures::oproc writeRegisterInterface {it} {
                 $it onWrite {hardware} {
                     input [getName $it]_next wire [$it width]
                     
-                    if {![$it hasAttribute hardware.osys::rfg::hardware_no_wen]} {
+                    if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
                         input [getName $it]_wen wire    
                     }
 
@@ -83,7 +83,7 @@ odfi::closures::oproc writeRegisterInterface {it} {
                     output [getName $it]_written [find_internalRF $it $rf]
                 }
 
-                $it onAttributes {hardware.osys::rfg::hardware_clear} {
+                $it onAttributes {hardware.osys::rfg::clear} {
                     input [getName $it]_clear wire
                 }
             
@@ -288,11 +288,11 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
             vputs "[getName $it]_load_enable <= 1'b1"
             vputs "[getName $it]_load_value <= write_data\[[expr [$it width] + $offset -1]:$offset\]"
         } otherwise {
-            $it onAttributes {software.osys::rfg::software_clear} {
+            $it onAttributes {software.osys::rfg::write_clear} {
                 vputs "[getName $it] <= [$it width]'b0"
             } otherwise {
             
-                $it onAttributes {software.osys::rfg::software_write_xor} {
+                $it onAttributes {software.osys::rfg::write_xor} {
                     vputs "[getName $it] <= write_data\[[expr [$it width] + $offset -1]:$offset\] ^ [getName $it]"
                 } otherwise {
                     vputs "[getName $it] <= write_data\[[expr [$it width] + $offset - 1]:$offset\]"
@@ -300,7 +300,7 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
 
             }
     
-            $it onAttributes {software.osys::rfg::software_written} {
+            $it onAttributes {hardware.osys::rfg::software_written} {
                 vputs "[getName $it]_written <= 1'b1"
             }
         }
@@ -350,7 +350,7 @@ odfi::closures::oproc writeFieldHardWrite {object} {
 
         }
     } otherwise {
-        $object onAttributes {hardware.osys::rfg::hardware_clear} {
+        $object onAttributes {hardware.osys::rfg::clear} {
             if {$condition == "ifcond"} {
                 vif "[getName $object]_clear" {
                     vputs "[getName $object] <= [$object width]'b0"
@@ -364,7 +364,7 @@ odfi::closures::oproc writeFieldHardWrite {object} {
         }
 
         if {$condition == "ifcond"} {
-            $object onAttributes {hardware.osys::rfg::hardware_no_wen} { 
+            $object onAttributes {hardware.osys::rfg::no_wen} { 
                 writeHardFieldFunction $object      
             } otherwise {
                     vif "[getName $object]_wen" {
@@ -372,7 +372,7 @@ odfi::closures::oproc writeFieldHardWrite {object} {
                     }
             }
         } else {
-            $object onAttributes {hardware.osys::rfg::hardware_no_wen} {
+            $object onAttributes {hardware.osys::rfg::no_wen} {
                 velse {
                     writeHardFieldFunction $object
                 }
@@ -419,7 +419,7 @@ odfi::closures::oproc writeRegisterReset {object} {
                         if {[$it name] != "Reserved"} {
                             vputs "[getName $it] <= [$it reset]"
                         }
-                        $it onAttributes {software.osys::rfg::software_written} {
+                        $it onAttributes {hardware.osys::rfg::software_written} {
                             vputs "[getName $it]_written <= 1'b0"
                         }
                     }

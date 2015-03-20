@@ -1,20 +1,48 @@
 registerFile Example_RF {
 
-    register test_0 {
-        field test_field {
-            width 32
-            reset 32'h0
-            software rw
-            hardware rw
+    ::repeat 2 {
+    register test_0_$i {
+            field test_field {
+                width 32
+                software rw
+                hardware {
+                    rw
+                    counter
+                }
+            }
+            reserved 8
+            field test_field2 {
+                width 16
+                software rw
+                hardware wo
+            }
+            reserved 4
+            field test_field3 {
+                width 4
+                software wo
+                hardware rw
+            }
         }
+    }
+
+    ramBlock rb {
+        width 32
+        depth 128
+        software rw
+        hardware rw
     }
 
     register test_1 {
         field test_field {
             width 32
-            reset 32'h0
-            software ro
-            hardware rw
+            software {
+                ro
+            }
+        
+            hardware {
+                rw
+                software_written
+            }
         }
     }
 
@@ -25,6 +53,15 @@ registerFile Example_RF {
             software rw
             hardware ro
         }
+        field test_2_field {
+            width 32
+            reset 32'h0
+            software {
+                rw
+                write_xor
+            }
+            hardware rw
+        }
     }
 
     register test_3 {
@@ -34,6 +71,10 @@ registerFile Example_RF {
             software wo
             hardware rw
         }
+    }
+
+    register rreinit_source_reg {
+        hardware rreinit_source
     }
 
     register test_3s {
@@ -54,7 +95,14 @@ registerFile Example_RF {
             hardware ro
         }
     }
-
+    
+    ramBlock rb1 {
+        width 32
+        depth 128
+        software rw
+        hardware rw
+    }
+#
 #    register test_4 {
 #        field test_field {
 #            width 32
@@ -130,7 +178,6 @@ registerFile Example_RF {
 #            software rw
 #            hardware {
 #                rw
-#                hardware_wen
 #            }
 #        }
 #    }
@@ -178,7 +225,7 @@ registerFile Example_RF {
 #            software rw
 #            hardware {
 #                rw
-#                software_write_xor
+#                write_xor
 #            }
 #        }
 #    }
@@ -190,7 +237,6 @@ registerFile Example_RF {
 #            software rw
 #            hardware {
 #                rw
-#                hardware_clear
 #            }
 #        }
 #    }
@@ -201,7 +247,7 @@ registerFile Example_RF {
 #            width 32
 #            reset 32'h0
 #            software {
-#                software_write_clear
+#                write_clear
 #                rw
 #            }
 #            hardware rw
@@ -244,7 +290,6 @@ registerFile Example_RF {
 #                hardware {
 #                    rw
 #                    software_written 1
-#                    hardware_wen
 #                }
 #            }
 #        }

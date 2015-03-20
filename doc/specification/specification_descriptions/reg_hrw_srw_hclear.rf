@@ -6,7 +6,7 @@ registerFile reg_hrw_srw_hclear {
             software rw
             hardware {
                 rw
-                hardware_clear
+                clear
             }
         }
     }

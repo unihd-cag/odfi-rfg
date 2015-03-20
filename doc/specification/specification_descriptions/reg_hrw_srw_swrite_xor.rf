@@ -6,7 +6,7 @@ registerFile reg_hrw_srw_swrite_xor {
             software rw
             hardware {
                 rw
-                software_write_xor
+                write_xor
             }
         }
     }

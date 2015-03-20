@@ -15,7 +15,7 @@ registerFile hierarchicalRF {
                 width 64
                 hardware {
                     rw
-                    hardware_no_wen
+                    no_wen
                 }
                 software rw
             }
@@ -28,7 +28,7 @@ registerFile hierarchicalRF {
                 width 64
                 hardware {
                     rw
-                    hardware_no_wen
+                    no_wen
                 }
                 software rw
             }
