@@ -38,14 +38,12 @@ namespace eval osys::generator {
 
             name $cName
             odfi::closures::doClosure $cClosure
-            puts $attributes
             generate
         
         }
 
         public method generate {} {
-            
-            [osys::rfg::getGenerator $name $::osys::generator::registerFile] produce $destinationPath          
+            [osys::rfg::getGenerator $name $::osys::generator::registerFile] produce $destinationPath $this     
         
         }   
 

@@ -163,6 +163,28 @@ namespace eval osys::rfg {
 
         }
 
+        public method onRead {group closure1 {keyword ""} {closure2 ""}} {
+    
+            if {[hasAttribute ${group}.osys::rfg::ro] || [hasAttribute ${group}.osys::rfg::rw]} {
+                odfi::closures::doClosure $closure1 1
+            } else {
+
+                if {$closure2 != ""} {
+                    odfi::closures::doClosure $closure2 1
+                }
+            }
+        }
+
+        public method onWrite {group closure1 {keyword ""} {closure2 ""}} {
+            if {[hasAttribute ${group}.osys::rfg::wo] || [hasAttribute ${group}.osys::rfg::rw]} {
+                odfi::closures::doClosure $closure1 1
+            } else {
+                if {$closure2 != ""} {
+                    odfi::closures::doClosure $closure2 1
+                }
+            }
+        }
+
         public method onAttributes {attributeList closure1 {keyword ""} {closure2 ""}} {
             set scoreList {}
 
@@ -654,8 +676,11 @@ namespace eval osys::rfg {
         public method field {fName closure} {
 
             ## Create 
-            set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
-
+            if {$fName == "Reserved"} {
+                set newField [::new [namespace parent]::Field $this.$fName.#auto $fName $closure]
+            } else {
+                set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
+            }
 
             ##puts "Created field: $newField"
 
@@ -673,13 +698,15 @@ namespace eval osys::rfg {
 
         public method reserved {reserved_width} {
 
-            field Reserved {width $reserved_width}
+            field Reserved {
+                name "Reserved"    
+                width $reserved_width
+            }
         }
 
         public method onEachField closure {
 
             odfi::list::each $fields {
-
                 odfi::closures::doClosure $closure 1
 
 

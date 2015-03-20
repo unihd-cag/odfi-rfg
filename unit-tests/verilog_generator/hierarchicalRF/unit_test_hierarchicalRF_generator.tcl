@@ -1,19 +1,15 @@
-source ../../../tcl/rfg.tm
-source ../../../tcl/generator-verilog/VerilogGenerator.tm
-source ../../../tcl/address-hierarchical/address-hierarchical.tm
+package require osys::rfg 1.0.0
+package require osys::generator 1.0.0
 
+readRF hierarchicalRF.rf
 
-catch {namespace inscope osys::rfg {source hierarchicalRF.rf}} result
-osys::rfg::address::hierarchical::calculate $result
-	
-set veriloggenerator [::new osys::rfg::generator::verilog::Verilog #auto $result]
-set destinationPath "compare_data/"
-$veriloggenerator produce $destinationPath
+generator verilog {
+    destinationPath "compare_data/"
+}
 
 catch {exec sh "iverilog_run.sh"} result
 if {$result != "VCD info: dumpfile hierarchicalRF.vcd opened for output."} {
- 	error "Test failed result of the iverilog_run was:\n $result"
+	error "Test failed result of the iverilog_run was:\n $result"
 } else {
- 	puts "Test sucessfull..."
+	puts "Test sucessfull..."
 }
-

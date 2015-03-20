@@ -20,7 +20,7 @@ package require Itcl 3.4
 package require odfi::common
 package require odfi::files 1.0.0
 package require odfi::list 2.0.0
-
+source [file dirname [file normalize [info script]]]/VerilogInterface.tm
 namespace eval osys::rfg::generator::verilog {
 
     variable location [file dirname [file normalize [info script]]]
@@ -36,10 +36,10 @@ namespace eval osys::rfg::generator::verilog {
             set registerFile $cRegisterFile
         }
 
-        public method produce destinationPath {
-            
+        public method produce {destinationPath {generator}} {
+            set ::dP $destinationPath
             file mkdir $destinationPath
-
+            set ::options $generator
             set registerfiles $registerFile
            	## Read and parse Verilog Template
 
@@ -50,12 +50,12 @@ namespace eval osys::rfg::generator::verilog {
                 return true
             }
             
-            foreach rf $registerfiles {
-                set registerFile $rf
-                ::puts "VerilogGenerator processing: $rf > ${destinationPath}[$registerFile name].v"
-                    
-                set verilog [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::verilog::location/registerfile_template.v.tcl]
-                odfi::files::writeToFile ${destinationPath}[$registerFile name].v $verilog
+            foreach ::rf $registerfiles {
+                ::puts "VerilogGenerator processing: $::rf > ${destinationPath}[$::rf name].v"
+                namespace eval :: {
+                    catch {source ${::osys::rfg::generator::verilog::location}/registerfile_template.tcl} result
+                    $result generate ${dP}[$rf name].v
+                }
             }
 
         }

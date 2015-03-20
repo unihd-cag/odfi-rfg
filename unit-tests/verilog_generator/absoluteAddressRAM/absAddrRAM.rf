@@ -14,7 +14,6 @@ osys::rfg::registerFile absAddrRAM {
     #             hardware {
     #                 rw
     #                 software_written 1
-    #                 hardware_wen
     #             } 
     #         }
     #     }
@@ -39,7 +38,6 @@ osys::rfg::registerFile absAddrRAM {
     #         hardware {
     #             rw
     #             software_written 1
-    #             hardware_wen
     #         } 
     #     }
     # }

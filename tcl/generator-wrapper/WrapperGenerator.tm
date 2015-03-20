@@ -36,7 +36,7 @@ namespace eval osys::rfg::generator::wrapper {
             set registerFile $cRegisterFile
         }
 
-        public method produce destinationPath {
+        public method produce {destinationPath {generator ""}} {
             
             file mkdir $destinationPath
                

@@ -1,0 +1,13 @@
+registerFile reg_hrw_srw_sticky {
+    register test {
+        field test_field {
+            width 32
+            reset 32'h0
+            software rw
+            hardware {
+                rw
+                sticky
+            }
+        }
+    }
+}

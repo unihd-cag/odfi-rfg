@@ -1,19 +1,11 @@
-source ../../../tcl/rfg.tm
-source ../../../tcl/generator-verilog/VerilogGenerator.tm
-source ../../../tcl/address-hierarchical/address-hierarchical.tm
+package require osys::rfg 1.0.0
+package require osys::generator 1.0.0
 
-catch {source ramRF.rf} result
+readRF ramRF.rf
 
-puts $result
-
-osys::rfg::address::hierarchical::calculate $result
-##osys::rfg::address::hierarchical::printTable $result
-
-set veriloggenerator [::new osys::rfg::generator::verilog::Verilog #auto $result]
-
-set destinationPath "compare_data/"
-
-$veriloggenerator produce $destinationPath
+generator verilog {
+    destinationPath "compare_data/"
+}
 
 catch {exec sh "iverilog_run.sh"} result
 if {$result != "VCD info: dumpfile ramRF.vcd opened for output."} {

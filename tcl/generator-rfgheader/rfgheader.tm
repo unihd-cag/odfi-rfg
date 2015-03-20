@@ -87,7 +87,7 @@ namespace eval osys::rfg::generator::rfgheader {
             return [ld [getRFsize $registerfile]]
         }
 
-        public method produce {destinationPath} {
+        public method produce {destinationPath {generator ""}} {
 
             file mkdir $destinationPath 
             puts "Rfgheader processing $registerFile > ${destinationPath}[$registerFile name].h"

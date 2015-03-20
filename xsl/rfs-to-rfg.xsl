@@ -144,8 +144,8 @@ registerFile <xsl:value-of select="@name"/> {
         <xsl:text>
         </xsl:text>
     </xsl:if>
-    <xsl:if test="@hw_wen">
-        <xsl:value-of select="$hier-level-tab-more"/>hardware_wen
+    <xsl:if test="not(@hw_wen)">
+        <xsl:value-of select="$hier-level-tab-more"/>no_wen
         <xsl:text>
         </xsl:text>  
     </xsl:if>
@@ -292,7 +292,7 @@ registerFile <xsl:value-of select="@name"/> {
 <!-- Special Attributes -->
     <!-- ################### -->
     <xsl:if test="@sw_write_clr">
-        <xsl:value-of select="$hier-level-tab-more"/>    software_write_clear
+        <xsl:value-of select="$hier-level-tab-more"/>    write_clear
     </xsl:if>
     <xsl:value-of select="$hier-level-tab-more"/>}    
 
@@ -303,8 +303,12 @@ registerFile <xsl:value-of select="@name"/> {
 
     <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
     <xsl:text>
-</xsl:text>
-    
+    </xsl:text>
+    <xsl:if test="@sw_write_xor">
+        <xsl:value-of select="$hier-level-tab-more"/>write_xor
+    </xsl:if> 
+    <xsl:text>
+    </xsl:text>   
     <!-- Special Attributes -->
     <!-- ################### -->
     <xsl:if test="@counter">
@@ -318,23 +322,18 @@ registerFile <xsl:value-of select="@name"/> {
         <xsl:text>
         </xsl:text>
     </xsl:if>
-    <xsl:if test="@hw_wen">
-        <xsl:value-of select="$hier-level-tab-more"/>hardware_wen  
+    <xsl:if test="not(@hw_wen)">
+        <xsl:value-of select="$hier-level-tab-more"/>no_wen
     </xsl:if>    
     <xsl:text>
 </xsl:text>
     <xsl:if test="@hw_clr">
-        <xsl:value-of select="$hier-level-tab-more"/>hardware_clear
+        <xsl:value-of select="$hier-level-tab-more"/>clear
     </xsl:if>    
     <xsl:text>
 </xsl:text>
     <xsl:if test="@sticky">
         <xsl:value-of select="$hier-level-tab-more"/>sticky
-    </xsl:if>    
-    <xsl:text>
-</xsl:text>
-    <xsl:if test="@sw_write_xor">
-        <xsl:value-of select="$hier-level-tab-more"/>software_write_xor
     </xsl:if>    
     <xsl:text>
 </xsl:text>

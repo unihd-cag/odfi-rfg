@@ -47,7 +47,7 @@ namespace eval osys::rfg::generator::htmlbrowser {
 
         }
 
-        public method produce destinationPath {
+        public method produce {destinationPath {generator ""}} {
             
             file mkdir $destinationPath
             ::puts "Htmlbrowser processing $registerFile > ${destinationPath}[$registerFile name].html"
@@ -56,18 +56,7 @@ namespace eval osys::rfg::generator::htmlbrowser {
             copyDependenciesTo $destinationPath
 
         }
-
-#           public method produce args {
-#   
-#   
-#               ## Create Special Stream 
-#               #set out [odfi::common::newStringChannel]
-#   
-#               odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html
-#   
-#           }
-
-
+    
     }
 
 }

@@ -5,7 +5,6 @@ osys::rfg::registerFile SingleRF {
    			width 64
    			hardware {
    				rw
-   				hardware_wen
    			}
   			software rw
    		}

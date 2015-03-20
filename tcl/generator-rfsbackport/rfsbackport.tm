@@ -47,7 +47,7 @@ namespace eval osys::rfg::generator::rfsbackport {
 #            odfi::files::writeToFile $targetFile $res 
 #        }
 
-        public method produce {destinationPath} {
+        public method produce {destinationPath {generator ""}} {
 
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
@@ -95,7 +95,7 @@ namespace eval osys::rfg::generator::rfsbackport {
                 odfi::common::println "<regfile>" $out
             } 
 
-            odfi::common::println "<regroot _baseAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" _absoluteAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\" $name desc=\"[$group description]\">"  $out
+            odfi::common::println "<regroot $name desc=\"[$group description]\">"  $out
             
             odfi::common::printlnIndent
             
@@ -199,7 +199,7 @@ namespace eval osys::rfg::generator::rfsbackport {
                 lappend attributes "rreinit=\"1\""
             }
 
-            $field onAttributes {hardware.osys::rfg::hardware_wen} {
+            if {![$field hasAttribute hardware.osys::rfg::no_wen]} {
                 lappend attributes "hw_wen=\"1\""
             }
 
@@ -207,7 +207,7 @@ namespace eval osys::rfg::generator::rfsbackport {
                 lappend attributes "sw_written=\"[$it getAttributeValue hardware.osys::rfg::software_written]\""
             }
 
-            $field onAttributes {hardware.osys::rfg::hardware_clear} {
+            $field onAttributes {hardware.osys::rfg::clear} {
                 lappend attributes "hw_clr=\"1\"" 
             }
 
@@ -215,11 +215,11 @@ namespace eval osys::rfg::generator::rfsbackport {
                 lappend attributes "sticky=\"1\""
             }
 
-            $field onAttributes {hardware.osys::rfg::software_write_xor} {
+            $field onAttributes {software.osys::rfg::write_xor} {
                 lappend attributes "sw_write_xor=\"1\""
             }
 
-            $field onAttributes {software.osys::rfg::software_write_clear} {
+            $field onAttributes {software.osys::rfg::write_clear} {
                 lappend attributes "sw_write_clr=\"1\""
             }
 
