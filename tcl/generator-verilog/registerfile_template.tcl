@@ -813,8 +813,8 @@ odfi::closures::oproc writeInstances {object} {
 odfi::closures::oproc writeAddrComment {object} {
     set str {}
     $object walkDepthFirst {
-        if {![$it isa osys::rfg::Group] || [$it isa osys::rfg::RegisterFile]} {
-            lappend str "[getName $it]: relative Address([getAddrBits $object]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
+        if {(![$it isa osys::rfg::Group] && ![$it isa osys::rfg::Aligner]) || [$it isa osys::rfg::RegisterFile]} {
+            lappend str "[getName $it]: relative Address([expr [getAddrBits $object] - 1]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
         }
         if {[$it isa osys::rfg::RegisterFile]} {
             return false

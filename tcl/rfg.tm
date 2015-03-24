@@ -484,9 +484,9 @@ namespace eval osys::rfg {
         }
 
         public method aligner {bits} {
-            set newAligner [::new [namespace $name.aligner.#auto aligner $bits]
+            set newAligner [::new [namespace parent]::Aligner ${this}.#auto ${this}.#auto $bits]
             lappend components $newAligner
-            $aligner parent $this
+            $newAligner parent $this
             return $newAligner
         } 
 

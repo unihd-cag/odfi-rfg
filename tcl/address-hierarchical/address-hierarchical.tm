@@ -224,30 +224,37 @@ namespace eval osys::rfg::address::hierarchical {
 
                 ::puts "Debug Addressing: [$it name]"
                 ::puts "current: $currentAddress"
+                ::puts "BaseAddress: $baseAddress"
                 if {$it==$key} {
                     continue
                 }
                 
                 ## Get Size of block, rounded up to next power of two size
                 set itSize [sizeOf $it]
-                set num_addr_bits [expr int(ceil(log($itSize)/log(2)))]
-                set blockSize [expr 2**$num_addr_bits]
+                if {$itSize == 0} {
+                    ::puts "Current position aligner: $currentAddress"
+                    ::puts "Aligment: [$it aligment]"
+                    set blockAddress [$it aligment]
+                    set currentAddress $blockAddress
+                } else {
+                    set num_addr_bits [expr int(ceil(log($itSize)/log(2)))]
+                    set blockSize [expr 2**$num_addr_bits] 
+                    ## The address of current element is:
+                    ##   - The current address + the size of the block 
+                    set blockAddress [expr (($currentAddress+$blockSize-1)/$blockSize)*$blockSize]
+                    set currentAddress [expr $blockAddress+$blockSize]
+                }
 
-
-                ## The address of current element is:
-                ##   - The current address + the size of the block 
-                set blockAddress [expr (($currentAddress+$blockSize-1)/$blockSize)*$blockSize]
-               
                 #puts "[$it name] Block address [format %0-20b $blockAddress], bs=$$blockSize Current Address = $currentAddress, bloc ksize -1:  [format %0-20b [expr $blockSize-1]]"
 
                 ## Address assign 
-                set bla $it
+                ##set bla $it
                 $it attributes software {
                     ::relative_address $blockAddress
                     ::absolute_address [expr $baseAddress | $blockAddress]
                 }
                 ## The next current address is the block address + the size of this block
-                set currentAddress [expr $blockAddress+$blockSize]
+                ## set currentAddress [expr $blockAddress+$blockSize]
                  
 
             }

@@ -57,7 +57,8 @@ namespace eval osys::rfg::generator::xmlgenerator {
             $registerFile onEachComponent {
                 if {[$it isa osys::rfg::Group]} {
                     writeGroup $out $it                
-                } else {
+                }
+                if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
 
                     writeRegister $out $it
                 }
@@ -88,7 +89,8 @@ namespace eval osys::rfg::generator::xmlgenerator {
             $group onEachComponent {
                 if {[$it isa osys::rfg::Group]} {
                     writeGroup $out $it                
-                } else {
+                }
+                if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
                     writeRegister $out $it
                 }
             } 
