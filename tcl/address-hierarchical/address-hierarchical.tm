@@ -96,7 +96,6 @@ namespace eval osys::rfg::address::hierarchical {
             
             odfi::closures::doClosure {
 
-
                 if {[string is integer "$operator"]} {
                     return $operator
                 } elseif {[$operator isa ::osys::rfg::Register]} {
@@ -145,8 +144,16 @@ namespace eval osys::rfg::address::hierarchical {
                 switch -exact -- $right {
                     "{}" -
                     "" {
-
-                      set ls [sizeOf $left]
+                        if {![string is integer $left]} {
+                            if {[$left isa osys::rfg::Aligner]} {
+                                set ls [$left aligment]
+                            } else {
+                                set ls [sizeOf $left]
+                            }
+                        } else {
+                            set ls [sizeOf $left]
+                        }
+                  
                       $left attributes software {
                         ::size  $ls
                       }
@@ -154,14 +161,28 @@ namespace eval osys::rfg::address::hierarchical {
                     }
                     default {
 
-                        ## Right Element size 
-                        set rightSize [sizeOf $right]
+                        ## Right Element size
+                        if {[$right isa osys::rfg::Aligner]} {
+                            set rightSize [expr int([sizeOf $left]/[$right aligment]+1)*[$right aligment]]
+                            ::puts "Aligner found..."
+                        } else {
+                            set rightSize [sizeOf $right]
+                        }
                         $right attributes software {
                             ::size  $rightSize
                         }
                         
                         ## Left size 
-                        set ls [sizeOf $left]
+                         if {![string is integer $left]} {
+                            if {[$left isa osys::rfg::Aligner]} {
+                                set ls [$left aligment]
+                            } else {
+                                set ls [sizeOf $left]
+                            }
+                        } else {
+                            set ls [sizeOf $left]
+                        }
+                      
                         if {![string is integer $left]} {
                             $left attributes software {
                                 ::size  $ls
@@ -169,7 +190,8 @@ namespace eval osys::rfg::address::hierarchical {
                         }
                         
 
-                        return [expr [sizeOf $left] + $rightSize ]
+                        ##return [expr [sizeOf $left] + $rightSize ]
+                        return [expr $ls + $rightSize]
                     }
                 }
 
@@ -232,17 +254,28 @@ namespace eval osys::rfg::address::hierarchical {
                 ## Get Size of block, rounded up to next power of two size
                 set itSize [sizeOf $it]
                 if {$itSize == 0} {
+                
                     ::puts "Current position aligner: $currentAddress"
                     ::puts "Aligment: [$it aligment]"
-                    set blockAddress [$it aligment]
+                    if {$currentAddress == 0} {
+                        set blockAddress [$it aligment]
+                    } else {
+                        ::puts "Else"
+                        ::puts "[expr int($currentAddress/[$it aligment]+1)]"
+                        set blockAddress [expr int($currentAddress/[$it aligment]+1)*[$it aligment]]
+                    }
+                    ::puts "Block Address Aligner $blockAddress"
                     set currentAddress $blockAddress
+                
                 } else {
+                
                     set num_addr_bits [expr int(ceil(log($itSize)/log(2)))]
                     set blockSize [expr 2**$num_addr_bits] 
                     ## The address of current element is:
                     ##   - The current address + the size of the block 
                     set blockAddress [expr (($currentAddress+$blockSize-1)/$blockSize)*$blockSize]
                     set currentAddress [expr $blockAddress+$blockSize]
+                
                 }
 
                 #puts "[$it name] Block address [format %0-20b $blockAddress], bs=$$blockSize Current Address = $currentAddress, bloc ksize -1:  [format %0-20b [expr $blockSize-1]]"

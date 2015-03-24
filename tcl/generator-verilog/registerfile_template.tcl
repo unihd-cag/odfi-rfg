@@ -595,7 +595,7 @@ odfi::closures::oproc writeRFBlock {object} {
         velse {
             set upper [expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]
             set lower [expr [getRFAddrWidth $object] + [getRFAddrOffset $object]]
-            set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> [getRFAddrOffset $object]]
+            set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> ([getRFAddrOffset $object] + [getRFAddrWidth $object])]
             set care [format %x $care]
             set care_width [expr [getRFAddrWidth $rf] - [getRFAddrWidth $object]]
             vif "address\[$upper:$lower\] == $care_width'h$care" {
