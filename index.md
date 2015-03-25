@@ -21,7 +21,6 @@ For example a register file definition with the RFG (Example_RF.rf):
                     hardware {
                         rw
                         software_written 1
-                        hardware_wen
                     }
                 }
             }
