@@ -595,7 +595,7 @@ odfi::closures::oproc writeRFBlock {object} {
         velse {
             set upper [expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]
             set lower [expr [getRFAddrWidth $object] + [getRFAddrOffset $object]]
-            set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> [getRFAddrOffset $object]]
+            set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> ([getRFAddrOffset $object] + [getRFAddrWidth $object])]
             set care [format %x $care]
             set care_width [expr [getRFAddrWidth $rf] - [getRFAddrWidth $object]]
             vif "address\[$upper:$lower\] == $care_width'h$care" {
@@ -813,8 +813,8 @@ odfi::closures::oproc writeInstances {object} {
 odfi::closures::oproc writeAddrComment {object} {
     set str {}
     $object walkDepthFirst {
-        if {![$it isa osys::rfg::Group] || [$it isa osys::rfg::RegisterFile]} {
-            lappend str "[getName $it]: relative Address([getAddrBits $object]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
+        if {(![$it isa osys::rfg::Group] && ![$it isa osys::rfg::Aligner]) || [$it isa osys::rfg::RegisterFile]} {
+            lappend str "[getName $it]: relative Address([expr [getAddrBits $object] - 1]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
         }
         if {[$it isa osys::rfg::RegisterFile]} {
             return false

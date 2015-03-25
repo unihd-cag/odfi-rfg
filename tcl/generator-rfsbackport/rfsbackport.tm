@@ -61,27 +61,6 @@ namespace eval osys::rfg::generator::rfsbackport {
             file mkdir $destinationPath
             ::puts "Rfsbackport processing ${destinationPath}[$registerFile name].anot.xml"
             odfi::files::writeToFile ${destinationPath}[$registerFile name].anot.xml $res
-
-#            odfi::common::println "<regroot name=\"[$registerFile name]\" >"  $out 
-#            odfi::common::printlnIndent
-#            writeDescription $out $registerFile
-#
-#            ## Write Components
-#            $registerFile onEachComponent {
-#                if {[$it isa osys::rfg::Group]} {
-#                    writeGroup $out $it                
-#                } else {
-#                    writeRegister $out $it
-#                }
-#            }
-# 
-#            odfi::common::printlnOutdent
-#            odfi::common::println "</regroot>"  $out 
-#
-#            ## Read  form special stream and return 
-#            flush $out
-#            set res [read $out]
-#            close $out
                                 
         }
 
@@ -105,7 +84,8 @@ namespace eval osys::rfg::generator::rfsbackport {
                 #puts "Component: $it"
                 if {[$it isa osys::rfg::Group]} {
                     writeGroup $out $it                
-                } else {
+                }
+                if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
                     writeRegister $out $it
                 }
             } 
