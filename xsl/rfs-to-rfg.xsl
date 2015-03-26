@@ -109,7 +109,7 @@ registerFile <xsl:value-of select="@name"/> {
 
 <!-- depth --> 
 <xsl:if test="@addrsize">
-<xsl:value-of select="$hier-level-tab"/>    depth [expr pow(2,<xsl:value-of select="@addrsize"/>)]
+<xsl:value-of select="$hier-level-tab"/>    depth [expr int(pow(2,<xsl:value-of select="@addrsize"/>))]
 <xsl:text>
     
 </xsl:text>   
@@ -134,32 +134,36 @@ registerFile <xsl:value-of select="@name"/> {
     <!-- Special Attributes -->
     <!-- ################### -->
     <xsl:if test="@counter">
-        <xsl:value-of select="$hier-level-tab-more"/>    counter
+        <xsl:value-of select="$hier-level-tab-more"/>   counter
     </xsl:if>
+    <xsl:text>
+    </xsl:text>  
+    <xsl:if test="@counter='2'">
+        <xsl:value-of select="$hier-level-tab-more"/>   edge_trigger
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>  
     <xsl:if test="@rreinit">
-        <xsl:value-of select="$hier-level-tab-more"/>    rreinit
+        <xsl:value-of select="$hier-level-tab-more"/>   rreinit
     </xsl:if>
+    <xsl:text>
+    </xsl:text>  
     <xsl:if test="@sw_written">
-        <xsl:value-of select="$hier-level-tab-more"/>    software_written <xsl:value-of select="@sw_written"></xsl:value-of>
-        <xsl:text>
-        </xsl:text>
+        <xsl:value-of select="$hier-level-tab-more"/>   software_written <xsl:value-of select="@sw_written"></xsl:value-of>
     </xsl:if>
+    <xsl:text>
+    </xsl:text> 
     <xsl:if test="not(@hw_wen) and not(@counter)">
-        <xsl:value-of select="$hier-level-tab-more"/>no_wen
-        <xsl:text>
-        </xsl:text>  
+        <xsl:value-of select="$hier-level-tab-more"/>   no_wen
     </xsl:if>
+    <xsl:text>
+    </xsl:text> 
     <xsl:if test="@external">
-        <xsl:value-of select="$hier-level-tab-more"/>external
-        <xsl:text>
-        </xsl:text>  
+        <xsl:value-of select="$hier-level-tab-more"/>   external
     </xsl:if>     
     <xsl:text>
-</xsl:text>
+    </xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/>}
-
-<xsl:text>
-</xsl:text>
     }
 
 <xsl:apply-templates />
@@ -272,80 +276,82 @@ registerFile <xsl:value-of select="@name"/> {
         <xsl:when test="fn:matches(@width,'^[A-Z_]+')">width        $<xsl:value-of select="@width"/></xsl:when>
         <xsl:otherwise>width        <xsl:value-of select="@width"/></xsl:otherwise>
     </xsl:choose>
-<xsl:text>
-</xsl:text>
-    
     <!-- Reset -->
+    <xsl:text>
+    </xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/><xsl:choose>
         <xsl:when test="fn:matches(@reset,'^[A-Z_]+')">reset        $<xsl:value-of select="@reset"/></xsl:when>
         <xsl:otherwise>reset        <xsl:value-of select="@reset"/></xsl:otherwise>
     </xsl:choose>
-    
-<xsl:text>
-</xsl:text>
-
+    <xsl:text>
+    </xsl:text>
     <!-- Rights and attributes--> 
     <xsl:value-of select="$hier-level-tab-more"/>software {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>
-</xsl:text>
+    </xsl:text>
 <!-- Special Attributes -->
     <!-- ################### -->
     <xsl:if test="@sw_write_clr">
-    <xsl:value-of select="$hier-level-tab-more"/>write_clear
+    <xsl:value-of select="$hier-level-tab-more"/>   write_clear
     </xsl:if>
     <xsl:text>
     </xsl:text>
     <xsl:if test="@sw_write_xor">
-    <xsl:value-of select="$hier-level-tab-more"/>write_xor
+    <xsl:value-of select="$hier-level-tab-more"/>   write_xor
     </xsl:if> 
     <xsl:text>
-</xsl:text>
+    </xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/>}    
-
-<xsl:text>  
-</xsl:text>
-
-    <xsl:value-of select="$hier-level-tab-more"/>hardware {
-
-    <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
     <xsl:text>
-    </xsl:text>   
+    </xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>hardware {
+    <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
     <!-- Special Attributes -->
     <!-- ################### -->
+    <xsl:text>
+    </xsl:text>
     <xsl:if test="@counter">
-    <xsl:value-of select="$hier-level-tab-more"/>    counter
+    <xsl:value-of select="$hier-level-tab-more"/>   counter
     </xsl:if>
+    <xsl:text>
+    </xsl:text>
+    <xsl:if test="@counter='2'">
+    <xsl:value-of select="$hier-level-tab-more"/>   edge_trigger
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>
     <xsl:if test="@rreinit">
-    <xsl:value-of select="$hier-level-tab-more"/>    rreinit
+    <xsl:value-of select="$hier-level-tab-more"/>   rreinit
     </xsl:if>
+    <xsl:text>
+    </xsl:text>
     <xsl:if test="@sw_written">
-    <xsl:value-of select="$hier-level-tab-more"/>    software_written <xsl:value-of select="@sw_written"></xsl:value-of>
-        <xsl:text>
-        </xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>   software_written <xsl:value-of select="@sw_written"></xsl:value-of>
     </xsl:if>
+    <xsl:text>
+    </xsl:text>
     <xsl:if test="not(@hw_wen) and not(@counter)">
-    <xsl:value-of select="$hier-level-tab-more"/>no_wen
+    <xsl:value-of select="$hier-level-tab-more"/>   no_wen
     </xsl:if>    
     <xsl:text>
-</xsl:text>
+    </xsl:text>
     <xsl:if test="@hw_clr">
-    <xsl:value-of select="$hier-level-tab-more"/>clear
-    </xsl:if>    
+    <xsl:value-of select="$hier-level-tab-more"/>   clear
+    </xsl:if> 
     <xsl:text>
-</xsl:text>
+    </xsl:text>
     <xsl:if test="@sticky">
-    <xsl:value-of select="$hier-level-tab-more"/>sticky
-    </xsl:if>    
+    <xsl:value-of select="$hier-level-tab-more"/>   sticky
+    </xsl:if>
     <xsl:text>
-</xsl:text>
-    <xsl:value-of select="$hier-level-tab-more"/>}
-
-<xsl:text>
-</xsl:text>
-
+    </xsl:text>
+<xsl:value-of select="$hier-level-tab-more"/>}
+    <xsl:text>
+    </xsl:text>
 <xsl:value-of select="$hier-level-tab"/>}
-
+    <xsl:text>
+    </xsl:text>
 </xsl:template>
     <!-- ################## -->
     <!-- Reserved           -->
@@ -429,4 +435,4 @@ registerFile <xsl:value-of select="@name"/> {
     <!-- Ignores --> 
     <!-- ######## -->
     <xsl:template match="node()"></xsl:template>
- </xsl:stylesheet>
+</xsl:stylesheet>

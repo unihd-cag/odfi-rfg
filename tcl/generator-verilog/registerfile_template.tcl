@@ -61,8 +61,11 @@ odfi::closures::oproc writeRegisterInterface {it} {
                 $it onAttributes {hardware.osys::rfg::software_written} {
                     output [getName $it]_written [find_internalRF $it $rf] 
                 }
-                
-                input [getName $it]_countup wire 
+                $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                    input [getName $it]_edge wire
+                } otherwise {
+                    input [getName $it]_countup wire
+                }
 
             } otherwise {
 
@@ -198,7 +201,7 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
     } otherwise {
 
         $it onEachField {
-            ::if {[$it name] != "Reserved"} {
+            if {[$it name] != "Reserved"} {
                 $it onAttributes {hardware.osys::rfg::counter} {
                     
                     ## Check if this is equivilant
@@ -211,8 +214,12 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                             reg [getName $it]_load_value [$it width]
                         }
                     }
+                    $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                        reg [getName $it]_countup
+                        reg [getName $it]_edge_last
+                    }
 
-                    ::if {![$it hasAttribute hardware.osys::rfg::ro] && \
+                    if {![$it hasAttribute hardware.osys::rfg::ro] && \
                         ![$it hasAttribute hardware.osys::rfg::rw]} {
                         wire [getName $it] [$it width]
                     }
@@ -415,6 +422,11 @@ odfi::closures::oproc writeRegisterReset {object} {
                             }
                         }
 
+                        $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                            vputs "[getName $it]_edge_last <= 1'b0"
+                            vputs "[getName $it]_countup <= 1'b0"
+                        }
+
                     } ohterwise {
                         if {[$it name] != "Reserved"} {
                             vputs "[getName $it] <= [$it reset]"
@@ -457,6 +469,17 @@ odfi::closures::oproc writeRegisterWrite {object} {
             }
             
             incr offset [$it width]
+            
+            $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                set obj $it
+                vif "[getName $obj]_edge != [getName $obj]_edge_last" {
+                    vputs "[getName $obj]_countup <= 1'b1"
+                    vputs "[getName $obj]_edge_last <= [getName $obj]_edge"
+                }
+                velse {
+                    vputs "[getName $obj]_countup <= 1'b0"
+                }
+            }
 
         }
     }
