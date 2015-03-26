@@ -244,9 +244,6 @@ namespace eval osys::rfg::address::hierarchical {
             set blockAddress 0
             foreach it $value {
 
-                ::puts "Debug Addressing: [$it name]"
-                ::puts "current: $currentAddress"
-                ::puts "BaseAddress: $baseAddress"
                 if {$it==$key} {
                     continue
                 }
@@ -255,16 +252,11 @@ namespace eval osys::rfg::address::hierarchical {
                 set itSize [sizeOf $it]
                 if {$itSize == 0} {
                 
-                    ::puts "Current position aligner: $currentAddress"
-                    ::puts "Aligment: [$it aligment]"
                     if {$currentAddress == 0} {
                         set blockAddress [$it aligment]
                     } else {
-                        ::puts "Else"
-                        ::puts "[expr int($currentAddress/[$it aligment]+1)]"
                         set blockAddress [expr int($currentAddress/[$it aligment]+1)*[$it aligment]]
                     }
-                    ::puts "Block Address Aligner $blockAddress"
                     set currentAddress $blockAddress
                 
                 } else {
