@@ -476,7 +476,7 @@ odfi::closures::oproc writeRegisterBlock {object} {
                     writeRegisterWrite $object
                 }
             } otherwise {
-                if {[hasWrite software $object] == true} {
+                if {[hasWrite software $object] == true || [hasWrite hardware $object]} {
                     if {[hasReset $object] == true} {
                         velse {
                             writeRegisterWrite $object
