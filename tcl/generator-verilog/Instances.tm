@@ -3,7 +3,7 @@ odfi::closures::oproc writeCounterModule {register field} {
 	odfi::common::println "" $resolve
 	odfi::common::println "counter48 #(" $resolve
 	odfi::common::println "	.DATASIZE([$field width])" $resolve
-	odfi::common::println ") [getName $register]_I (" $resolve
+	odfi::common::println ") [getName $field]_I (" $resolve
 	odfi::common::println "	.clk(clk)," $resolve
 	odfi::common::println "	.res_n(res_n)," $resolve
 	odfi::common::println "	.increment([getName $field]_countup)," $resolve

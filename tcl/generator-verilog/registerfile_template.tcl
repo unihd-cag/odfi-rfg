@@ -741,7 +741,7 @@ odfi::closures::oproc writeExternalRamSignals {object} {
 }
 
 odfi::closures::oproc writeRFSoftRead {object} {
-    set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> [getRFAddrOffset $object]]
+    set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> ([getRFAddrOffset $object] + [getRFAddrWidth $object])]
     set care [format %x $care]
     set care_width [expr [getRFAddrWidth $rf] - [getRFAddrWidth $object]]
     set dontCare_width [getRFAddrWidth $object]
