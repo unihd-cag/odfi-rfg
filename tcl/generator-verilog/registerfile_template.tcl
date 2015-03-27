@@ -61,8 +61,11 @@ odfi::closures::oproc writeRegisterInterface {it} {
                 $it onAttributes {hardware.osys::rfg::software_written} {
                     output [getName $it]_written [find_internalRF $it $rf] 
                 }
-                
-                input [getName $it]_countup wire 
+                $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                    input [getName $it]_edge wire
+                } otherwise {
+                    input [getName $it]_countup wire
+                }
 
             } otherwise {
 
@@ -198,7 +201,7 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
     } otherwise {
 
         $it onEachField {
-            ::if {[$it name] != "Reserved"} {
+            if {[$it name] != "Reserved"} {
                 $it onAttributes {hardware.osys::rfg::counter} {
                     
                     ## Check if this is equivilant
@@ -211,8 +214,12 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                             reg [getName $it]_load_value [$it width]
                         }
                     }
+                    $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                        reg [getName $it]_countup
+                        reg [getName $it]_edge_last
+                    }
 
-                    ::if {![$it hasAttribute hardware.osys::rfg::ro] && \
+                    if {![$it hasAttribute hardware.osys::rfg::ro] && \
                         ![$it hasAttribute hardware.osys::rfg::rw]} {
                         wire [getName $it] [$it width]
                     }
@@ -415,6 +422,11 @@ odfi::closures::oproc writeRegisterReset {object} {
                             }
                         }
 
+                        $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                            vputs "[getName $it]_edge_last <= 1'b0"
+                            vputs "[getName $it]_countup <= 1'b0"
+                        }
+
                     } ohterwise {
                         if {[$it name] != "Reserved"} {
                             vputs "[getName $it] <= [$it reset]"
@@ -457,6 +469,17 @@ odfi::closures::oproc writeRegisterWrite {object} {
             }
             
             incr offset [$it width]
+            
+            $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                set obj $it
+                vif "[getName $obj]_edge != [getName $obj]_edge_last" {
+                    vputs "[getName $obj]_countup <= 1'b1"
+                    vputs "[getName $obj]_edge_last <= [getName $obj]_edge"
+                }
+                velse {
+                    vputs "[getName $obj]_countup <= 1'b0"
+                }
+            }
 
         }
     }
@@ -595,7 +618,7 @@ odfi::closures::oproc writeRFBlock {object} {
         velse {
             set upper [expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]
             set lower [expr [getRFAddrWidth $object] + [getRFAddrOffset $object]]
-            set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> [getRFAddrOffset $object]]
+            set care [expr [$object getAttributeValue software.osys::rfg::relative_address] >> ([getRFAddrOffset $object] + [getRFAddrWidth $object])]
             set care [format %x $care]
             set care_width [expr [getRFAddrWidth $rf] - [getRFAddrWidth $object]]
             vif "address\[$upper:$lower\] == $care_width'h$care" {
@@ -813,8 +836,8 @@ odfi::closures::oproc writeInstances {object} {
 odfi::closures::oproc writeAddrComment {object} {
     set str {}
     $object walkDepthFirst {
-        if {![$it isa osys::rfg::Group] || [$it isa osys::rfg::RegisterFile]} {
-            lappend str "[getName $it]: relative Address([getAddrBits $object]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
+        if {(![$it isa osys::rfg::Group] && ![$it isa osys::rfg::Aligner]) || [$it isa osys::rfg::RegisterFile]} {
+            lappend str "[getName $it]: relative Address([expr [getAddrBits $object] - 1]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
         }
         if {[$it isa osys::rfg::RegisterFile]} {
             return false
