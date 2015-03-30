@@ -213,11 +213,11 @@ odfi::closures::oproc writeRFModule {registerfile} {
 		if {[$it isa osys::rfg::RamBlock]} {
 			
 			$it onAttributes {hardware.osys::rfg::rw} { 
-				lappend signalList "	.[getName $it]_addr([getName $it]_addr)"
-				lappend signalList "	.[getName $it]_ren([getName $it]_ren)"
-				lappend signalList "	.[getName $it]_rdata([getName $it]_rdata)"
-				lappend signalList "	.[getName $it]_wen([getName $it]_wen)"
-				lappend signalList "	.[getName $it]_wdata([getName $it]_wdata)"
+				lappend signalList "	    .[getName $it]_addr([getName $it]_addr)"
+				lappend signalList "	    .[getName $it]_ren([getName $it]_ren)"
+				lappend signalList "	    .[getName $it]_rdata([getName $it]_rdata)"
+				lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
+				lappend signalList "	    .[getName $it]_wdata([getName $it]_wdata)"
 			}
 
 		} elseif {[$it isa osys::rfg::Register]} {

@@ -10,8 +10,9 @@ set addr_object ""
 odfi::closures::oproc writeRamBlockInterface {it} {
     
     $it onAttributes {hardware.osys::rfg::external} {
-        output [getName $it]_rf_addr wire [ld [$it depth]]
-
+        if {[$it depth] != 1} {
+            output [getName $it]_rf_addr wire [ld [$it depth]]
+        }
         $it onRead {software} {
             output [getName $it]_rf_ren reg
             input [getName $it]_rf_rdata wire [$it width]
@@ -158,10 +159,14 @@ odfi::closures::oproc writeRamBlockInternalSigs {it} {
         $it onAttributes {hardware.osys::rfg::shared_bus} {
             ## Maybe with Offset
             if {$it == [getFirstSharedBusObject $rf]} {
-                reg address_reg [ld [$it depth]]
+                if {[$it depth] != 1} {
+                    reg address_reg [ld [$it depth]]
+                }
             }
         } otherwise {
-            reg [getName $it]_address_reg [ld [$it depth]]        
+            if {[$it depth] != 1} {
+                reg [getName $it]_address_reg [ld [$it depth]]
+            }
         }
 
     } otherwise {
@@ -443,7 +448,7 @@ odfi::closures::oproc writeRegisterReset {object} {
 
 odfi::closures::oproc writeRegisterWrite {object} {
     $object onAttributes {hardware.osys::rfg::rreinit_source} {
-        vif "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress $object]/8]) && write_en" {
+        vif "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress $object]/(2**[getRFAddrOffset $rf])]) && write_en" {
             vputs "rreinit <= 1'b1"   
         }
         velse {
@@ -517,7 +522,9 @@ odfi::closures::oproc writeRegisterBlock {object} {
 odfi::closures::oproc writeRamBlockReset {object} {
     vif "!res_n" {
         if {![$object hasAttribute hardware.osys::rfg::external]} {
-           vputs "[getName $object]_rf_addr <= [ld [$object depth]]'b0"
+            if {[$object depth] != 1} {
+                vputs "[getName $object]_rf_addr <= [ld [$object depth]]'b0"
+            }
         }
         $object onWrite {software} {
             vputs "[getName $object]_rf_wen <= 1'b0"
@@ -539,7 +546,9 @@ odfi::closures::oproc writeRamBlockWrite {object} {
         set lower [expr [getRFAddrOffset $rf] + [$object getAttributeValue software.osys::rfg::address_shift]]
         
         if {![$object hasAttribute hardware.osys::rfg::external]} {
-            vputs "[getName $object]_rf_addr <= address\[$higher:$lower\]"
+            if {[$object depth] != 1} {
+                vputs "[getName $object]_rf_addr <= address\[$higher:$lower\]"
+            }
         }
         
         $object onWrite {software} {
@@ -553,24 +562,41 @@ odfi::closures::oproc writeRamBlockWrite {object} {
         }
    
     } else {
-        vif "address\[[expr [getAddrBits $rf] - 1]:$lower_identifier\] == $equal" {
-            set higher [expr [ld [$object depth]] +[getRFAddrOffset $rf] - 1 + [$object getAttributeValue software.osys::rfg::address_shift]]
-            set lower [expr [getRFAddrOffset $rf] + [$object getAttributeValue software.osys::rfg::address_shift]]
-            
-            if {![$object hasAttribute hardware.osys::rfg::external]} {
-                vputs "[getName $object]_rf_addr <= address\[$higher:$lower\]"
-            }
-
-            $object onWrite {software} {
+        if {[$object depth] != 1} {
+            vif "address\[[expr [getAddrBits $rf] - 1]:$lower_identifier\] == $equal" {
+                set higher [expr [ld [$object depth]] +[getRFAddrOffset $rf] - 1 + [$object getAttributeValue software.osys::rfg::address_shift]]
+                set lower [expr [getRFAddrOffset $rf] + [$object getAttributeValue software.osys::rfg::address_shift]]
                 
                 if {![$object hasAttribute hardware.osys::rfg::external]} {
-                    vputs "[getName $object]_rf_wdata <= write_data\[[expr [$object width]-1]:0\]"
+                    vputs "[getName $object]_rf_addr <= address\[$higher:$lower\]"
                 }
-                
-                vputs "[getName $object]_rf_wen <= write_en"
+
+                $object onWrite {software} {
+                    
+                    if {![$object hasAttribute hardware.osys::rfg::external]} {
+                        vputs "[getName $object]_rf_wdata <= write_data\[[expr [$object width]-1]:0\]"
+                    }
+                    
+                    vputs "[getName $object]_rf_wen <= write_en"
+                }
+                $object onRead {software} {
+                    vputs "[getName $object]_rf_ren <= read_en"
+                }
             }
-            $object onRead {software} {
-                vputs "[getName $object]_rf_ren <= read_en"
+        } else {
+            vif "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress $object]/(2**[getRFAddrOffset $rf])])" {
+                $object onWrite {software} {
+                    
+                    if {![$object hasAttribute hardware.osys::rfg::external]} {
+                        vputs "[getName $object]_rf_wdata <= write_data\[[expr [$object width]-1]:0\]"
+                    }
+                    
+                    vputs "[getName $object]_rf_wen <= write_en"
+                }
+                $object onRead {software} {
+                    vputs "[getName $object]_rf_ren <= read_en"
+                }
+               
             }
         }
     }
@@ -591,7 +617,9 @@ odfi::closures::oproc writeRamBlock {object} {
                 $object onWrite {software} {
                     assign [getName $object]_rf_wdata [getName $object]_write_data_reg
                 }
-                assign [getName $object]_rf_addr [getName $object]_address_reg
+                if {[$object depth] != 1} {
+                    assign [getName $object]_rf_addr [getName $object]_address_reg
+                }
             }
         }
         comment "RamBlock: [getName $object]"
@@ -697,15 +725,36 @@ odfi::closures::oproc writeRamBlockSoftRead {object} {
     set care [format %x $care]
     set care_width [expr [getAddrBits $rf] - [ld [$object depth]] - 3 - [$object getAttributeValue software.osys::rfg::address_shift]]
     set dontCare_width [expr [ld [$object depth]] + [$object getAttributeValue software.osys::rfg::address_shift]]
-    case_select "\{[getRBAddrssDecode $object $rf]\}" {
-        $object onRead {software} {
-            vputs "read_data\[[expr [$object width]-1]:0\] <= [getName $object]_rf_rdata"
+    if {[$object depth] != 1} {
+        case_select "\{[getRBAddrssDecode $object $rf]\}" {
+            $object onRead {software} {
+                vputs "read_data\[[expr [$object width]-1]:0\] <= [getName $object]_rf_rdata"
+            }
+            if {[$object width] != [getRFmaxWidth $rf]} {
+                vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:[$object width]\] <= [expr [getRFmaxWidth $rf] - [$object width]]'b0"
+            }
+            vputs "invalid_address <= 1'b0"
+            $object onAttributes {hardware.osys::rfg::external} {
+                vputs "access_complete <= [getName $object]_rf_access_complete"
+            } otherwise {
+                vputs "access_complete <= write_en || read_en_dly2"
+            }
         }
-        if {[$object width] != [getRFmaxWidth $rf]} {
-            vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:[$object width]\] <= [expr [getRFmaxWidth $rf] - [$object width]]'b0"
+    } else {
+        case_select "$width'h[format %x [expr [$object getAttributeValue software.osys::rfg::relative_address] / ([$rf register_size]/8)]]" {
+            $object onRead {software} {
+                vputs "read_data\[[expr [$object width]-1]:0\] <= [getName $object]_rf_rdata"
+            }
+            if {[$object width] != [getRFmaxWidth $rf]} {
+                vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:[$object width]\] <= [expr [getRFmaxWidth $rf] - [$object width]]'b0"
+            }
+            vputs "invalid_address <= 1'b0"
+            $object onAttributes {hardware.osys::rfg::external} {
+                vputs "access_complete <= [getName $object]_rf_access_complete"
+            } otherwise {
+                vputs "access_complete <= write_en || read_en_dly2"
+            }
         }
-        vputs "invalid_address <= 1'b0"
-        vputs "access_complete <= write_en || read_en_dly2"
     }
 }
 
@@ -724,9 +773,11 @@ odfi::closures::oproc writeExternalRamSignals {object} {
                     $it onWrite {software} {
                         vputs "[getName $it]_write_data_reg <= write_data\[[expr [$it width]-1]:0\]"
                     }
-                    set lower_addr [expr [getRFAddrOffset $rf] + [$it getAttributeValue software.osys::rfg::address_shift]]
-                    set higher_addr [expr [ld [$it depth]] -1 + [$it getAttributeValue software.osys::rfg::address_shift] + [getRFAddrOffset $rf]]
-                    vputs "[getName $it]_address_reg <= address\[$higher_addr:$lower_addr\]"
+                    if {[$it depth] != 1} {
+                        set lower_addr [expr [getRFAddrOffset $rf] + [$it getAttributeValue software.osys::rfg::address_shift]]
+                        set higher_addr [expr [ld [$it depth]] -1 + [$it getAttributeValue software.osys::rfg::address_shift] + [getRFAddrOffset $rf]]
+                        vputs "[getName $it]_address_reg <= address\[$higher_addr:$lower_addr\]"
+                    }
                 }
             }
         }

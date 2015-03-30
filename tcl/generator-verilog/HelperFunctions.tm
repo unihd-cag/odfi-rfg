@@ -109,16 +109,24 @@ proc CheckForRegBlock {object} {
             set return_value true
         } otherwise {
             $object onEachField {
-                if {[$it reset] != ""} {
-                    set return_value true
-                }
                 $it onWrite {software} {
                     set return_value true
                 }
                 $it onWrite {hardware} {
                     set return_value true
                 }
-
+                $it onAttributes {hardware.osys::rfg::counter} {
+                    if {[$it hasAttribute hardware.osys::rfg::wo] ||\
+                        [$it hasAttribute hardware.osys::rfg::rw] ||\
+                        [$it hasAttribute software.osys::rfg::wo] ||\
+                        [$it hasAttribute software.osys::rfg::rw]} {
+                        set return_value true
+                    }
+                } otherwise {
+                   if {[$it reset] != ""} {
+                        set return_value true
+                    }
+                }
             }
         }
     }
