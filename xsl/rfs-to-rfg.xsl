@@ -120,6 +120,11 @@ registerFile <xsl:value-of select="@name"/> {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>
     </xsl:text>
+    <xsl:if test="@addr_shift">
+        <xsl:value-of select="$hier-level-tab-more"/>   address_shift <xsl:value-of select="@addr_shift"/>
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>  
 <xsl:value-of select="$hier-level-tab-more"/>}    
 
 <xsl:text>  
@@ -331,8 +336,13 @@ registerFile <xsl:value-of select="@name"/> {
     </xsl:if>
     <xsl:text>
     </xsl:text>
-    <xsl:if test="@sw_written">
-    <xsl:value-of select="$hier-level-tab-more"/>   software_written <xsl:value-of select="@sw_written"></xsl:value-of>
+    <xsl:if test="@sw_written='1'">
+    <xsl:value-of select="$hier-level-tab-more"/>   software_written
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>
+    <xsl:if test="@sw_written='2'">
+    <xsl:value-of select="$hier-level-tab-more"/>   changed
     </xsl:if>
     <xsl:text>
     </xsl:text>

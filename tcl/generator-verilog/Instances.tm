@@ -244,6 +244,10 @@ odfi::closures::oproc writeRFModule {registerfile} {
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							lappend signalList "	    .[getName $it]_written([getName $it]_written)"
 						}
+                        
+                        $it onAttributes {hardware.osys::rfg::changed} {
+							lappend signalList "	    .[getName $it]_changed([getName $it]_changed)"
+						}
 
 						lappend signalList "	    .[getName $it]_countup([getName $it]_countup)"
 
@@ -273,6 +277,11 @@ odfi::closures::oproc writeRFModule {registerfile} {
 						$it onAttributes {hardware.osys::rfg::software_written} {
 							lappend signalList "	    .[getName $it]_written([getName $it]_written)"
 						}
+
+                        $it onAttributes {hardware.osys::rfg::changed} {
+							lappend signalList "	    .[getName $it]_changed([getName $it]_changed)"
+						}
+
 
                         $it onAttributes {hardware.osys::rfg::clear} {
                             lappend signalList "        .[getName $it]_clear([getName $it]_clear)"
