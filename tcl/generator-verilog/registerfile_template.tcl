@@ -62,6 +62,11 @@ odfi::closures::oproc writeRegisterInterface {it} {
                 $it onAttributes {hardware.osys::rfg::software_written} {
                     output [getName $it]_written [find_internalRF $it $rf] 
                 }
+
+                $it onAttributes {hardware.osys::rfg::changed} {
+                    output [getName $it]_changed [find_internalRF $it $rf] 
+                }
+
                 $it onAttributes {hardware.osys::rfg::edge_trigger} {
                     input [getName $it]_edge wire
                 } otherwise {
@@ -86,6 +91,11 @@ odfi::closures::oproc writeRegisterInterface {it} {
                 $it onAttributes {hardware.osys::rfg::software_written} {
                     output [getName $it]_written [find_internalRF $it $rf]
                 }
+
+                $it onAttributes {hardware.osys::rfg::changed} {
+                    output [getName $it]_changed [find_internalRF $it $rf]
+                }
+
 
                 $it onAttributes {hardware.osys::rfg::clear} {
                     input [getName $it]_clear wire
@@ -231,10 +241,8 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                         
                 } otherwise {
                     
-                    $it onAttributes {hardware.osys::rfg::software_written} {
-                        if {[$it getAttributeValue hardware.osys::rfg::software_written] == 2} {
+                    $it onAttributes {hardware.osys::rfg::changed} {
                             reg [getName $it]_res_in_last_cycle
-                        }
                     }
 
                     if {![$it hasAttribute hardware.osys::rfg::ro] && \
@@ -315,6 +323,9 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
             $it onAttributes {hardware.osys::rfg::software_written} {
                 vputs "[getName $it]_written <= 1'b1"
             }
+            $it onAttributes {hardware.osys::rfg::changed} {
+                vputs "[getName $it]_changed <= 1'b1"
+            }
         }
 
     }
@@ -329,8 +340,13 @@ odfi::closures::oproc writeHardFieldFunction {it} {
     }
     
     $it onAttributes {hardware.osys::rfg::software_written} {
-        vputs "[getName $it]_written <= 1'b1"
+        vputs "[getName $it]_written <= 1'b0"
     }
+
+    $it onAttributes {hardware.osys::rfg::changed} {
+        vputs "[getName $it]_changed <= 1'b0"
+    }
+
 
 }
 
@@ -431,13 +447,28 @@ odfi::closures::oproc writeRegisterReset {object} {
                             vputs "[getName $it]_edge_last <= 1'b0"
                             vputs "[getName $it]_countup <= 1'b0"
                         }
+                        
+                        $it onAttributes {hardware.osys::rfg::software_written} {
+                            vputs "[getName $it]_written <= 1'b0"
+                        }
+                        
+                        $it onAttributes {hardware.osys::rfg::changed} {
+                            vputs "[getName $it]_changed <=1'b0"
+                            vputs "[getName $it]_res_in_last_cycle <= 1'b1"
+                        }
 
                     } ohterwise {
                         if {[$it name] != "Reserved"} {
                             vputs "[getName $it] <= [$it reset]"
                         }
+
                         $it onAttributes {hardware.osys::rfg::software_written} {
                             vputs "[getName $it]_written <= 1'b0"
+                        }
+
+                        $it onAttributes {hardware.osys::rfg::changed} {
+                            vputs "[getName $it]_changed <=1'b0"
+                            vputs "[getName $it]_res_in_last_cycle <= 1'b1"
                         }
                     }
                 }
@@ -462,6 +493,17 @@ odfi::closures::oproc writeRegisterWrite {object} {
                 $it onWrite {hardware} {
                     set condition "elsecond"
                     writeFieldHardWrite $it
+                } otherwise {
+                    $it onAttributes {hardware.osys::rfg::software_written} {
+                        velse {
+                            vputs "[getName $it]_written <= 1'b0"
+                        }
+                    }
+                    $it onAttributes {hardware.osys::rfg::changed} {
+                        velse {
+                            vputs "[getName $it]_changed <= 1'b0"
+                        }
+                    }
                 }
 
             } otherwise {
@@ -469,7 +511,7 @@ odfi::closures::oproc writeRegisterWrite {object} {
                 $it onWrite {hardware} {
                     set condition "ifcond"
                     writeFieldHardWrite $it
-                }
+                } 
 
             }
             
@@ -483,6 +525,14 @@ odfi::closures::oproc writeRegisterWrite {object} {
                 }
                 velse {
                     vputs "[getName $obj]_countup <= 1'b0"
+                }
+            }
+
+            $it onAttributes {hardware.osys::rfg::changed} {
+                set obj $it
+                vif "[getName $obj]_res_in_last_cycle == 1'b1" {
+                    vputs "[getName $obj]_changed <= 1'b1"
+                    vputs "[getName $obj]_res_in_last_cycle <= 1'b0"
                 }
             }
 

@@ -46,6 +46,7 @@ attributeFunction ::clear
 attributeFunction ::write_clear
 attributeFunction ::shared_bus
 attributeFunction ::edge_trigger
+attributeFunction ::changed
 
 ## Addressing
 attributeFunction ::relative_address
