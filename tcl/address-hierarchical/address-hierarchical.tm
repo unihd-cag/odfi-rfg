@@ -96,7 +96,7 @@ namespace eval osys::rfg::address::hierarchical {
             
             odfi::closures::doClosure {
 
-                if {[string is integer "$operator"]} {
+                if {[string is wideinteger "$operator"]} {
                     return $operator
                 } elseif {[$operator isa ::osys::rfg::Register]} {
                     ## ToDo: Fix this it is not always 8
@@ -144,7 +144,7 @@ namespace eval osys::rfg::address::hierarchical {
                 switch -exact -- $right {
                     "{}" -
                     "" {
-                        if {![string is integer $left]} {
+                        if {![string is wideinteger $left]} {
                             if {[$left isa osys::rfg::Aligner]} {
                                 set ls [$left aligment]
                             } else {
@@ -164,7 +164,6 @@ namespace eval osys::rfg::address::hierarchical {
                         ## Right Element size
                         if {[$right isa osys::rfg::Aligner]} {
                             set rightSize [expr int([sizeOf $left]/[$right aligment]+1)*[$right aligment]]
-                            ::puts "Aligner found..."
                         } else {
                             set rightSize [sizeOf $right]
                         }
@@ -173,7 +172,7 @@ namespace eval osys::rfg::address::hierarchical {
                         }
                         
                         ## Left size 
-                         if {![string is integer $left]} {
+                         if {![string is wideinteger $left]} {
                             if {[$left isa osys::rfg::Aligner]} {
                                 set ls [$left aligment]
                             } else {
@@ -183,7 +182,7 @@ namespace eval osys::rfg::address::hierarchical {
                             set ls [sizeOf $left]
                         }
                       
-                        if {![string is integer $left]} {
+                        if {![string is wideinteger $left]} {
                             $left attributes software {
                                 ::size  $ls
                             }

@@ -135,7 +135,11 @@ registerFile <xsl:value-of select="@name"/> {
     <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
     <xsl:text>
 </xsl:text>
-    
+<xsl:if test="@shared_bus='1'">
+    <xsl:value-of select="$hier-level-tab-more"/>   shared_bus 
+</xsl:if>
+    <xsl:text>
+    </xsl:text> 
     <!-- Special Attributes -->
     <!-- ################### -->
     <xsl:if test="@counter">
@@ -254,7 +258,21 @@ registerFile <xsl:value-of select="@name"/> {
 
 
 </xsl:template>
+    <!-- ########################## -->
+    <!-- Aligner --> 
+    <!-- ########################## -->
+    <xsl:template match="aligner">
+    <!-- Gather depth -->
+    <xsl:variable name="hier-pos"><xsl:number from="regroot" count="regroot|reg64|hwreg" level="multiple" format="1"></xsl:number></xsl:variable>
+    <xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
+    <xsl:variable name="hier-level-tab-more"><xsl:value-of select="$hier-level-tab"></xsl:value-of><xsl:text>    </xsl:text></xsl:variable>
 
+    <xsl:value-of select="$hier-level-tab"/>aligner <xsl:value-of select="@to"/>
+    <xsl:text>
+    
+    </xsl:text> 
+<xsl:apply-templates />
+</xsl:template>
     <!-- Fields -->
     <!-- ################## -->
     <xsl:template match="hwreg">

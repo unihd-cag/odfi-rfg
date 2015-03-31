@@ -159,7 +159,9 @@ proc hasWrite {interface object} {
     return $return_value
 }
 # logarithmus dualis function for address bit calculation
-proc ld x "expr {int(ceil(log(\$x)/[expr log(2)]))}"
+proc ld x {
+    expr {wide(ceil(log($x)/[expr log(2)]))}
+}
 
 ## this functions finds a parent registerfile which is a internal RF 
 ## for this it uses an offset until which it searches
@@ -213,7 +215,7 @@ proc getRFsize {registerfile} {
 	set offset [$registerfile getAttributeValue software.osys::rfg::absolute_address]
 	$registerfile walk {
 		if {![$item isa osys::rfg::Group]} {
-		 	if {[string is integer [$item getAttributeValue software.osys::rfg::absolute_address]]} {
+		 	if {[string is wideinteger [$item getAttributeValue software.osys::rfg::absolute_address]]} {
 		 		if {$size <= [$item getAttributeValue software.osys::rfg::absolute_address]} {
 		 			set size [expr [$item getAttributeValue software.osys::rfg::absolute_address]+[$item getAttributeValue software.osys::rfg::size]]
 		 		}
