@@ -153,20 +153,25 @@ namespace eval osys::rfg::address::hierarchical {
                         } else {
                             set ls [sizeOf $left]
                         }
-                  
-                      $left attributes software {
-                        ::size  $ls
-                      }
-                      return $ls
+                        ::puts "Left: $left"
+                        ::puts "ls: $ls"
+                        $left attributes software {
+                            ::size  $ls
+                        }
+                        return $ls
                     }
                     default {
 
                         ## Right Element size
                         if {[$right isa osys::rfg::Aligner]} {
+                            ::puts "sizeOf Left: [sizeOf $left]"
+                            ::puts "Aligment: [$right aligment]"
                             set rightSize [expr int([sizeOf $left]/[$right aligment]+1)*[$right aligment]]
                         } else {
                             set rightSize [sizeOf $right]
                         }
+                        ::puts "Right: $right"
+                        ::puts "rs: $rightSize"
                         $right attributes software {
                             ::size  $rightSize
                         }
@@ -183,6 +188,8 @@ namespace eval osys::rfg::address::hierarchical {
                         }
                       
                         if {![string is wideinteger $left]} {
+                            ::puts "Left: $left"
+                            ::puts "ls: $ls"
                             $left attributes software {
                                 ::size  $ls
                             }
@@ -190,7 +197,11 @@ namespace eval osys::rfg::address::hierarchical {
                         
 
                         ##return [expr [sizeOf $left] + $rightSize ]
-                        return [expr $ls + $rightSize]
+                        if {[$right isa osys::rfg::Aligner]} {
+                            return $rightSize
+                        } else {
+                            return [expr $ls + $rightSize]
+                        }
                     }
                 }
 
@@ -221,7 +232,7 @@ namespace eval osys::rfg::address::hierarchical {
         ###################
         ## Go Map top down 
         ######################
-        ::puts "Debug $map"
+        ##::puts "Debug $map"
         odfi::list::arrayEach $map {
             
             puts "Address Distribution on : $key"
