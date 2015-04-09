@@ -34,7 +34,10 @@ registerFile subRF {
                 reset 24'h12abcd
 
                 software ro
-                hardware wo
+                hardware {
+                    wo
+                    no_wen
+                }
             
             }
             
@@ -64,6 +67,7 @@ registerFile subRF {
                 hardware {
                     rw
                     software_written 1
+                    no_wen
                 }
             
             }
@@ -75,6 +79,7 @@ registerFile subRF {
                 hardware {
                     rw
                     software_written 2
+                    no_wen
                 }
             
             }
@@ -85,7 +90,6 @@ registerFile subRF {
                 software rw
                 hardware {
                     rw
-                    hardware_wen
                 }
             
             }

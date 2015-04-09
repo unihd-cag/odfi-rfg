@@ -6,7 +6,6 @@ osys::rfg::registerFile counter_RF {
             software rw
             hardware {
                 rw
-                hardware_wen
                 counter
             }
         }

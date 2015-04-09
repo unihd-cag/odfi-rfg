@@ -1,86 +1,88 @@
 # write counter instance
-proc writeCounterModule {register field} {
-	puts "	counter48 #("
-	puts "		.DATASIZE([$field width])"
-	puts "	) [getName $register]_I ("
-	puts "		.clk(clk),"
-	puts "		.res_n(res_n),"
-	puts "		.increment([getName $field]_countup),"
+odfi::closures::oproc writeCounterModule {register field} {
+	odfi::common::println "" $resolve
+	odfi::common::println "counter48 #(" $resolve
+	odfi::common::println "	.DATASIZE([$field width])" $resolve
+	odfi::common::println ") [getName $field]_I (" $resolve
+	odfi::common::println "	.clk(clk)," $resolve
+	odfi::common::println "	.res_n(res_n)," $resolve
+	odfi::common::println "	.increment([getName $field]_countup)," $resolve
 	if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
-		puts "		.load([getName $field]_load_value),"	
+		odfi::common::println "	.load([getName $field]_load_value)," $resolve
 	} else {
-		puts " 		.load([$field width]'b0),"
+		odfi::common::println " .load([$field width]'b0)," $resolve
 	}
 	$field onAttributes {hardware.osys::rfg::rreinit} {
 		if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
-			puts "		.load_enable(rreinit || [getName $field]_load_enable),"
+			odfi::common::println "	.load_enable(rreinit || [getName $field]_load_enable)," $resolve
 		} else {
-			puts "		.load_enable(rreinit),"
+			odfi::common::println "	.load_enable(rreinit)," $resolve
 		}				
 	} otherwise {
 		if {[$field hasAttribute hardware.osys::rfg::rw] || [$field hasAttribute hardware.osys::rfg::wo] || [$field hasAttribute software.osys::rfg::rw] || [$field hasAttribute software.osys::rfg::wo]} {
-			puts "		.load_enable([getName $field]_load_enable),"
+			odfi::common::println "	.load_enable([getName $field]_load_enable)," $resolve
 		} else {
-			puts "		.load_enable(1'b0),"
+			odfi::common::println "	.load_enable(1'b0)," $resolve
 		}
 		
 	}
-	puts "		.value([getName $field])"
-	puts "	);"
-	puts ""
+	odfi::common::println "	.value([getName $field])" $resolve
+	odfi::common::println ");" $resolve
+	odfi::common::println "" $resolve
 }
 
 # write Ram Instance
-proc writeRamModule {ramBlock} {
+odfi::closures::oproc writeRamModule {ramBlock} {
 	
 	## 2rw 2w1r
 	if {([$ramBlock hasAttribute hardware.osys::rfg::rw] && [$ramBlock hasAttribute software.osys::rfg::rw]) ||\
 		([$ramBlock hasAttribute hardware.osys::rfg::rw] && [$ramBlock hasAttribute software.osys::rfg::wo]) ||\
 		([$ramBlock hasAttribute hardware.osys::rfg::wo] && [$ramBlock hasAttribute software.osys::rfg::rw])} {
-		puts "	ram_2rw_1c #("
-		puts "		.DATASIZE([$ramBlock width]),"
-		puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
-		puts "		.PIPELINED(0)"
-		puts "	) [getName $ramBlock] ("
-		puts "		.clk(clk)," 
+		odfi::common::println "" $resolve
+	    odfi::common::println "ram_2rw_1c #(" $resolve
+		odfi::common::println " .DATASIZE([$ramBlock width])," $resolve
+		odfi::common::println " .ADDRSIZE([ld [$ramBlock depth]])," $resolve
+		odfi::common::println "	.PIPELINED(0)" $resolve
+		odfi::common::println ") [getName $ramBlock] (" $resolve
+		odfi::common::println "	.clk(clk)," $resolve
 		$ramBlock onAttributes {software.osys::rfg::wo} {
-			puts "		.wen_a([getName $ramBlock]_rf_wen),"
-			puts "		.ren_a(1'b0),"
-			puts "		.addr_a([getName $ramBlock]_rf_addr),"
-			puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
-			puts "		.wen_b([getName $ramBlock]_wen),"
-			puts "		.ren_b([getName $ramBlock]_ren),"
-			puts "		.addr_b([getName $ramBlock]_addr),"
-			puts "		.wdata_b([getName $ramBlock]_wdata),"
-			puts "		.rdata_b([getName $ramBlock]_rdata)"
-			puts "	);"
-			puts ""
+			odfi::common::println " .wen_a([getName $ramBlock]_rf_wen)," $resolve
+			odfi::common::println "	.ren_a(1'b0)," $resolve
+			odfi::common::println "	.addr_a([getName $ramBlock]_rf_addr)," $resolve
+			odfi::common::println "	.wdata_a([getName $ramBlock]_rf_wdata)," $resolve
+			odfi::common::println "	.wen_b([getName $ramBlock]_wen)," $resolve
+			odfi::common::println "	.ren_b([getName $ramBlock]_ren)," $resolve 
+			odfi::common::println "	.addr_b([getName $ramBlock]_addr)," $resolve
+			odfi::common::println "	.wdata_b([getName $ramBlock]_wdata)," $resolve
+			odfi::common::println "	.rdata_b([getName $ramBlock]_rdata)" $resolve
+			odfi::common::println ");" $resolve
+			odfi::common::println "" $resolve
 		} otherwise {
 			$ramBlock onAttributes {hardware.osys::rfg::wo} {
-				puts "		.wen_a([getName $ramBlock]_rf_wen),"
-				puts "		.ren_a([getName $ramBlock]_rf_ren),"
-				puts "		.addr_a([getName $ramBlock]_rf_addr),"
-				puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
-				puts "		.rdata_a([getName $ramBlock]_rf_rdata),"
-				puts "		.wen_b([getName $ramBlock]_wen),"
-				puts "		.ren_b(1'b0),"
-				puts "		.addr_b([getName $ramBlock]_addr),"
-				puts "		.wdata_b([getName $ramBlock]_wdata)"
-				puts "	);"
-				puts ""
+				odfi::common::println "	.wen_a([getName $ramBlock]_rf_wen)," $resolve
+				odfi::common::println "	.ren_a([getName $ramBlock]_rf_ren)," $resolve
+				odfi::common::println "	.addr_a([getName $ramBlock]_rf_addr)," $resolve
+				odfi::common::println "	.wdata_a([getName $ramBlock]_rf_wdata)," $resolve
+				odfi::common::println "	.rdata_a([getName $ramBlock]_rf_rdata)," $resolve
+				odfi::common::println "	.wen_b([getName $ramBlock]_wen)," $resolve
+				odfi::common::println "	.ren_b(1'b0)," $resolve
+				odfi::common::println "	.addr_b([getName $ramBlock]_addr)," $resolve
+				odfi::common::println "	.wdata_b([getName $ramBlock]_wdata)" $resolve
+				odfi::common::println ");" $resolve
+				odfi::common::println ""
 			} otherwise {
-				puts "		.wen_a([getName $ramBlock]_rf_wen),"
-				puts "		.ren_a([getName $ramBlock]_rf_ren),"
-				puts "		.addr_a([getName $ramBlock]_rf_addr),"
-				puts "		.wdata_a([getName $ramBlock]_rf_wdata),"
-				puts "		.rdata_a([getName $ramBlock]_rf_rdata),"
-				puts "		.wen_b([getName $ramBlock]_wen),"
-				puts "		.ren_b([getName $ramBlock]_ren),"
-				puts "		.addr_b([getName $ramBlock]_addr),"
-				puts "		.wdata_b([getName $ramBlock]_wdata),"
-				puts "		.rdata_b([getName $ramBlock]_rdata)"
-				puts "	);"
-				puts ""
+				odfi::common::println "	.wen_a([getName $ramBlock]_rf_wen)," $resolve
+				odfi::common::println "	.ren_a([getName $ramBlock]_rf_ren)," $resolve
+				odfi::common::println "	.addr_a([getName $ramBlock]_rf_addr)," $resolve
+				odfi::common::println "	.wdata_a([getName $ramBlock]_rf_wdata)," $resolve
+				odfi::common::println "	.rdata_a([getName $ramBlock]_rf_rdata)," $resolve
+				odfi::common::println "	.wen_b([getName $ramBlock]_wen)," $resolve
+				odfi::common::println "	.ren_b([getName $ramBlock]_ren)," $resolve
+				odfi::common::println "	.addr_b([getName $ramBlock]_addr)," $resolve
+				odfi::common::println "	.wdata_b([getName $ramBlock]_wdata)," $resolve
+				odfi::common::println "	.rdata_b([getName $ramBlock]_rdata)" $resolve
+				odfi::common::println ");" $resolve
+				odfi::common::println "" $resolve
 			}
 		}
 
@@ -89,40 +91,40 @@ proc writeRamModule {ramBlock} {
 		## 2r1w
 		if {([$ramBlock hasAttribute hardware.osys::rfg::rw] && [$ramBlock hasAttribute software.osys::rfg::ro]) ||\
 			([$ramBlock hasAttribute hardware.osys::rfg::ro] && [$ramBlock hasAttribute software.osys::rfg::rw])} {
-			
-			puts "	ram_1w2r_1c #("
-			puts "		.DATASIZE([$ramBlock width]),"
-			puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
-			puts "		.INIT_RAM(1'b0),"
-			puts "		.PIPELINED(0)"
-			puts "	) [getName $ramBlock] ("
-			puts "		.clk(clk),"				
+			odfi::common::println "" $resolve
+			odfi::common::println "ram_1w2r_1c #(" $resolve
+			odfi::common::println "	.DATASIZE([$ramBlock width])," $resolve
+			odfi::common::println "	.ADDRSIZE([ld [$ramBlock depth]])," $resolve
+			odfi::common::println "	.INIT_RAM(1'b0)," $resolve
+			odfi::common::println "	.PIPELINED(0)" $resolve
+			odfi::common::println ") [getName $ramBlock] (" $resolve
+			odfi::common::println "	.clk(clk),"				 $resolve
 			$ramBlock onAttributes {software.osys::rfg::ro} {
-				puts "		.wen([getName $ramBlock]_wen),"
-				puts "		.waddr([getName $ramBlock]_addr),"
-				puts "		.wdata([getName	$ramBlock]_wdata),"
-				puts "		.ren1([getName $ramBlock]_ren),"
-				puts "		.raddr1([getName $ramBlock]_addr),"
-				puts "		.rdata1([getName $ramBlock]_rdata),"
-				puts "		.ren2([getName $ramBlock]_rf_ren),"
-				puts "		.raddr2([getName $ramBlock]_rf_addr),"
-				puts "		.rdata2([getName $ramBlock]_rf_rdata)"
-				puts "	);"
-				puts ""
+				odfi::common::println "	.wen([getName $ramBlock]_wen)," $resolve
+				odfi::common::println "	.waddr([getName $ramBlock]_addr)," $resolve
+				odfi::common::println "	.wdata([getName	$ramBlock]_wdata)," $resolve
+				odfi::common::println "	.ren1([getName $ramBlock]_ren)," $resolve
+				odfi::common::println "	.raddr1([getName $ramBlock]_addr)," $resolve
+				odfi::common::println "	.rdata1([getName $ramBlock]_rdata)," $resolve
+				odfi::common::println "	.ren2([getName $ramBlock]_rf_ren)," $resolve
+				odfi::common::println "	.raddr2([getName $ramBlock]_rf_addr)," $resolve
+				odfi::common::println "	.rdata2([getName $ramBlock]_rf_rdata)" $resolve
+				odfi::common::println ");" $resolve
+				odfi::common::println "" $resolve
 			}
 
 			$ramBlock onAttributes {hardware.osys::rfg::ro} {
-				puts "		.wen([getName $ramBlock]_rf_wen),"
-				puts "		.waddr([getName $ramBlock]_rf_addr),"
-				puts "		.wdata([getName	$ramBlock]_rf_wdata),"
-				puts "		.ren1([getName $ramBlock]_ren),"
-				puts "		.raddr1([getName $ramBlock]_addr),"
-				puts "		.rdata1([getName $ramBlock]_rdata),"
-				puts "		.ren2([getName $ramBlock]_rf_ren),"
-				puts "		.raddr2([getName $ramBlock]_rf_addr),"
-				puts "		.rdata2([getName $ramBlock]_rf_rdata)"
-				puts "	);"
-				puts ""					
+				odfi::common::println "	.wen([getName $ramBlock]_rf_wen)," $resolve
+				odfi::common::println "	.waddr([getName $ramBlock]_rf_addr)," $resolve
+				odfi::common::println "	.wdata([getName	$ramBlock]_rf_wdata)," $resolve
+				odfi::common::println "	.ren1([getName $ramBlock]_ren)," $resolve
+				odfi::common::println "	.raddr1([getName $ramBlock]_addr)," $resolve
+				odfi::common::println "	.rdata1([getName $ramBlock]_rdata)," $resolve
+				odfi::common::println "	.ren2([getName $ramBlock]_rf_ren)," $resolve
+				odfi::common::println "	.raddr2([getName $ramBlock]_rf_addr)," $resolve
+				odfi::common::println "	.rdata2([getName $ramBlock]_rf_rdata)" $resolve
+				odfi::common::println ");" $resolve
+				odfi::common::println "" $resolve
 			}
 
 		} else {
@@ -131,58 +133,58 @@ proc writeRamModule {ramBlock} {
 			if {([$ramBlock hasAttribute hardware.osys::rfg::wo] && [$ramBlock hasAttribute software.osys::rfg::ro]) ||\
 				([$ramBlock hasAttribute hardware.osys::rfg::ro] && [$ramBlock hasAttribute software.osys::rfg::wo]) ||\
 				[$ramBlock hasAttribute hardware.osys::rfg::rw] || [$ramBlock hasAttribute software.osys::rfg::rw]} {
-				
-				puts "	ram_1w1r_1c #("
-				puts "		.DATASIZE([$ramBlock width]),"
-				puts "		.ADDRSIZE([ld [$ramBlock depth]]),"
-				puts "		.INIT_RAM(1'b0),"
-				puts "		.PIPELINED(0),"
-				puts "		.REG_LIMIT(1)"
-				puts "	) [getName $ramBlock] ("
-				puts "		.clk(clk),"	
+				odfi::common::println "" $resolve
+				odfi::common::println "ram_1w1r_1c #(" $resolve
+				odfi::common::println "	.DATASIZE([$ramBlock width])," $resolve
+				odfi::common::println "	.ADDRSIZE([ld [$ramBlock depth]])," $resolve
+				odfi::common::println "	.INIT_RAM(1'b0)," $resolve
+				odfi::common::println "	.PIPELINED(0)," $resolve
+				odfi::common::println "	.REG_LIMIT(1)" $resolve
+				odfi::common::println ") [getName $ramBlock] (" $resolve
+				odfi::common::println "	.clk(clk),"	 $resolve
 				
 				$ramBlock onAttributes {hardware.osys::rfg::wo} {
-					puts "		.wen([getName $ramBlock]_wen),"
-					puts "		.wdata([getName $ramBlock]_wdata),"
-					puts "		.waddr([getName $ramBlock]_addr),"
-					puts "		.ren([getName $ramBlock]_rf_ren),"
-					puts "		.raddr([getName $ramBlock]_rf_addr),"
-					puts "		.rdata([getName $ramBlock]_rf_rdata)"
-					puts "	);"
-					puts ""
+					odfi::common::println "	.wen([getName $ramBlock]_wen)," $resolve
+					odfi::common::println "	.wdata([getName $ramBlock]_wdata)," $resolve
+					odfi::common::println "	.waddr([getName $ramBlock]_addr)," $resolve
+					odfi::common::println "	.ren([getName $ramBlock]_rf_ren)," $resolve
+					odfi::common::println "	.raddr([getName $ramBlock]_rf_addr)," $resolve
+					odfi::common::println "	.rdata([getName $ramBlock]_rf_rdata)" $resolve
+					odfi::common::println ");" $resolve
+					odfi::common::println "" $resolve
 				}
 
 				$ramBlock onAttributes {hardware.osys::rfg::ro} {
-					puts "		.wen([getName $ramBlock]_rf_wen),"
-					puts "		.wdata([getName $ramBlock]_rf_wdata),"
-					puts "		.waddr([getName $ramBlock]_rf_addr),"
-					puts "		.ren([getName $ramBlock]_ren),"
-					puts "		.raddr([getName $ramBlock]_addr),"
-					puts "		.rdata([getName $ramBlock]_rdata)"
-					puts "	);"
-					puts ""
+					odfi::common::println "	.wen([getName $ramBlock]_rf_wen)," $resolve
+					odfi::common::println "	.wdata([getName $ramBlock]_rf_wdata)," $resolve
+					odfi::common::println "	.waddr([getName $ramBlock]_rf_addr)," $resolve
+					odfi::common::println "	.ren([getName $ramBlock]_ren)," $resolve
+					odfi::common::println "	.raddr([getName $ramBlock]_addr)," $resolve
+					odfi::common::println "	.rdata([getName $ramBlock]_rdata)" $resolve
+					odfi::common::println ");" $resolve
+					odfi::common::println "" $resolve
 				}
 
 				$ramBlock onAttributes {hardware.osys::rfg::rw} {
-					puts "		.wen([getName $ramBlock]_wen),"
-					puts "		.wdata([getName $ramBlock]_wdata),"
-					puts "		.waddr([getName $ramBlock]_addr),"
-					puts "		.ren([getName $ramBlock]_ren),"
-					puts "		.raddr([getName $ramBlock]_addr),"
-					puts "		.rdata([getName $ramBlock]_rdata)"
-					puts "	);"
-					puts ""
+					odfi::common::println "	.wen([getName $ramBlock]_wen)," $resolve
+					odfi::common::println "	.wdata([getName $ramBlock]_wdata)," $resolve
+					odfi::common::println "	.waddr([getName $ramBlock]_addr)," $resolve
+					odfi::common::println "	.ren([getName $ramBlock]_ren)," $resolve
+					odfi::common::println "	.raddr([getName $ramBlock]_addr)," $resolve
+					odfi::common::println "	.rdata([getName $ramBlock]_rdata)" $resolve
+					odfi::common::println ");" $resolve
+					odfi::common::println "" $resolve
 				}
 
 				$ramBlock onAttributes {software.osys::rfg::rw} {
-					puts "		.wen([getName $ramBlock]_wen),"
-					puts "		.wdata([getName $ramBlock]_wdata),"
-					puts "		.waddr([getName $ramBlock]_addr),"
-					puts "		.ren([getName $ramBlock]_ren),"
-					puts "		.raddr([getName $ramBlock]_addr),"
-					puts "		.rdata([getName $ramBlock]_rdata)"
-					puts "	);"
-					puts ""
+					odfi::common::println "	.wen([getName $ramBlock]_wen)," $resolve
+					odfi::common::println "	.wdata([getName $ramBlock]_wdata)," $resolve
+					odfi::common::println "	.waddr([getName $ramBlock]_addr)," $resolve
+					odfi::common::println "	.ren([getName $ramBlock]_ren)," $resolve
+					odfi::common::println "	.raddr([getName $ramBlock]_addr)," $resolve
+					odfi::common::println "	.rdata([getName $ramBlock]_rdata)" $resolve
+					odfi::common::println ");" $resolve
+					odfi::common::println "" $resolve
 				}
 
 			}
@@ -192,28 +194,30 @@ proc writeRamModule {ramBlock} {
 }
 
 # write RF instance
-proc writeRFModule {registerfile} {
-	puts "	[$registerfile name] [$registerfile name]_I ("
-	puts "		.res_n(res_n),"
-	puts "		.clk(clk),"
-	puts "		.address([$registerfile name]_address),"
-	puts "		.read_data([$registerfile name]_read_data),"
-	puts "		.invalid_address([$registerfile name]_invalid_address),"
-	puts "		.access_complete([$registerfile name]_access_complete),"
-	puts "		.read_en([$registerfile name]_read_en),"
-	puts "		.write_en([$registerfile name]_write_en),"
-	puts "		.write_data([$registerfile name]_write_data),"
+odfi::closures::oproc writeRFModule {registerfile} {
+    odfi::common::println "" $resolve
+	odfi::common::println "[$registerfile name] [$registerfile name]_I (" $resolve
+	odfi::common::println "	.res_n(res_n)," $resolve
+	odfi::common::println "	.clk(clk)," $resolve
+	odfi::common::println "	.address([$registerfile name]_address)," $resolve
+	odfi::common::println "	.read_data([$registerfile name]_read_data)," $resolve
+	odfi::common::println "	.invalid_address([$registerfile name]_invalid_address)," $resolve
+	odfi::common::println "	.access_complete([$registerfile name]_access_complete)," $resolve
+	odfi::common::println "	.read_en([$registerfile name]_read_en)," $resolve
+	odfi::common::println "	.write_en([$registerfile name]_write_en)," $resolve
+	odfi::common::println "	.write_data([$registerfile name]_write_data)," $resolve
+    odfi::common::printlnOutdent
 
-		set signalList {}
+	set signalList {}
 	$registerfile walkDepthFirst {
 		if {[$it isa osys::rfg::RamBlock]} {
 			
 			$it onAttributes {hardware.osys::rfg::rw} { 
-				lappend signalList "		.[getName $it]_addr([$registerfile name]_[getName $it]_addr)"
-				lappend signalList "		.[getName $it]_ren([$registerfile name]_[getName $it]_ren)"
-				lappend signalList "		.[getName $it]_rdata([$registerfile name]_[getName $it]_rdata)"
-				lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
-				lappend signalList "		.[getName $it]_wdata([$registerfile name]_[getName $it]_wdata)"
+				lappend signalList "	    .[getName $it]_addr([getName $it]_addr)"
+				lappend signalList "	    .[getName $it]_ren([getName $it]_ren)"
+				lappend signalList "	    .[getName $it]_rdata([getName $it]_rdata)"
+				lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
+				lappend signalList "	    .[getName $it]_wdata([getName $it]_wdata)"
 			}
 
 		} elseif {[$it isa osys::rfg::Register]} {
@@ -223,52 +227,65 @@ proc writeRFModule {registerfile} {
 					$it onAttributes {hardware.osys::rfg::counter} {
 						
 						$it onAttributes {hardware.osys::rfg::rw} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
-							lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							lappend signalList "	    .[getName $it]_next([getName $it]_next)"
+							lappend signalList "	    .[getName $it]([getName $it])"
+							lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
 						}
 						
 						$it onAttributes {hardware.osys::rfg::wo} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
-							lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							lappend signalList "	    .[getName $it]_next([getName $it]_next)"
+							lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							lappend signalList "	    .[getName $it]([getName $it])"
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "		.[getName $it]_written([$registerfile name]_[getName $it]_written)"
+							lappend signalList "	    .[getName $it]_written([getName $it]_written)"
+						}
+                        
+                        $it onAttributes {hardware.osys::rfg::changed} {
+							lappend signalList "	    .[getName $it]_changed([getName $it]_changed)"
 						}
 
-						lappend signalList "		.[getName $it]_countup([$registerfile name]_[getName $it]_countup)"
+						lappend signalList "	    .[getName $it]_countup([getName $it]_countup)"
 
 					} otherwise {
 
 						$it onAttributes {hardware.osys::rfg::rw} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							lappend signalList "	    .[getName $it]_next([getName $it]_next)"
+							lappend signalList "	    .[getName $it]([getName $it])"
 							
-							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
+								lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
 							}
 						}
 						
 						$it onAttributes {hardware.osys::rfg::wo} {
-							lappend signalList "		.[getName $it]_next([$registerfile name]_[getName $it]_next)"
+							lappend signalList "	    .[getName $it]_next([getName $it]_next)"
 							
-							$it onAttributes {hardware.osys::rfg::hardware_wen} {
-								lappend signalList "		.[getName $it]_wen([$registerfile name]_[getName $it]_wen)"
+							if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
+								lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
 							}
 						}
 
 						$it onAttributes {hardware.osys::rfg::ro} {
-							lappend signalList "		.[getName $it]([$registerfile name]_[getName $it])"
+							lappend signalList "	    .[getName $it]([getName $it])"
 						}
 
 						$it onAttributes {hardware.osys::rfg::software_written} {
-							lappend signalList "		.[getName $it]_written([$registerfile name]_[getName $it]_written)"
+							lappend signalList "	    .[getName $it]_written([getName $it]_written)"
 						}
+
+                        $it onAttributes {hardware.osys::rfg::changed} {
+							lappend signalList "	    .[getName $it]_changed([getName $it]_changed)"
+						}
+
+
+                        $it onAttributes {hardware.osys::rfg::clear} {
+                            lappend signalList "        .[getName $it]_clear([getName $it]_clear)"
+                        }
 
 					}
 
@@ -284,8 +301,8 @@ proc writeRFModule {registerfile} {
 
 	}
 
-	puts [join $signalList ",\n"]
-
-		puts "	);"
-	puts ""
+	odfi::common::println [join $signalList ",\n"] $resolve
+	odfi::common::printlnIndent
+    odfi::common::println ");" $resolve
+	odfi::common::println "" $resolve
 }
