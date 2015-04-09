@@ -5,9 +5,9 @@ import uni.hd.cag.osys.rfg.rf.device._
 
 
 trait RemoteRFLanguage extends RFLanguage {
-  var registerFileDefinition:String  = "tourmalet_extoll_rf.anot.xml"
+  //var registerFileDefinition:String  = "tourmalet_extoll_rf.anot.xml"
   //println("about to make registerfile at " + registerFileDefinition)
-  val registerFile: RegisterFile = RegisterFile(getClass.getResource("/"+registerFileDefinition))
+  val registerFile: RegisterFile //= RegisterFile(getClass.getResource("/"+registerFileDefinition))
   
   //println("made register file at " + registerFile)
   
