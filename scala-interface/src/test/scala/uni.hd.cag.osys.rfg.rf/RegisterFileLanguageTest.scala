@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package uni.hd.cag.osys.rfg.rf
 
 import org.scalatest._
-import uni.hd.cag.osys.rfg.rf.RFLanguage
 import uni.hd.cag.osys.rfg.rf.device.Device
 import uni.hd.cag.osys.rfg.rf.device.simulation.SimpleSimulationDevice
 import com.idyria.osi.ooxoo.core.buffers.extras.transaction.Transaction
