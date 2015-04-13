@@ -42,7 +42,7 @@ namespace eval osys::rfg {
             ## Not Found, try to load package 
             #########
             set packageName "osys::rfg::generator::[string tolower $name]"
-            set generatorName "::${packageName}::$name"
+            set generatorName "::${packageName}::[string toupper $name 0 0]"
             if {[catch "package require $packageName"]} {
                 
                 ## Error 
@@ -161,6 +161,28 @@ namespace eval osys::rfg {
 
 
 
+        }
+
+        public method onRead {group closure1 {keyword ""} {closure2 ""}} {
+    
+            if {[hasAttribute ${group}.osys::rfg::ro] || [hasAttribute ${group}.osys::rfg::rw]} {
+                odfi::closures::doClosure $closure1 1
+            } else {
+
+                if {$closure2 != ""} {
+                    odfi::closures::doClosure $closure2 1
+                }
+            }
+        }
+
+        public method onWrite {group closure1 {keyword ""} {closure2 ""}} {
+            if {[hasAttribute ${group}.osys::rfg::wo] || [hasAttribute ${group}.osys::rfg::rw]} {
+                odfi::closures::doClosure $closure1 1
+            } else {
+                if {$closure2 != ""} {
+                    odfi::closures::doClosure $closure2 1
+                }
+            }
         }
 
         public method onAttributes {attributeList closure1 {keyword ""} {closure2 ""}} {
@@ -332,6 +354,17 @@ namespace eval osys::rfg {
 
     }
 
+    itcl::class Aligner {
+        inherit Common
+        
+        odfi::common::classField public aligment 0
+
+        constructor {cName bits} {Common::constructor $cName} {
+            aligment [expr 2**$bits]
+        }
+
+    }
+
     ######################
     ## Group 
     ######################
@@ -349,12 +382,7 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $cClosure
         }
 
-        ## external Method
-        ####################
-        ## Sources an external RegisterFile 
-
-        public method external {rf_filename {name ""}} {
-            
+        public method sourceRF {rf_filename attribute name} {
             set RF_list_old {}
             set RF_list_new {}
 
@@ -404,11 +432,22 @@ namespace eval osys::rfg {
                         }
                         puts "WARNING: Automatic naming was used for [$RF name] in [$RF parent]"
                     }
-                    $RF attributes hardware {
-                        external
+               $RF attributes hardware {
+                        $attribute
                     }
                 }
             }
+        }
+
+        public method internal {rf_filename {name ""}} {
+           
+            sourceRF $rf_filename internal $name 
+        
+        }
+
+        public method external {rf_filename {name ""}} {
+
+            sourceRF $rf_filename external $name 
 
         }
 
@@ -438,25 +477,19 @@ namespace eval osys::rfg {
  
             ## Add to list
             lappend components $newGroup
-            ## calculate size
-            set size_int 0
             $newGroup parent $this                           
             ## Return
             return $newGroup 
 
         }
+
         public method aligner {bits} {
-            set size [expr "2**$bits"]
+            set newAligner [::new [namespace parent]::Aligner ${this}.#auto ${this}.#auto $bits]
+            lappend components $newAligner
+            $newAligner parent $this
+            return $newAligner
         } 
 
-        public method checker {bits closure} {
-            set start_address $size
-            odfi::closures::doClosure $closure 1
-            set end_address $size
-            if {[expr "$end_address-$start_address"]>[expr "2**$bits"]} {
-                error "The addresspan within the checker in $this is [expr "$end_address-$start_address"] but only [expr "2**$bits"] addresses are allowed!"
-            }  
-        }
         public method onEachComponent closure {
             foreach it $components {
                 odfi::closures::doClosure $closure 1
@@ -648,8 +681,11 @@ namespace eval osys::rfg {
         public method field {fName closure} {
 
             ## Create 
-            set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
-
+            if {$fName == "Reserved"} {
+                set newField [::new [namespace parent]::Field $this.$fName.#auto $fName $closure]
+            } else {
+                set newField [::new [namespace parent]::Field $this.$fName $fName $closure]
+            }
 
             ##puts "Created field: $newField"
 
@@ -667,13 +703,15 @@ namespace eval osys::rfg {
 
         public method reserved {reserved_width} {
 
-            field Reserved {width $reserved_width}
+            field Reserved {
+                name "Reserved"    
+                width $reserved_width
+            }
         }
 
         public method onEachField closure {
 
             odfi::list::each $fields {
-
                 odfi::closures::doClosure $closure 1
 
 
@@ -712,7 +750,9 @@ namespace eval osys::rfg {
         
 
         constructor {cName cClosure} {Common::constructor $cName} {
-
+            attributes software {
+                address_shift 0
+            }
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
@@ -744,7 +784,6 @@ namespace eval osys::rfg {
         odfi::common::classField public reset 0
         
         constructor {cName cClosure} {Common::constructor $cName} {
-
             ## Execute closure 
             odfi::closures::doClosure $cClosure
         }
@@ -768,32 +807,6 @@ namespace eval osys::rfg {
 
     }
 
-    proc attributeFunction {fname} {
-  
-        set attributeName [string trimleft $fname ::]
-
-        ## Category 
-        ##  1. Namespace of attributeFunction call location without leading ::
-        ##  2. Add :: to name
-        #################
-        set category [string trimleft [uplevel namespace current] ::]
-
-        set attributeName ${category}::$attributeName
-
-        set res "proc $fname args {
-            uplevel 1 addAttribute $attributeName \$args 
-        }"
-        uplevel 1 $res 
- 
-    }  
-
-    proc attributeGroup {fname} {
-        set res "proc $fname args {
-            uplevel 1 attributes [string trimleft $fname ::] \$args
-        }"
-        uplevel 1 $res
-    }
-
     itcl::class RegisterFile {
         inherit Group Region
         ## Constructor
@@ -808,6 +821,6 @@ namespace eval osys::rfg {
             odfi::closures::doClosure $closure
         }
     }
-
     source [file dirname [info script]]/globalfunctions.tcl
+    source [file dirname [info script]]/rfgfunctions.tcl
 }

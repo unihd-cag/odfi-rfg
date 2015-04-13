@@ -109,57 +109,75 @@ registerFile <xsl:value-of select="@name"/> {
 
 <!-- depth --> 
 <xsl:if test="@addrsize">
-<xsl:value-of select="$hier-level-tab"/>    depth [expr pow(2,<xsl:value-of select="@addrsize"/>)]
+<xsl:value-of select="$hier-level-tab"/>    depth [expr int(pow(2,<xsl:value-of select="@addrsize"/>))]
 <xsl:text>
     
 </xsl:text>   
 </xsl:if>
 
     <!-- Rights and attributes--> 
-    <xsl:value-of select="$hier-level-tab-more"/>attributes software {
+    <xsl:value-of select="$hier-level-tab-more"/>software {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>
-</xsl:text>
-    <xsl:value-of select="$hier-level-tab-more"/>}    
+    </xsl:text>
+    <xsl:if test="@addr_shift">
+        <xsl:value-of select="$hier-level-tab-more"/>   address_shift <xsl:value-of select="@addr_shift"/>
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>  
+<xsl:value-of select="$hier-level-tab-more"/>}    
 
 <xsl:text>  
 </xsl:text>
 
-    <xsl:value-of select="$hier-level-tab-more"/>attributes hardware {
+    <xsl:value-of select="$hier-level-tab-more"/>hardware {
 
     <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
     <xsl:text>
 </xsl:text>
-    
+<xsl:if test="@shared_bus='1'">
+    <xsl:value-of select="$hier-level-tab-more"/>   shared_bus 
+</xsl:if>
+    <xsl:text>
+    </xsl:text> 
     <!-- Special Attributes -->
     <!-- ################### -->
     <xsl:if test="@counter">
-        <xsl:value-of select="$hier-level-tab-more"/>    counter
+        <xsl:value-of select="$hier-level-tab-more"/>   counter
     </xsl:if>
+    <xsl:text>
+    </xsl:text>  
+    <xsl:if test="@counter='2'">
+        <xsl:value-of select="$hier-level-tab-more"/>   edge_trigger
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>  
     <xsl:if test="@rreinit">
-        <xsl:value-of select="$hier-level-tab-more"/>    rreinit
+        <xsl:value-of select="$hier-level-tab-more"/>   rreinit
     </xsl:if>
-    <xsl:if test="@sw_written">
-        <xsl:value-of select="$hier-level-tab-more"/>    software_written <xsl:value-of select="@sw_written"></xsl:value-of>
-        <xsl:text>
-        </xsl:text>
+    <xsl:text>
+    </xsl:text>  
+    <xsl:if test="@sw_written='1'">
+        <xsl:value-of select="$hier-level-tab-more"/>   software_written
     </xsl:if>
-    <xsl:if test="@hw_wen">
-        <xsl:value-of select="$hier-level-tab-more"/>hardware_wen
-        <xsl:text>
-        </xsl:text>  
+    <xsl:text>
+    </xsl:text>
+    <xsl:if test="@sw_written='2'">
+        <xsl:value-of select="$hier-level-tab-more"/>   changed
     </xsl:if>
+    <xsl:text>
+    </xsl:text> 
+    <xsl:if test="not(@hw_wen) and not(@counter)">
+        <xsl:value-of select="$hier-level-tab-more"/>   no_wen
+    </xsl:if>
+    <xsl:text>
+    </xsl:text> 
     <xsl:if test="@external">
-        <xsl:value-of select="$hier-level-tab-more"/>external
-        <xsl:text>
-        </xsl:text>  
+        <xsl:value-of select="$hier-level-tab-more"/>   external
     </xsl:if>     
     <xsl:text>
-</xsl:text>
+    </xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/>}
-
-<xsl:text>
-</xsl:text>
     }
 
 <xsl:apply-templates />
@@ -225,7 +243,7 @@ registerFile <xsl:value-of select="@name"/> {
 <!-- Special Attributes -->
 <!-- ################### -->
 <xsl:if test="./rreinit">
-<xsl:value-of select="$hier-level-tab"/>    attributes hardware {
+<xsl:value-of select="$hier-level-tab"/>    hardware {
     
     <xsl:value-of select="$hier-level-tab"/>    rreinit_source    
 
@@ -240,7 +258,21 @@ registerFile <xsl:value-of select="@name"/> {
 
 
 </xsl:template>
+    <!-- ########################## -->
+    <!-- Aligner --> 
+    <!-- ########################## -->
+    <xsl:template match="aligner">
+    <!-- Gather depth -->
+    <xsl:variable name="hier-pos"><xsl:number from="regroot" count="regroot|reg64|hwreg" level="multiple" format="1"></xsl:number></xsl:variable>
+    <xsl:variable name="hier-level-tab"><xsl:value-of select="fn:replace(fn:replace($hier-pos,'[0-9]',$tab),'\.','')"></xsl:value-of></xsl:variable>
+    <xsl:variable name="hier-level-tab-more"><xsl:value-of select="$hier-level-tab"></xsl:value-of><xsl:text>    </xsl:text></xsl:variable>
 
+    <xsl:value-of select="$hier-level-tab"/>aligner <xsl:value-of select="@to"/>
+    <xsl:text>
+    
+    </xsl:text> 
+<xsl:apply-templates />
+</xsl:template>
     <!-- Fields -->
     <!-- ################## -->
     <xsl:template match="hwreg">
@@ -272,79 +304,87 @@ registerFile <xsl:value-of select="@name"/> {
         <xsl:when test="fn:matches(@width,'^[A-Z_]+')">width        $<xsl:value-of select="@width"/></xsl:when>
         <xsl:otherwise>width        <xsl:value-of select="@width"/></xsl:otherwise>
     </xsl:choose>
-<xsl:text>
-</xsl:text>
-    
     <!-- Reset -->
+    <xsl:text>
+    </xsl:text>
     <xsl:value-of select="$hier-level-tab-more"/><xsl:choose>
         <xsl:when test="fn:matches(@reset,'^[A-Z_]+')">reset        $<xsl:value-of select="@reset"/></xsl:when>
         <xsl:otherwise>reset        <xsl:value-of select="@reset"/></xsl:otherwise>
     </xsl:choose>
-    
-<xsl:text>
-</xsl:text>
-
+    <xsl:text>
+    </xsl:text>
     <!-- Rights and attributes--> 
-    <xsl:value-of select="$hier-level-tab-more"/>attributes software {
+    <xsl:value-of select="$hier-level-tab-more"/>software {
     <xsl:value-of select="$hier-level-tab-more"/>       <xsl:value-of select="@sw"/>
     <xsl:text>
-</xsl:text>
+    </xsl:text>
 <!-- Special Attributes -->
     <!-- ################### -->
     <xsl:if test="@sw_write_clr">
-        <xsl:value-of select="$hier-level-tab-more"/>    software_write_clear
+    <xsl:value-of select="$hier-level-tab-more"/>   write_clear
     </xsl:if>
-    <xsl:value-of select="$hier-level-tab-more"/>}    
-
-<xsl:text>  
-</xsl:text>
-
-    <xsl:value-of select="$hier-level-tab-more"/>attributes hardware {
-
-    <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
     <xsl:text>
-</xsl:text>
-    
+    </xsl:text>
+    <xsl:if test="@sw_write_xor">
+    <xsl:value-of select="$hier-level-tab-more"/>   write_xor
+    </xsl:if> 
+    <xsl:text>
+    </xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>}    
+    <xsl:text>
+    </xsl:text>
+    <xsl:value-of select="$hier-level-tab-more"/>hardware {
+    <xsl:value-of select="$hier-level-tab-more"/> <xsl:value-of select="@hw"/>
     <!-- Special Attributes -->
     <!-- ################### -->
+    <xsl:text>
+    </xsl:text>
     <xsl:if test="@counter">
-        <xsl:value-of select="$hier-level-tab-more"/>    counter
+    <xsl:value-of select="$hier-level-tab-more"/>   counter
     </xsl:if>
+    <xsl:text>
+    </xsl:text>
+    <xsl:if test="@counter='2'">
+    <xsl:value-of select="$hier-level-tab-more"/>   edge_trigger
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>
     <xsl:if test="@rreinit">
-        <xsl:value-of select="$hier-level-tab-more"/>    rreinit
+    <xsl:value-of select="$hier-level-tab-more"/>   rreinit
     </xsl:if>
-    <xsl:if test="@sw_written">
-        <xsl:value-of select="$hier-level-tab-more"/>    software_written <xsl:value-of select="@sw_written"></xsl:value-of>
-        <xsl:text>
-        </xsl:text>
+    <xsl:text>
+    </xsl:text>
+    <xsl:if test="@sw_written='1'">
+    <xsl:value-of select="$hier-level-tab-more"/>   software_written
     </xsl:if>
-    <xsl:if test="@hw_wen">
-        <xsl:value-of select="$hier-level-tab-more"/>hardware_wen  
+    <xsl:text>
+    </xsl:text>
+    <xsl:if test="@sw_written='2'">
+    <xsl:value-of select="$hier-level-tab-more"/>   changed
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>
+    <xsl:if test="not(@hw_wen) and not(@counter)">
+    <xsl:value-of select="$hier-level-tab-more"/>   no_wen
     </xsl:if>    
     <xsl:text>
-</xsl:text>
+    </xsl:text>
     <xsl:if test="@hw_clr">
-        <xsl:value-of select="$hier-level-tab-more"/>hardware_clear
-    </xsl:if>    
+    <xsl:value-of select="$hier-level-tab-more"/>   clear
+    </xsl:if> 
     <xsl:text>
-</xsl:text>
+    </xsl:text>
     <xsl:if test="@sticky">
-        <xsl:value-of select="$hier-level-tab-more"/>sticky
-    </xsl:if>    
+    <xsl:value-of select="$hier-level-tab-more"/>   sticky
+    </xsl:if>
     <xsl:text>
-</xsl:text>
-    <xsl:if test="@sw_write_xor">
-        <xsl:value-of select="$hier-level-tab-more"/>software_write_xor
-    </xsl:if>    
+    </xsl:text>
+<xsl:value-of select="$hier-level-tab-more"/>}
     <xsl:text>
-</xsl:text>
-    <xsl:value-of select="$hier-level-tab-more"/>}
-
-<xsl:text>
-</xsl:text>
-
+    </xsl:text>
 <xsl:value-of select="$hier-level-tab"/>}
-
+    <xsl:text>
+    </xsl:text>
 </xsl:template>
     <!-- ################## -->
     <!-- Reserved           -->
@@ -428,4 +468,4 @@ registerFile <xsl:value-of select="@name"/> {
     <!-- Ignores --> 
     <!-- ######## -->
     <xsl:template match="node()"></xsl:template>
- </xsl:stylesheet>
+</xsl:stylesheet>

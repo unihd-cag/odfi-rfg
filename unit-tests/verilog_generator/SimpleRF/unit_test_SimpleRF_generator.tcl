@@ -1,19 +1,11 @@
-source ../../../tcl/rfg.tm
-source ../../../tcl/generator-verilog/VerilogGenerator.tm
-source ../../../tcl/address-hierarchical/address-hierarchical.tm
+package require osys::rfg 1.0.0
+package require osys::generator 1.0.0
 
-catch {source SimpleRF.rf} result
+readRF SimpleRF.rf
 
-puts $result
-
-osys::rfg::address::hierarchical::calculate $result
-##osys::rfg::address::hierarchical::printTable $result
-
-set veriloggenerator [::new osys::rfg::veriloggenerator::VerilogGenerator #auto $result]
-
-set destinationFile "compare_data/SimpleRF.v"
-
-$veriloggenerator produce_RegisterFile $destinationFile
+generator verilog {
+    destinationPath "compare_data/"
+}
 
 catch {exec sh "iverilog_run.sh"} result
 if {$result != "VCD info: dumpfile SimpleRF.vcd opened for output."} {

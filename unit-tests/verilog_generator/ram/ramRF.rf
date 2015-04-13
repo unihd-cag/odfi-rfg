@@ -2,12 +2,12 @@
 osys::rfg::registerFile ramRF {
     group info_rf {
        
-#        ramBlock TestRAM {
-#            width 16
-#            depth 32 
-#            software rw
-#            hardware rw
-#        }
+        ramBlock TestRAM {
+            width 16
+            depth 32 
+            software rw
+            hardware rw
+        }
 #
 #        ramBlock TestRAM1 {
 #            width 16
@@ -36,12 +36,12 @@ osys::rfg::registerFile ramRF {
 #            hardware rw
 #       }
 #
-        ramBlock TestRAM5 {
-            width 16
-            depth 32
-            software wo
-            hardware rw
-        }
+#    ramBlock TestRAM5 {
+#            width 16
+#            depth 32
+#            software wo
+#            hardware rw
+#        }
 #        
 #        ramBlock TestRAM6 {
 #            width 16

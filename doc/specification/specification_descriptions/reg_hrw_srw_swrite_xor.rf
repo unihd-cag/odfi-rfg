@@ -1,0 +1,15 @@
+registerFile reg_hrw_srw_swrite_xor {
+    register test {
+        field test_field {
+            width 32
+            reset 32'h0
+            software {
+                rw
+                write_xor
+            }
+            hardware {
+                rw
+            }
+        }
+    }
+}

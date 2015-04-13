@@ -15,43 +15,29 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+proc attributeFunction {fname} {
 
-## Groups
-########################
+    set attributeName [string trimleft $fname ::]
 
-attributeGroup ::hardware
-attributeGroup ::software
+    ## Category 
+    ##  1. Namespace of attributeFunction call location without leading ::
+    ##  2. Add :: to name
+    #################
+    set category [string trimleft [uplevel namespace current] ::]
 
-## Rights
-########################
+    set attributeName ${category}::$attributeName
 
-attributeFunction ::rw
-attributeFunction ::ro
-attributeFunction ::wo
+    set res "proc $fname args {
+        uplevel 1 addAttribute $attributeName \$args 
+    }"
+    uplevel 1 $res 
 
-## Verilog specials
-########################
+}  
 
-attributeFunction ::counter
-attributeFunction ::rreinit
-attributeFunction ::rreinit_source
-attributeFunction ::software_written
-attributeFunction ::hardware_wen
-attributeFunction ::sticky
-attributeFunction ::software_write_xor
-attributeFunction ::external
-attributeFunction ::hardware_clear
-attributeFunction ::software_write_clear
+proc attributeGroup {fname} {
+    set res "proc $fname args {
+        uplevel 1 attributes [string trimleft $fname ::] \$args
+    }"
+    uplevel 1 $res
+}
 
-## Addressing
-attributeFunction ::relative_address
-attributeFunction ::absolute_address
-attributeFunction ::absolute_start_address
-attributeFunction ::absolute_end_address
-attributeFunction ::aligner
-attributeFunction ::size
-
-## RFG 
-############
-attributeFunction file 
-attributeFunction line

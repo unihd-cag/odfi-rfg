@@ -22,7 +22,7 @@ package require odfi::list 2.0.0
 namespace eval osys::rfg::generator::xmlgenerator {
 
 
-    itcl::class XMLGenerator {
+    itcl::class Xmlgenerator {
 
         public variable registerFile 
 
@@ -43,7 +43,7 @@ namespace eval osys::rfg::generator::xmlgenerator {
             }
         }
 
-        public method produce args {
+        public method produce {destinationPath {generator ""}} {
 
 
             ## Create Special Stream 
@@ -57,7 +57,8 @@ namespace eval osys::rfg::generator::xmlgenerator {
             $registerFile onEachComponent {
                 if {[$it isa osys::rfg::Group]} {
                     writeGroup $out $it                
-                } else {
+                }
+                if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
 
                     writeRegister $out $it
                 }
@@ -66,14 +67,12 @@ namespace eval osys::rfg::generator::xmlgenerator {
             odfi::common::printlnOutdent
             odfi::common::println "</RegisterFile>"  $out 
 
-        
-
+            file mkdir $destinationPath
+            ::puts "XMLGenerator processing $registerFile > ${destinationPath}[$registerFile name].xml"
             ## Read  form special stream and return 
             flush $out
             set res [read $out]
-            close $out
-            return $res
-
+            odfi::files::writeToFile ${destinationPath}[$registerFile name].xml $res
 
 
         }
@@ -90,7 +89,8 @@ namespace eval osys::rfg::generator::xmlgenerator {
             $group onEachComponent {
                 if {[$it isa osys::rfg::Group]} {
                     writeGroup $out $it                
-                } else {
+                }
+                if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
                     writeRegister $out $it
                 }
             } 

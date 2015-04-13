@@ -48,7 +48,7 @@
                                 lappend signalList "        .${context}[getName $it]_next()"
                                 lappend signalList "        .${context}[getName $it]()"
                                 
-                                $it onAttributes {hardware.osys::rfg::hardware_wen} {
+                                if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
                                     lappend signalList "        .${context}[getName $it]_wen()"
                                 }
                             }
@@ -56,7 +56,7 @@
                             $it onAttributes {hardware.osys::rfg::wo} {
                                 lappend signalList "        .${context}[getName $it]_next()"
                                 
-                                $it onAttributes {hardware.osys::rfg::hardware_wen} {
+                                if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
                                     lappend signalList "        .${context}[getName $it]_wen()"
                                 }
                             }
@@ -69,7 +69,7 @@
                                 lappend signalList "        .${context}[getName $it]_written()"
                             }
 
-                            $it onAttributes {hardware.osys::rfg::hardware_clear} {
+                            $it onAttributes {hardware.osys::rfg::clear} {
                                 lappend signalList "    .${context}[getName $it]_clear()"
                             } 
 
@@ -168,7 +168,7 @@ proc writeBlackbox {object context} {
                                 lappend signalList "    output wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]"
                             }   
 
-                            $it onAttributes {hardware.osys::rfg::hardware_wen} {
+                            if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
                                 lappend signalList "    input wire ${context}[getName $it]_wen"
                             }
                         }
@@ -180,7 +180,7 @@ proc writeBlackbox {object context} {
                                 lappend signalList "    input wire\[[expr {[$it width]-1}]:0\] ${context}[getName $it]_next"
                             }   
 
-                            $it onAttributes {hardware.osys::rfg::hardware_wen} {
+                            if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
                                 lappend signalList "    input wire ${context}[getName $it]_wen" 
                             }
                         }
@@ -198,7 +198,7 @@ proc writeBlackbox {object context} {
                             lappend signalList "    output wire ${context}[getName $it]_written" 
                         }
 
-                        $it onAttributes {hardware.osys::rfg::hardware_clear} {
+                        $it onAttributes {hardware.osys::rfg::clear} {
                             lappend signalList "    input wire ${context}[getName $it]_clear"   
                         }
 
@@ -288,7 +288,7 @@ proc writeBlackbox {object context} {
                                 lappend signalList "        .[getName $it]_next([getName $it]_next)"
                                 lappend signalList "        .[getName $it]([getName $it])"
                                 
-                                $it onAttributes {hardware.osys::rfg::hardware_wen} {
+                                if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
                                     lappend signalList "        .[getName $it]_wen([getName $it]_wen)"
                                 }
                             }
@@ -296,7 +296,7 @@ proc writeBlackbox {object context} {
                             $it onAttributes {hardware.osys::rfg::wo} {
                                 lappend signalList "        .[getName $it]_next([getName $it]_next)"
                                 
-                                $it onAttributes {hardware.osys::rfg::hardware_wen} {
+                                if {![$it hasAttribute hardware.osys::rfg::no_wen]} {
                                     lappend signalList "        .[getName $it]_wen([getName $it]_wen)"
                                 }
                             }
@@ -309,7 +309,7 @@ proc writeBlackbox {object context} {
                                 lappend signalList "        .[getName $it]_written([getName $it]_written)"
                             }
 
-                            $it onAttributes {hardware.osys::rfg::hardware_clear} {
+                            $it onAttributes {hardware.osys::rfg::clear} {
                                 lappend signalList "        .[getName $it]_clear([getName $it]_clear)"   
                             }
 
