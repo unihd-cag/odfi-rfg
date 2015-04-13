@@ -42,3 +42,9 @@ generator wrapper {
     destinationPath "verilog/"
 
 }
+
+generator egenerator {
+
+    destinationPath "e/"
+
+}
