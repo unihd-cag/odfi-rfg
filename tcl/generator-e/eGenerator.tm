@@ -23,7 +23,7 @@ package require odfi::files 1.0.0
 
 namespace eval osys::rfg::generator::egenerator {
 
-    itcl::class EGenerator {
+    itcl::class Egenerator {
 
         public variable registerFile 
 
@@ -39,12 +39,14 @@ namespace eval osys::rfg::generator::egenerator {
             }
         }
 
-        public method produce_RegisterFile destinationFile {
-            set res [produce ]
-            odfi::files::writeToFile $destinationFile $res
+        public method produce {destinationPath {generator ""}} {
+            file mkdir $destinationPath
+            ::puts "eGenerator processing ${destinationPath}[$registerFile name].e"
+            set res [produce_RegisterFile ]
+            odfi::files::writeToFile ${destinationPath}[$registerFile name].e $res
         }
 
-        public method produce args {
+        public method produce_RegisterFile args {
             set out [odfi::common::newStringChannel]
         
             odfi::common::println "<'" $out
