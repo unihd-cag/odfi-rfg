@@ -1,0 +1,5 @@
+registerFile example {
+    external sub0.rf sub0
+    external sub1.rf sub1
+    external sub2.rf sub2
+}

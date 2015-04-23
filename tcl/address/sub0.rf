@@ -1,0 +1,10 @@
+registerFile sub0 {
+    group Test {
+        register A {
+        }
+        register B {
+        }
+        register C {
+        }
+    }
+}
