@@ -27,6 +27,10 @@ namespace eval osys::rfg::address {
 
     proc calculate rf {
         lappend RF_List $rf
+        $rf attributes software {
+            relative_address 0
+            absolute_address 0
+        }
         ## Setting the size of the primitives (Register and RamBlocks)
         ## and creating a RegisterFile list
         $rf walkDepthFirst {
@@ -61,17 +65,7 @@ namespace eval osys::rfg::address {
             set size 0
             set auto_align [$rf register_size]
             $regfile walkDepthFirst {
-                if {[$it isa osys::rfg::Register]} {
-                    set relative_address [expr wide(ceil(double($relative_address)/double($auto_align)))*$auto_align]
-                    $it attributes software {
-                        relative_address $relative_address
-                    }
-                    set auto_align [$it getAttributeValue software.osys::rfg::size]
-                    set size [expr $relative_address + [$it getAttributeValue software.osys::rfg::size]]
-                    incr relative_address [$it getAttributeValue software.osys::rfg::size]
-                }
-
-                if {[$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
+                if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
                     if {$auto_align < [$it getAttributeValue software.osys::rfg::size]} {
                         set auto_align [$it getAttributeValue software.osys::rfg::size]
                     }
@@ -84,6 +78,12 @@ namespace eval osys::rfg::address {
                     incr relative_address [$it getAttributeValue software.osys::rfg::size]
                 }
 
+                if {[$it isa osys::rfg::Aligner]} {
+                    if {$auto_align < [$it aligment]} {
+                        set auto_align [$it aligment]
+                    }
+                }
+
                 if {[$it isa osys::rfg::RegisterFile]} {
                     return false
                 }
@@ -93,13 +93,31 @@ namespace eval osys::rfg::address {
                 size [expr 2**[ld $size]]
             }
         }
-        ::puts "$rf Rel: [$rf getAttributeValue software.osys::rfg::relative_address] Size: [$rf getAttributeValue software.osys::rfg::size]"
-        $rf walkDepthFirst {
-            ::puts "$it Rel: [$it getAttributeValue software.osys::rfg::relative_address]  Size: [$it getAttributeValue software.osys::rfg::size]"
-            return true
+
+        ## Walking through the RF list in correct order to set absolute addresses
+        
+        foreach regfile $RF_List {
+            $regfile walkDepthFirst {
+                if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RegisterFile] || [$it isa osys::rfg::RamBlock]} {
+                    set relative_address [$it getAttributeValue software.osys::rfg::relative_address]
+                    $it attributes software {
+                        absolute_address [expr [$regfile getAttributeValue software.osys::rfg::absolute_address] + $relative_address]
+                    }
+                }
+
+                if {[$it isa osys::rfg::RegisterFile]} {
+                    return false
+                }
+
+                return true
+
+            }
         }
 
-
+        $rf walkDepthFirst {
+            ::puts "[$it name] AbsAddr: [$it getAttributeValue software.osys::rfg::absolute_address] RelAddr: [$it getAttributeValue software.osys::rfg::relative_address] Size: [$it getAttributeValue software.osys::rfg::size]"
+            return true
+        }
     }
 
 }
