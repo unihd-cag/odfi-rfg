@@ -14,11 +14,11 @@ odfi::closures::oproc writeRamBlockInterface {it} {
             output [getName $it]_rf_addr wire [ld [$it depth]]
         }
         $it onRead {software} {
-            output [getName $it]_rf_ren reg
+            output [getName $it]_rf_ren [find_internalRF $it $rf]
             input [getName $it]_rf_rdata wire [$it width]
         }
         $it onWrite {software} {
-            output [getName $it]_rf_wen reg
+            output [getName $it]_rf_wen [find_internalRF $it $rf]
             output [getName $it]_rf_wdata wire [$it width]
         }
 
@@ -939,6 +939,7 @@ odfi::closures::oproc writeAddrComment {object} {
     $object walkDepthFirst {
         if {(![$it isa osys::rfg::Group] && ![$it isa osys::rfg::Aligner]) || [$it isa osys::rfg::RegisterFile]} {
             lappend str "[getName $it]: relative Address([expr [getAddrBits $object] - 1]:[getRFAddrOffset $object]) : [expr [$it getAttributeValue software.osys::rfg::relative_address] / 2**[getRFAddrOffset $object] ] size (Byte): [$it getAttributeValue software.osys::rfg::size]"
+            lappend str "InternalDebug: relativeAddress(Byte) : [expr [$it getAttributeValue software.osys::rfg::relative_address]]"
         }
         if {[$it isa osys::rfg::RegisterFile]} {
             return false

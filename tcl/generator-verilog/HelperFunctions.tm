@@ -211,18 +211,29 @@ proc getRFmaxWidth {registerfile} {
 
 # function to get the address Bits for the register file 
 proc getRFsize {registerfile} {
-	set size 0
-	set offset [$registerfile getAttributeValue software.osys::rfg::absolute_address]
-	$registerfile walk {
-		if {![$item isa osys::rfg::Group]} {
-		 	if {[string is wideinteger [$item getAttributeValue software.osys::rfg::absolute_address]]} {
-		 		if {$size <= [$item getAttributeValue software.osys::rfg::absolute_address]} {
-		 			set size [expr [$item getAttributeValue software.osys::rfg::absolute_address]+[$item getAttributeValue software.osys::rfg::size]]
-		 		}
-		 	}
-		}
-	}
-	return [expr $size - $offset]
+#	set size 0
+#	set offset [$registerfile getAttributeValue software.osys::rfg::absolute_address]
+#	$registerfile walk {
+#		if {![$item isa osys::rfg::Group]} {
+#		 	if {[$registerfile name] == "nw"} {
+#                ::puts "Item: [$item name]"
+#                ::puts "Offset $offset"
+#                ::puts "Absolute Address: [$item getAttributeValue software.osys::rfg::absolute_address]"
+#                ::puts "Absolute - Offset: [$item getAttributeValue software.osys::rfg::absolute_address] - $offset"
+#                ::puts "Size: [$item getAttributeValue software.osys::rfg::size]"
+#                ::puts "Current size: $size"
+#            }
+#            if {[string is wideinteger [$item getAttributeValue software.osys::rfg::absolute_address]]} {
+#		 		if {$size <= [expr [$item getAttributeValue software.osys::rfg::absolute_address]- $offset + [$item getAttributeValue software.osys::rfg::size]]} {
+#		 			set size [expr [$item getAttributeValue software.osys::rfg::absolute_address] - $offset +[$item getAttributeValue software.osys::rfg::size]]
+#		 		}
+#		 	}
+#		}
+#	}
+#    ::puts "getRFsize: $registerfile -> size: $size offset: $offset"
+#    ::puts "Calculated size: [expr $size - $offset]"
+    return [$registerfile getAttributeValue software.osys::rfg::size]
+#    return $size
 }
 
 proc getAddrBits {registerfile} {
