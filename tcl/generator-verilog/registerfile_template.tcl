@@ -550,7 +550,7 @@ odfi::closures::oproc writeRegisterBlock {object} {
     ## check if anything is generated
     if {[CheckForRegBlock $object] == true} {
         comment "Register: [getName $object]"
-        always $always_content {
+        clocked clk res_n $res_type {
             ## write Reset
             writeRegisterReset $object
             ## write Software write
@@ -678,7 +678,9 @@ odfi::closures::oproc writeRamBlock {object} {
             }
         }
         comment "RamBlock: [getName $object]"
-        always $always_content {
+        
+        clocked clk res_n $res_type {
+        #always $always_content {}
             writeRamBlockReset $object
             velse {
                 writeRamBlockWrite $object
@@ -691,7 +693,8 @@ odfi::closures::oproc writeRamBlock {object} {
 
 odfi::closures::oproc writeRFBlock {object} {
     comment "RegisterFile: [getName $object]"
-    always $always_content {
+    clocked clk res_n $res_type {
+    #always $always_content {}
         vif "!res_n" {
             vputs "[getName $object]_write_en <= 1'b0"
             vputs "[getName $object]_read_en <= 1'b0"
@@ -864,7 +867,8 @@ odfi::closures::oproc writeRFSoftRead {object} {
 
 odfi::closures::oproc writeSoftReadInterface {object} {
     comment "Address Decoder Software Read:"
-    always $always_content { 
+    clocked clk res_n $res_type {
+    #always $always_content {}
         vif "!res_n" {
             vputs "invalid_address <= 1'b0"
             vputs "access_complete <= 1'b0"
@@ -961,12 +965,16 @@ osys::verilogInterface::module [$rf name] {
     writeVModuleInterface $rf
 
 } body {
-    set always_content "posedge clk"
+    set res_type "sync" 
     $options onAttributes {options.::reset} {
-        if {[$options getAttributeValue options.::reset] != "sync"} {
-            set always_content "posedge clk or negedge res_n"    
-        }
+        set res_type [$options getAttributeValue options.::reset]
     }
+    #set always_content "posedge clk"
+    #$options onAttributes {options.::reset} {
+    #    if {[$options getAttributeValue options.::reset] != "sync"} {
+    #        set always_content "posedge clk or negedge res_n"    
+    #    }
+    #}
     ## Write Internal Signals
     writeInternalSigs $rf
 
