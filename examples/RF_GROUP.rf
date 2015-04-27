@@ -1,0 +1,57 @@
+registerFile RF_GROUP {
+
+    group GROUP_0 {
+
+        register REG_6 {
+            field field_0 {
+                width        16
+                reset        16'h0
+                attributes software {
+                }    
+                attributes hardware {
+                }
+            }
+            field field_1 {
+                width        32
+                attributes software {
+                }    
+                attributes hardware {
+                }
+            }
+            field field_2 {
+                width        16
+                attributes software {
+                }    
+                attributes hardware {
+                }
+            }
+        }
+
+        ramBlock RAM_2 {
+            width 64
+            depth 2
+            software rw
+            hardware rw
+        }
+
+        group GROUP_1 {
+
+            register REG_7 {
+                field field_0 {
+                    width        32
+                    attributes software {
+                    }    
+                    attributes hardware {
+                    }
+                }
+                field field_1 {
+                    width        32
+                    attributes software {
+                    }    
+                    attributes hardware {
+                    }
+                }
+            }
+        }
+    }
+}

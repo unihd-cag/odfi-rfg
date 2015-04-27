@@ -1,0 +1,48 @@
+registerFile RF_BOTTOM {
+
+    register REG_2 {
+        field field_0 {
+            width        16
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+        field field_1 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+    }
+
+    register REG_3 {
+        field field_0 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+        field field_1 {
+            width        32
+            attributes software {
+            }    
+            attributes hardware {
+            }
+        }
+    }
+    ramBlock RAM_0 {
+        width 64
+        depth 2
+        software rw
+        hardware rw
+    }
+    ramBlock RAM_1 {
+        width 64
+        depth 4 
+        software rw
+        hardware rw
+    }
+}
