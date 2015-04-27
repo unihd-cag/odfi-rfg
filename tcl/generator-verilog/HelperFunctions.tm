@@ -137,6 +137,9 @@ proc CheckForRegBlock {object} {
 
 proc hasReset {object} {
     set return_value false
+    $object onAttributes {hardware.osys::rfg::rreinit_source} {
+        set return_value true
+    }
     $object onEachField {
        if {[$it reset] != ""} {
             set return_value true 

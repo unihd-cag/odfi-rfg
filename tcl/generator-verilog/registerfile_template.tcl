@@ -213,44 +213,43 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
 
     $it onAttributes {hardware.osys::rfg::rreinit_source} {
         reg rreinit
-    } otherwise {
+    }
 
-        $it onEachField {
-            if {[$it name] != "Reserved"} {
-                $it onAttributes {hardware.osys::rfg::counter} {
-                    
-                    ## Check if this is equivilant
-                    $it onWrite {hardware} {
+    $it onEachField {
+        if {[$it name] != "Reserved"} {
+            $it onAttributes {hardware.osys::rfg::counter} {
+                
+                ## Check if this is equivilant
+                $it onWrite {hardware} {
+                    reg [getName $it]_load_enable
+                    reg [getName $it]_load_value [$it width]
+                } otherwise {
+                    $it onWrite {software} {
                         reg [getName $it]_load_enable
                         reg [getName $it]_load_value [$it width]
-                    } otherwise {
-                        $it onWrite {software} {
-                            reg [getName $it]_load_enable
-                            reg [getName $it]_load_value [$it width]
-                        }
                     }
-                    $it onAttributes {hardware.osys::rfg::edge_trigger} {
-                        reg [getName $it]_countup
-                        reg [getName $it]_edge_last
-                    }
-
-                    if {![$it hasAttribute hardware.osys::rfg::ro] && \
-                        ![$it hasAttribute hardware.osys::rfg::rw]} {
-                        wire [getName $it] [$it width]
-                    }
-                        
-                } otherwise {
-                    
-                    $it onAttributes {hardware.osys::rfg::changed} {
-                            reg [getName $it]_res_in_last_cycle
-                    }
-
-                    if {![$it hasAttribute hardware.osys::rfg::ro] && \
-                        ![$it hasAttribute hardware.osys::rfg::rw] } {
-                        reg [getName $it] [$it width]
-                    }
-
                 }
+                $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                    reg [getName $it]_countup
+                    reg [getName $it]_edge_last
+                }
+
+                if {![$it hasAttribute hardware.osys::rfg::ro] && \
+                    ![$it hasAttribute hardware.osys::rfg::rw]} {
+                    wire [getName $it] [$it width]
+                }
+                    
+            } otherwise {
+                
+                $it onAttributes {hardware.osys::rfg::changed} {
+                        reg [getName $it]_res_in_last_cycle
+                }
+
+                if {![$it hasAttribute hardware.osys::rfg::ro] && \
+                    ![$it hasAttribute hardware.osys::rfg::rw] } {
+                    reg [getName $it] [$it width]
+                }
+
             }
         }
     }
@@ -419,16 +418,21 @@ odfi::closures::oproc writeFieldHardWrite {object} {
 }
 
 odfi::closures::oproc writeRegisterReset {object} {
-    $object onAttributes {hardware.osys::rfg::rreinit_source} {
-        
-        vif "!res_n" {
-            vputs "rreinit <= 1'b0"    
-        }
-
-    } otherwise {
-        
+#    $object onAttributes {hardware.osys::rfg::rreinit_source} {
+#        
+#        vif "!res_n" {
+#            vputs "rreinit <= 1'b0"    
+#        }
+#
+#    } otherwise {
+#        
         if {[hasReset $object] == true} {
             vif "!res_n" {
+
+                $object onAttributes {hardware.osys::rfg::rreinit_source} {
+                    vputs "rreinit <= 1'b0"
+                }
+
                 $object onEachField {
                     $it onAttributes {hardware.osys::rfg::counter} {
                         
@@ -474,7 +478,7 @@ odfi::closures::oproc writeRegisterReset {object} {
                 }
             }
         }
-    }
+    #}
 }
 
 odfi::closures::oproc writeRegisterWrite {object} {
@@ -485,7 +489,8 @@ odfi::closures::oproc writeRegisterWrite {object} {
         velse {
             vputs "rreinit <= 1'b0"
         }
-    } otherwise {
+    } 
+    #otherwise {
         set offset 0
         $object onEachField {
             $it onWrite {software} {
@@ -537,7 +542,7 @@ odfi::closures::oproc writeRegisterWrite {object} {
             }
 
         }
-    }
+    #}
 }
 
 odfi::closures::oproc writeRegisterBlock {object} {
