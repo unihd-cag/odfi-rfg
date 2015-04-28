@@ -170,7 +170,7 @@ odfi::closures::oproc writeRamBlockInternalSigs {it} {
             ## Maybe with Offset
             if {$it == [getFirstSharedBusObject $rf]} {
                 if {[$it depth] != 1} {
-                    reg address_reg [ld [$it depth]]
+                    reg address_reg [getRFAddrWidth $rf] [getRFAddrOffset $rf]
                 }
             }
         } otherwise {

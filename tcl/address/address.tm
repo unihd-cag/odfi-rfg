@@ -47,7 +47,7 @@ namespace eval osys::rfg::address {
 
             if {[$it isa osys::rfg::RamBlock]} {
                 $it attributes software {
-                    size [expr [$it depth]*[$rf register_size]/8]
+                    size [expr ([$it depth]*[$rf register_size]/8) << [$it getAttributeValue software.osys::rfg::address_shift]]
                 }
             }
             return true
