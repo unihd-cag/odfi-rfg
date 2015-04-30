@@ -228,6 +228,37 @@ namespace eval osys::verilogInterface {
             odfi::common::printlnOutdent
             odfi::common::println "end" $resolve
         }
+
+        public method clocked {clk res res_type closure} {
+            if {$res_type == "async"} {
+                odfi::common::println "always @(posedge $clk or negedge $res)" $resolve
+                odfi::common::println "begin" $resolve
+                odfi::common::printlnIndent
+            } elseif {$res_type == "sync"} {
+                odfi::common::println "always @(posedge $clk)" $resolve
+                odfi::common::println "begin" $resolve
+                odfi::common::printlnIndent
+            } elseif {$res_type == "both"} {
+                odfi::common::println "`ifdef ASYNC_RES" $resolve
+                odfi::common::println "always @(posedge $clk or negedge $res) `else" $resolve
+                odfi::common::println "always @(posedge $clk) `endif" $resolve
+                odfi::common::println "begin" $resolve
+                odfi::common::printlnIndent
+            } else {
+                error "VerilogInterface: clocked expected async | sync | both as value but not $res_type"
+            }
+            
+            if {$always_context == ""} {
+                ## Create always object
+                $this always_context [::new [namespace parent]::Always #auto $closure]
+            } else {
+                $always_context do $closure
+            }
+            odfi::common::println [$always_context getResolve] $resolve
+            odfi::common::printlnOutdent
+            odfi::common::println "end" $resolve
+        }
+
     }
 
     itcl::class Module {

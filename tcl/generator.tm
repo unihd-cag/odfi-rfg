@@ -18,7 +18,7 @@
 
 package provide osys::generator 1.0.0
 package require osys::rfg 1.0.0
-package require osys::rfg::address::hierarchical
+package require osys::rfg::address
 package require Itcl 3.4
 package require odfi::common
 package require odfi::list 2.0.0
@@ -66,7 +66,7 @@ proc readRF {inputFile} {
         }
     } ::osys::generator::registerFile
 	
-    osys::rfg::address::hierarchical::calculate $::osys::generator::registerFile
+    osys::rfg::address::calculate $::osys::generator::registerFile
 
 }
 
