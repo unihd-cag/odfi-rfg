@@ -1,6 +1,5 @@
 package require osys::rfg
 package require HelperFunctions
-package require osys::rfg::address::hierarchical
 source ${::osys::rfg::generator::verilog::location}/Instances.tm
 
 set rb_save ""

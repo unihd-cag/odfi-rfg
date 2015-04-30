@@ -53,17 +53,12 @@ namespace eval osys::rfg::address {
             return true
         }
 
-
-        $rf walkDepthFirst {
-            return true
-        }
-
         ## Walkin through the RF list in reverse to first set the size and relative address
         ## for the rfs with only primitives
         foreach regfile [lreverse $RF_List] {
             set relative_address 0
             set size 0
-            set auto_align [$rf register_size]
+            set auto_align [expr [$rf register_size]/8]
             $regfile walkDepthFirst {
                 if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::RegisterFile]} {
                     if {$auto_align < [$it getAttributeValue software.osys::rfg::size]} {

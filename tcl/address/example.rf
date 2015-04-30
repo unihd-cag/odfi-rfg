@@ -1,7 +1,0 @@
-registerFile example {
-    external sub0.rf sub0
-    aligner 12
-    external sub1.rf sub1
-    aligner 12
-    external sub2.rf sub2
-}

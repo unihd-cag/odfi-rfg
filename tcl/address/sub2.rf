@@ -1,3 +1,0 @@
-registerFile sub2 {
-    external sub0.rf subsub0
-}

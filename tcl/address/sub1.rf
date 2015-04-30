@@ -1,9 +1,0 @@
-registerFile sub1 {
-    register A {
-    }
-    ramBlock B {
-        depth 32
-        width 16
-    }
-
-}
