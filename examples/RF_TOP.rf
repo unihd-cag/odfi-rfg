@@ -81,5 +81,5 @@ registerFile RF_TOP {
         }
     }
 
-    external RF_GROUP.rf RF_GROUP
+#    external RF_GROUP.rf RF_GROUP
 }
