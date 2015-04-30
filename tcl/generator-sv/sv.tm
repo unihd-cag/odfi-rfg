@@ -57,22 +57,22 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "endclass : [string tolower [$it name]]\n" $out
 
 			    } elseif {[$it isa osys::rfg::Register]} {
-#                    odfi::common::println "class [string tolower [$it name]] extends cag_rgm_register;\n" $out
-#                    odfi::common::println "\ttypedef struct packed {" $out
+                    odfi::common::println "class [string tolower [$it name]] extends cag_rgm_register;\n" $out
+                    odfi::common::println "\ttypedef struct packed {" $out
                     $it onEachField {
-#                        odfi::common::println "bit \[[expr {[$it width] - 1}]:0\] [$it name];" $out
+                        odfi::common::println "\t\tbit \[[expr {[$it width] - 1}]:0\] [$it name];" $out
                     }
-#                    odfi::common::println "} pkt_flds_s;\n" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
-#                    odfi::common::println "" $out
+                    odfi::common::println "\t} pkd_flds_s;\n" $out
+                    odfi::common::println "\t`cag_rgm_register_fields(pkd_flds_s)\n" $out
+                    odfi::common::println "\t`uvm_object_utils_begin([string tolower [$it name]])" $out
+                    odfi::common::println "\t\t`uvm_field_int(fields,UVM_ALL_ON)" $out
+                    odfi::common::println "\t`uvm_object_utils_end\n" $out
+                    odfi::common::println "\tfunction new(string name=\"[string tolower [$it name]]\");" $out
+                    odfi::common::println "\t\tsuper.new(name);" $out
+                    odfi::common::println "\t\tthis.name = name;" $out
+                    odfi::common::println "\t\tset_address('h[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]);" $out
+                    odfi::common::println "\tendfunction : new\n" $out
+                    odfi::common::println "endclass : [string tolower [$it name]]" $out
 #                    odfi::common::println "reg_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]] {" $out
                     $it onEachField {
 #                    odfi::common::println "    [$it name] : uint(bits:[$it width]) : [$it reset];" $out
