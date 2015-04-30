@@ -89,21 +89,11 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "\t\tset_address('h[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]);" $out
                     odfi::common::println "\tendfunction : new\n" $out
                     odfi::common::println "endclass : [getFullName $it]" $out
-#                    odfi::common::println "reg_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]] {" $out
-                    $it onEachField {
-#                    odfi::common::println "    [$it name] : uint(bits:[$it width]) : [$it reset];" $out
-                    }
-#                    odfi::common::println "};" $out
-#                    odfi::common::println "" $out
-
                 } elseif {[$it isa osys::rfg::Group]} {
                     if {[$it isa osys::rfg::RegisterFile]} {
-#                        odfi::common::println "reg_file_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]];" $out
-#                    odfi::common::println "" $out
 
                     } else {
-#                        odfi::common::println "group_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it];" $out
-#                        odfi::common::println "" $out
+
                     }
                 }
                 return true
