@@ -1,5 +1,59 @@
 package provide HelperFunctions 1.0.0
 
+<<<<<<< Updated upstream
+=======
+proc getSoftAccess {object} {
+    set readable false
+    set writeable false
+    
+    if {[$object isa osys::rfg::RamBlock]} {
+        
+        $object onWrite {software} {
+            set writeable true
+        }
+
+        $object onRead {software} {
+            set readable true
+        }
+    }
+
+    if {[$object isa osys::rfg::Register]} {
+        $object onAttributes {hardware.osys::rfg::rreinit_source} {
+            set writeable true
+        }
+
+        $object onEachField {
+            
+            $it onWrite {software} {
+                set writeable true
+            }
+
+            $it onRead {software} {
+                set readable true
+            }
+        }
+
+    }
+ 
+    if {($writeable == true) && ($readable == true)} {
+        return "1'b0"
+    }
+
+    if {($writeable == true) && ($readable == false)} {
+        return "read_en"
+    }
+
+    if {($writeable == false) && ($readable == true)} {
+        return "write_en"
+    }
+
+    if {($writeable == false) && ($readable == false)} {
+        return "write_en || read_en"
+    }
+}
+
+
+>>>>>>> Stashed changes
 set rb_save ""
 proc hasRamBlock {rf} {
     global rb_save 
