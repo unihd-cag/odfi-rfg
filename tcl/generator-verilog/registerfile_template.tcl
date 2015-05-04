@@ -417,67 +417,58 @@ odfi::closures::oproc writeFieldHardWrite {object} {
 }
 
 odfi::closures::oproc writeRegisterReset {object} {
-#    $object onAttributes {hardware.osys::rfg::rreinit_source} {
-#        
-#        vif "!res_n" {
-#            vputs "rreinit <= 1'b0"    
-#        }
-#
-#    } otherwise {
-#        
-        if {[hasReset $object] == true} {
-            vif "!res_n" {
+    if {[hasReset $object] == true} {
+        vif "!res_n" {
 
-                $object onAttributes {hardware.osys::rfg::rreinit_source} {
-                    vputs "rreinit <= 1'b0"
-                }
+            $object onAttributes {hardware.osys::rfg::rreinit_source} {
+                vputs "rreinit <= 1'b0"
+            }
 
-                $object onEachField {
-                    $it onAttributes {hardware.osys::rfg::counter} {
-                        
-                        $it onWrite {software} {
+            $object onEachField {
+                $it onAttributes {hardware.osys::rfg::counter} {
+                    
+                    $it onWrite {software} {
+                        vputs "[getName $it]_load_value <= [$it reset]"
+                        vputs "[getName $it]_load_enable <= 1'b0"
+                    } otherwise {
+
+                        $it onWrite {hardware} {
                             vputs "[getName $it]_load_value <= [$it reset]"
                             vputs "[getName $it]_load_enable <= 1'b0"
-                        } otherwise {
+                        }
+                    }
 
-                            $it onWrite {hardware} {
-                                vputs "[getName $it]_load_value <= [$it reset]"
-                                vputs "[getName $it]_load_enable <= 1'b0"
-                            }
-                        }
+                    $it onAttributes {hardware.osys::rfg::edge_trigger} {
+                        vputs "[getName $it]_edge_last <= 1'b0"
+                        vputs "[getName $it]_countup <= 1'b0"
+                    }
+                    
+                    $it onAttributes {hardware.osys::rfg::software_written} {
+                        vputs "[getName $it]_written <= 1'b0"
+                    }
+                    
+                    $it onAttributes {hardware.osys::rfg::changed} {
+                        vputs "[getName $it]_changed <=1'b0"
+                        vputs "[getName $it]_res_in_last_cycle <= 1'b1"
+                    }
 
-                        $it onAttributes {hardware.osys::rfg::edge_trigger} {
-                            vputs "[getName $it]_edge_last <= 1'b0"
-                            vputs "[getName $it]_countup <= 1'b0"
-                        }
-                        
-                        $it onAttributes {hardware.osys::rfg::software_written} {
-                            vputs "[getName $it]_written <= 1'b0"
-                        }
-                        
-                        $it onAttributes {hardware.osys::rfg::changed} {
-                            vputs "[getName $it]_changed <=1'b0"
-                            vputs "[getName $it]_res_in_last_cycle <= 1'b1"
-                        }
+                } ohterwise {
+                    if {[$it name] != "Reserved"} {
+                        vputs "[getName $it] <= [$it reset]"
+                    }
 
-                    } ohterwise {
-                        if {[$it name] != "Reserved"} {
-                            vputs "[getName $it] <= [$it reset]"
-                        }
+                    $it onAttributes {hardware.osys::rfg::software_written} {
+                        vputs "[getName $it]_written <= 1'b0"
+                    }
 
-                        $it onAttributes {hardware.osys::rfg::software_written} {
-                            vputs "[getName $it]_written <= 1'b0"
-                        }
-
-                        $it onAttributes {hardware.osys::rfg::changed} {
-                            vputs "[getName $it]_changed <=1'b0"
-                            vputs "[getName $it]_res_in_last_cycle <= 1'b1"
-                        }
+                    $it onAttributes {hardware.osys::rfg::changed} {
+                        vputs "[getName $it]_changed <=1'b0"
+                        vputs "[getName $it]_res_in_last_cycle <= 1'b1"
                     }
                 }
             }
         }
-    #}
+    } 
 }
 
 odfi::closures::oproc writeRegisterWrite {object} {
@@ -489,59 +480,57 @@ odfi::closures::oproc writeRegisterWrite {object} {
             vputs "rreinit <= 1'b0"
         }
     } 
-    #otherwise {
-        set offset 0
-        $object onEachField {
-            $it onWrite {software} {
-                    writeFieldSoftWrite $it $offset            
-                $it onWrite {hardware} {
-                    set condition "elsecond"
-                    writeFieldHardWrite $it
-                } otherwise {
-                    $it onAttributes {hardware.osys::rfg::software_written} {
-                        velse {
-                            vputs "[getName $it]_written <= 1'b0"
-                        }
-                    }
-                    $it onAttributes {hardware.osys::rfg::changed} {
-                        velse {
-                            vputs "[getName $it]_changed <= 1'b0"
-                        }
-                    }
-                }
-
+    set offset 0
+    $object onEachField {
+        $it onWrite {software} {
+                writeFieldSoftWrite $it $offset            
+            $it onWrite {hardware} {
+                set condition "elsecond"
+                writeFieldHardWrite $it
             } otherwise {
-                
-                $it onWrite {hardware} {
-                    set condition "ifcond"
-                    writeFieldHardWrite $it
-                } 
-
-            }
-            
-            incr offset [$it width]
-            
-            $it onAttributes {hardware.osys::rfg::edge_trigger} {
-                set obj $it
-                vif "[getName $obj]_edge != [getName $obj]_edge_last" {
-                    vputs "[getName $obj]_countup <= 1'b1"
-                    vputs "[getName $obj]_edge_last <= [getName $obj]_edge"
+                $it onAttributes {hardware.osys::rfg::software_written} {
+                    velse {
+                        vputs "[getName $it]_written <= 1'b0"
+                    }
                 }
-                velse {
-                    vputs "[getName $obj]_countup <= 1'b0"
+                $it onAttributes {hardware.osys::rfg::changed} {
+                    velse {
+                        vputs "[getName $it]_changed <= 1'b0"
+                    }
                 }
             }
 
-            $it onAttributes {hardware.osys::rfg::changed} {
-                set obj $it
-                vif "[getName $obj]_res_in_last_cycle == 1'b1" {
-                    vputs "[getName $obj]_changed <= 1'b1"
-                    vputs "[getName $obj]_res_in_last_cycle <= 1'b0"
-                }
-            }
+        } otherwise {
+            
+            $it onWrite {hardware} {
+                set condition "ifcond"
+                writeFieldHardWrite $it
+            } 
 
         }
-    #}
+        
+        incr offset [$it width]
+        
+        $it onAttributes {hardware.osys::rfg::edge_trigger} {
+            set obj $it
+            vif "[getName $obj]_edge != [getName $obj]_edge_last" {
+                vputs "[getName $obj]_countup <= 1'b1"
+                vputs "[getName $obj]_edge_last <= [getName $obj]_edge"
+            }
+            velse {
+                vputs "[getName $obj]_countup <= 1'b0"
+            }
+        }
+
+        $it onAttributes {hardware.osys::rfg::changed} {
+            set obj $it
+            vif "[getName $obj]_res_in_last_cycle == 1'b1" {
+                vputs "[getName $obj]_changed <= 1'b1"
+                vputs "[getName $obj]_res_in_last_cycle <= 1'b0"
+            }
+        }
+
+    }
 }
 
 odfi::closures::oproc writeRegisterBlock {object} {
@@ -679,7 +668,6 @@ odfi::closures::oproc writeRamBlock {object} {
         comment "RamBlock: [getName $object]"
         
         clocked clk res_n $res_type {
-        #always $always_content {}
             writeRamBlockReset $object
             velse {
                 writeRamBlockWrite $object
@@ -693,7 +681,6 @@ odfi::closures::oproc writeRamBlock {object} {
 odfi::closures::oproc writeRFBlock {object} {
     comment "RegisterFile: [getName $object]"
     clocked clk res_n $res_type {
-    #always $always_content {}
         vif "!res_n" {
             vputs "[getName $object]_write_en <= 1'b0"
             vputs "[getName $object]_read_en <= 1'b0"
@@ -771,7 +758,7 @@ odfi::closures::oproc writeRegisterSoftRead {object} {
         if {$offset != [getRFmaxWidth $rf]} {
             vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:$offset\] <= [expr [getRFmaxWidth $rf] - $offset]'b0"
         }
-        vputs "invalid_address <= 1'b0"
+        vputs "invalid_address <= [getSoftAccess $object]"
         vputs "access_complete <= read_en || write_en"
     }
 }
@@ -790,7 +777,7 @@ odfi::closures::oproc writeRamBlockSoftRead {object} {
             if {[$object width] != [getRFmaxWidth $rf]} {
                 vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:[$object width]\] <= [expr [getRFmaxWidth $rf] - [$object width]]'b0"
             }
-            vputs "invalid_address <= 1'b0"
+            vputs "invalid_address <= [getSoftAccess $object]"
             $object onAttributes {hardware.osys::rfg::external} {
                 vputs "access_complete <= [getName $object]_rf_access_complete"
             } otherwise {
@@ -805,7 +792,7 @@ odfi::closures::oproc writeRamBlockSoftRead {object} {
             if {[$object width] != [getRFmaxWidth $rf]} {
                 vputs "read_data\[[expr [getRFmaxWidth $rf]-1]:[$object width]\] <= [expr [getRFmaxWidth $rf] - [$object width]]'b0"
             }
-            vputs "invalid_address <= 1'b0"
+            vputs "invalid_address <= [getSoftAccess $object]"
             $object onAttributes {hardware.osys::rfg::external} {
                 vputs "access_complete <= [getName $object]_rf_access_complete"
             } otherwise {
@@ -867,7 +854,6 @@ odfi::closures::oproc writeRFSoftRead {object} {
 odfi::closures::oproc writeSoftReadInterface {object} {
     comment "Address Decoder Software Read:"
     clocked clk res_n $res_type {
-    #always $always_content {}
         vif "!res_n" {
             vputs "invalid_address <= 1'b0"
             vputs "access_complete <= 1'b0"
@@ -968,12 +954,7 @@ osys::verilogInterface::module [$rf name] {
     $options onAttributes {options.::reset} {
         set res_type [$options getAttributeValue options.::reset]
     }
-    #set always_content "posedge clk"
-    #$options onAttributes {options.::reset} {
-    #    if {[$options getAttributeValue options.::reset] != "sync"} {
-    #        set always_content "posedge clk or negedge res_n"    
-    #    }
-    #}
+
     ## Write Internal Signals
     writeInternalSigs $rf
 
