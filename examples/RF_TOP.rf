@@ -28,13 +28,12 @@ registerFile RF_TOP {
 
     register REG_1 {
         field field_0 {
-            width        16
+            width        32
             attributes software {
             }    
             attributes hardware {
             }
         }
-        reserved 16
         field field_1 {
             width        16
             attributes software {
