@@ -26,7 +26,6 @@ package require odfi::ewww::webdata 1.0.0
 # function to getRFmaxWidth
 proc getRFmaxWidth {registerfile} {
     set maxwidth 0
-    ::puts "RegisterFile: $registerfile"
     $registerfile walkDepthFirst {
         if {[$it isa osys::rfg::RamBlock]} {
             if {$maxwidth < [$it width]} {
