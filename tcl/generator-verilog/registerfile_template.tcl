@@ -751,11 +751,11 @@ odfi::closures::oproc writeWriteInterface {object} {
 
 odfi::closures::oproc writeRegisterSoftRead {object} {
     if {[getRFAddrWidth $rf] == 0} {
-        set width 1
+        set select "1'bx"
     } else {
-        set width [getRFAddrWidth $rf]
+        set select "[getRFAddrWidth $rf]'h[format %x [expr [$object getAttributeValue software.osys::rfg::relative_address] / ([$rf register_size]/8)]]"
     }
-    case_select "$width'h[format %x [expr [$object getAttributeValue software.osys::rfg::relative_address] / ([$rf register_size]/8)]]" {
+    case_select "$select" {
         set offset 0
         $object onEachField {
             
