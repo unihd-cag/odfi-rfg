@@ -691,7 +691,11 @@ odfi::closures::oproc writeRFBlock {object} {
             vputs "[getName $object]_write_en <= 1'b0"
             vputs "[getName $object]_read_en <= 1'b0"
             vputs "[getName $object]_write_data <= [getRFmaxWidth $object]'b0"
-            vputs "[getName $object]_address <= [getRFAddrWidth $object]'b0"
+            if {[getRFAddrWidth $object] == 0} {
+                vputs "[getName $object]_address <= 1'b0"
+            } else {
+                vputs "[getName $object]_address <= [getRFAddrWidth $object]'b0"
+            }
         }
         velse {
             set upper [expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]
