@@ -47,8 +47,10 @@ attributeFunction ::write_clear
 attributeFunction ::shared_bus
 attributeFunction ::edge_trigger
 attributeFunction ::changed
+attributeFunction ::trigger
 
 ## Addressing
+##################
 attributeFunction ::relative_address
 attributeFunction ::absolute_address
 attributeFunction ::absolute_start_address
