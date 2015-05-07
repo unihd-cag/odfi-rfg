@@ -10,3 +10,16 @@ and make it executable with:
 
     chmod +x RFG-vx.x.x
     
+It is recommanded to put the executable to the search path for an easy to use in the command line.
+
+One recommanded way to do this is to create a bin folder in your home directory and add it to the PATH variable.
+
+1.To create the bin directory:
+
+    mkdir ~/bin
+    
+2.Copy the executable to this folder.
+
+3.To add the ~\bin directory to the search PATH modify your .bashrc and add:
+
+    export PATH=$PATH:~/bin
