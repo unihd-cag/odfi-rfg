@@ -35,14 +35,11 @@ For example a register file definition with the RFG (Example_RF.rf):
     }
 
 Now the in the RFG available generators can be applied on the description to generate the verilog, xml, and documentation files. For this a little generator script is written. For example to create a verilog description and a xml representation:
-
-    package require osys::rfg 1.0.0
-    package require osys::generator 1.0.0
     
     readRF "Example_RF.rf"
     
     generator verilog {
-        destinationPath "doc/"
+        destinationPath "verilog/"
     }
 
     generator xmlgenerator {
