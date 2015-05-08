@@ -41,7 +41,7 @@ In the second step in the RFG available generators can be applied on the descrip
     readRF "Example_RF.rf"
     
     generator verilog {
-        destinationPath "doc/"
+        destinationPath "verilog/"
     }
 
     generator xmlgenerator {
