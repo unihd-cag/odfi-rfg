@@ -11,7 +11,7 @@ This section will give you a starting point on working with the RFG Tool and pro
 
 If you have installed the executable like recommanded you now have the possiblity to execute the tool in this way:
 
-    RFG-Vx.x.x Generate.tcl MyFirstRF.rf
+    RFG-Vx.x.x Generate.tcl
 
 To create a RegisterFile with the RFG tool two files are needed. First the .rf file which contains the register file description. And the Generator script which calls the different generators on this description.
 
@@ -64,4 +64,4 @@ With the readRF command the register file description is read in and the address
 Now in the last step we have to run RFG with the Generator script and the regiter file description:
 For this run the RFG command in your project folder:
 
-    RFG-Vx.x.x Generate.tcl MyFirstRF.rf
+    RFG-Vx.x.x Generate.tcl
