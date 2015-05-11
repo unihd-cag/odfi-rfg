@@ -44,7 +44,7 @@ registerFile RF_TOP {
         reserved 16
     }
 
-    external RF_BOTTOM.rf RF_BOTTOM
+    internal RF_BOTTOM.rf RF_BOTTOM
 
     register REG_4 {
         field field_0 {
