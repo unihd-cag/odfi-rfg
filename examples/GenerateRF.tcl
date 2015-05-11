@@ -3,51 +3,51 @@ package require osys::generator 1.0.0
 
 readRF "RF_TOP.rf"
     
-#generator verilog {
+generator verilog {
 
-#    destinationPath "verilog/"
+    destinationPath "verilog/"
 
-#    options {
-#        reset async
-#    }
+    options {
+        reset async
+    }
 
-#}
+}
 
-#generator htmlbrowser {
+generator htmlbrowser {
 
-#    destinationPath "doc/"
+    destinationPath "doc/"
 
-#}
+}
 
-#generator xmlgenerator {
+generator xmlgenerator {
 
-#    destinationPath "xml/"
+    destinationPath "xml/"
 
-#}
+}
 
-#generator rfsbackport {
+generator rfsbackport {
 
-#    destinationPath "xml/"
+    destinationPath "xml/"
 
-#}
+}
 
-#generator rfgheader {
+generator rfgheader {
 
-#    destinationPath "verilog_header/"
+    destinationPath "verilog_header/"
 
-#}
+}
 
-#generator wrapper {
+generator wrapper {
 
-#    destinationPath "verilog/"
+    destinationPath "verilog/"
 
-#}
+}
 
-#generator egenerator {
+generator egenerator {
 
-#    destinationPath "e/"
+    destinationPath "e/"
 
-#}
+}
 
 generator sv {
 
