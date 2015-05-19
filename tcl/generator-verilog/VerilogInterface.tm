@@ -46,27 +46,36 @@ namespace eval osys::verilogInterface {
             odfi::closures::doClosure $cClosure
         }
         
-        public method input {name type {width 1} {offset 0}} {
-            if {$width <= 1} {
+        public method input {name type {width 1} {offset 0} {vector false}} {
+            if {($width <= 1) && ($offset == 0) && ($vector == false)} {
                 lappend in_out_list "input $type $name"
             } else {
+                if {$width - 1 < 0} {
+                    set width 1
+                }
                 lappend in_out_list "input $type\[[expr $width -1+$offset]:$offset\] $name"
             }
         }
 
-        public method output {name type {width 1} {offset 0}} {
-            if {$width <= 1} {
+        public method output {name type {width 1} {offset 0} {vector false}} {
+            if {($width <= 1) && ($offset == 0) && ($vector == false)} {
                 lappend in_out_list "output $type $name"
             } else {
+                if {$width - 1 < 0} {
+                    set width 1
+                }
                 lappend in_out_list "output $type\[[expr $width -1+$offset]:$offset\] $name"
             }
 
         }
 
-        public method inout {name type {width 1} {offset 0}} {
-            if {$width <= 1} {
+        public method inout {name type {width 1} {offset 0} {vector false}} {
+            if {($width <= 1) && ($offset == 0) && ($vector == false)} {
                 lappend in_out_list "inout $type $name"
             } else {
+                if {$width - 1 < 0} {
+                    set width 1
+                }
                 lappend in_out_list "inout $type\[[expr $width -1+$offset]:$offset\] $name"
             }
 
