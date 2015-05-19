@@ -146,6 +146,11 @@ registerFile <xsl:value-of select="@name"/> {
         <xsl:value-of select="$hier-level-tab-more"/>   counter
     </xsl:if>
     <xsl:text>
+    </xsl:text>
+    <xsl:if test="@te">
+        <xsl:value-of select="$hier-level-tab-more"/>   trigger "<xsl:value-of select="@te"/>"
+    </xsl:if>
+    <xsl:text>
     </xsl:text>  
     <xsl:if test="@counter='2'">
         <xsl:value-of select="$hier-level-tab-more"/>   edge_trigger
@@ -359,6 +364,11 @@ registerFile <xsl:value-of select="@name"/> {
     </xsl:if>
     <xsl:text>
     </xsl:text>
+    <xsl:if test="@te">
+        <xsl:value-of select="$hier-level-tab-more"/>   trigger "<xsl:value-of select="@te"/>"
+    </xsl:if>
+    <xsl:text>
+    </xsl:text>  
     <xsl:if test="@sw_written='2'">
     <xsl:value-of select="$hier-level-tab-more"/>   changed
     </xsl:if>

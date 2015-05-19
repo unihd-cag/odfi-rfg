@@ -26,8 +26,9 @@ namespace eval osys::rfg::trigger {
                 if {[$it isa osys::rfg::Register]} {
                     $it onEachField {
                         $it onAttributes {hardware.osys::rfg::trigger} {
-                            lappend trigger_list [$it getAttributeValue hardware.osys::rfg::trigger]
-                            ##::puts $trigger_list
+                            if {lsearch $trigger_list [$it getAttributeValue hardware.osys::rfg::trigger] == -1} {
+                                lappend trigger_list [$it getAttributeValue hardware.osys::rfg::trigger]
+                            }
                         }
                     }
                 }
