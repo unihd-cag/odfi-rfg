@@ -114,6 +114,11 @@ odfi::closures::oproc writeRegisterFileInterface {it} {
     input [getName $it]_read_data wire [getRFmaxWidth $it] 0 true
     output [getName $it]_write_en reg
     output [getName $it]_write_data reg [getRFmaxWidth $it] 0 true
+
+    $it onAttributes {hardware.osys::rfg::trigger} {
+        input [getName $it]_triggers wire [llength [$it getAttributeValue hardware.osys::rfg::trigger]]
+    }
+
 }
 
 
@@ -145,6 +150,10 @@ odfi::closures::oproc writeVModuleInterface {rf} {
         } else {
             return true
         }
+    }
+
+    $rf onAttributes {hardware.osys::rfg::trigger} {
+        output triggers reg [llength [$rf getAttributeValue hardware.osys::rfg::trigger]]
     }
 }
 
@@ -250,6 +259,11 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                 }
 
             }
+
+            $it onAttributes {hardware.osys::rfg::trigger} {
+                wire [getName $it]_trigger       
+            }
+
         }
     }
 
@@ -534,10 +548,17 @@ odfi::closures::oproc writeRegisterWrite {object} {
 }
 
 odfi::closures::oproc writeRegisterBlock {object} {
-
+    
     ## check if anything is generated
     if {[CheckForRegBlock $object] == true} {
         comment "Register: [getName $object]"
+        
+        $object onEachField {
+            $it onAttributes {hardware.osys::rfg::trigger} {
+                assign [getName $it]_trigger "([getName $it] != [getName $it]_next)"
+            }
+        }
+
         clocked clk res_n $res_type {
             ## write Reset
             writeRegisterReset $object
@@ -963,6 +984,55 @@ odfi::closures::oproc writeAddrComment {object} {
     setCommentHeader [join $str "\n"]
 }
 
+odfi::closures::oproc writeTriggerBlock {object} {
+    $object onAttributes {hardware.osys::rfg::trigger} {
+        comment "Trigger Block"
+        clocked clk res_n $res_type {
+            
+            vif "!res_n" {
+                vputs "triggers <= [llength [$object getAttributeValue hardware.osys::rfg::trigger]]'b0"  
+            }
+
+            velse {
+
+                $object walkDepthFirst {
+                    set offset 0
+                    if {[$it isa osys::rfg::Register]} {
+                        $it onEachField {
+                            $it onAttributes {hardware.osys::rfg::trigger} {
+                                if {[llength [$object getAttributeValue hardware.osys::rfg::trigger]] == 1} {
+                                    vputs "triggers <= [getName $it]_trigger"
+                                } else {
+                                    vputs "triggers\[$offset\] <= [getName $it]_trigger"
+                                    incr offset
+                                }
+                            }
+                        }
+                    }
+                    if {[$it isa osys::rfg::RegisterFile]} {
+                        
+                        $it onAttributes {hardware.osys::rfg::trigger} {
+                            if {[llength [$object getAttributeValue hardware.osys::rfg::trigger]] == 1} {
+                                vputs "triggers <= [getName $it]_trigger"
+                            } else {
+                                set trigger_width [$it getAttributeValue hardware.osys::rfg::trigger]
+                                vputs "\[[expr $trigger_width + $offset - 1]:$offset\]"
+                                incr offset $trigger_width
+                            }
+                        }
+
+                        return false
+                    } else {
+                        return true
+                    }
+                }
+            }
+
+
+        }
+    }
+}
+
 osys::verilogInterface::module [$rf name] {
     writeAddrComment $rf
     ## Write RegisterFile Signal Interface
@@ -982,6 +1052,10 @@ osys::verilogInterface::module [$rf name] {
     
     ## Write Hardware/Software Write Interface/Always Block
     writeWriteInterface $rf
+
+    ## Write Trigger Block
+    
+    writeTriggerBlock $rf
     
     ## Writhe the Software Read Interface/ Address Decoder
     writeSoftReadInterface $rf

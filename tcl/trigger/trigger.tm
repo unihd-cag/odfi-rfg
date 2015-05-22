@@ -24,14 +24,19 @@ namespace eval osys::rfg::trigger {
             set trigger_list {}
             $regfile walkDepthFirst {
                 if {[$it isa osys::rfg::Register]} {
+                    set reg $it
                     $it onEachField {
                         $it onAttributes {hardware.osys::rfg::trigger} {
-                            if {lsearch $trigger_list [$it getAttributeValue hardware.osys::rfg::trigger] == -1} {
+                         
+                            if {[lsearch $trigger_list [$it getAttributeValue hardware.osys::rfg::trigger]] == -1} {
                                 lappend trigger_list [$it getAttributeValue hardware.osys::rfg::trigger]
                             }
+
                         }
                     }
+
                 }
+                
                 if {[$it isa osys::rfg::RegisterFile]} {
                     return false
                 } else {
