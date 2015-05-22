@@ -152,6 +152,13 @@ Attributes define some Properties of the different objects in a registerfile, li
 
 ### Main Attributes
 
+| Attribute Name| Description    | Objects | 
+| ------------- |:--------------:|--------:|
+| description   | Description for the Object| group, register,field, ramBlock, registerFile|         
+| width         | width of the Object| field, ramBlock|
+| depth         | depth of a ramBlock| ramBlock |
+| reset         | reset value of a field | field |
+
 ### Attribute Groups
 
 ### Attribute Properties
