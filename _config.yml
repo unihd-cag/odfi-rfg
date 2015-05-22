@@ -1,6 +1,8 @@
 module: osys-rfg
 name: Osys RFG
 markdown: redcarpet
+redcarpet:
+  extensions: [tables]
 highlighter: pygments
 odfi:
     id: odfi-rfg
