@@ -3,34 +3,26 @@ registerFile RF_BOTTOM {
     register REG_2 {
         field field_0 {
             width        16
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
         field field_1 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
     }
 
     register REG_3 {
         field field_0 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
         field field_1 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
     }
     ramBlock RAM_0 {

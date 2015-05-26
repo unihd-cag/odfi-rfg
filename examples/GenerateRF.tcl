@@ -1,7 +1,7 @@
 package require osys::rfg 1.0.0
 package require osys::generator 1.0.0
 
-readRF "RF_TOP.rf"
+readRF "$argv"
     
 generator verilog {
 

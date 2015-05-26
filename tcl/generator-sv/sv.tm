@@ -93,20 +93,43 @@ namespace eval osys::rfg::generator::sv {
 
 			    } elseif {[$item isa osys::rfg::Register]} {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_register;\n" $out
-                    odfi::common::println "\ttypedef struct packed {" $out
                     $item onEachField {
-                        odfi::common::println "\t\tbit \[[expr {[$it width] - 1}]:0\] [$it name];" $out
+                        if {[$it name] != "Reserved"} {
+                            odfi::common::println "\t\tbit \[[expr {[$it width] - 1}]:0\] [$it name];" $out
+                        }
                     }
-                    odfi::common::println "\t} pkd_flds_s;\n" $out
-                    odfi::common::println "\t`cag_rgm_register_fields(pkd_flds_s)\n" $out
-                    odfi::common::println "\t`uvm_object_utils_begin([getFullName $item])" $out
-                    odfi::common::println "\t\t`uvm_field_int(fields,UVM_ALL_ON)" $out
+                    odfi::common::println "\n\t`uvm_object_utils_begin([getFullName $item])" $out
+                    $item onEachField {
+                        if {[$it name] != "Reserved"} {
+                            odfi::common::println "\t\t`uvm_field_int([$it name],UVM_ALL_ON | UVM_NOPACK)" $out
+                        }
+                    }
                     odfi::common::println "\t`uvm_object_utils_end\n" $out
                     odfi::common::println "\tfunction new(string name=\"[getFullName $item]\");" $out
                     odfi::common::println "\t\tsuper.new(name);" $out
                     odfi::common::println "\t\tthis.name = name;" $out
                     odfi::common::println "\t\tset_address('h[format %x [$item getAttributeValue software.osys::rfg::absolute_address]]);" $out
                     odfi::common::println "\tendfunction : new\n" $out
+                    odfi::common::println "\tfunction void do_pack(uvm_packer packer);" $out
+                    odfi::common::println "\t\tsuper.do_pack(packer);" $out
+                    $item onEachField {
+                        if {[$it name] != "Reserved"} {
+                            odfi::common::println "\t\tpacker.pack_field([$it name],[$it width]);" $out
+                        } else {
+                            odfi::common::println "\t\tpacker.pack_field([$it width]'b0,[$it width]);" $out
+                        }
+                    }
+                    odfi::common::println "\tendfunction : do_pack\n" $out
+                    odfi::common::println "\tfunction void do_unpack(uvm_packer packer);" $out
+                    odfi::common::println "\t\tsuper.do_unpack(packer);" $out
+                    $item onEachField {
+                        if {[$it name] != "Reserved"} {
+                            odfi::common::println "\t\t[$it name] = packer.unpack_field([$it width]);" $out
+                        } else {
+                            odfi::common::println "\t\tvoid'(packer.unpack_field([$it width]));" $out
+                        }
+                    }
+                    odfi::common::println "\tendfunction : do_unpack\n" $out
                     odfi::common::println "endclass : [getFullName $item]\n" $out
                 } elseif {[$item isa osys::rfg::Group]} {
                     if {[$item isa osys::rfg::RegisterFile]} {
