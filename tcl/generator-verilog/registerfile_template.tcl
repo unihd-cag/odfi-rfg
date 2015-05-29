@@ -994,9 +994,52 @@ odfi::closures::oproc writeTriggerBlock {object} {
             }
 
             velse {
+                
+                set offset 0
+
+                set trigger_list {}
+                
+                set offset 0
 
                 $object walkDepthFirst {
-                    set offset 0
+                    if {[$it isa osys::rfg::Register]} {
+                        $it onEachField {
+                            $it onAttributes {hardware.osys::rfg::trigger} {
+                                ::puts "Test..."
+                                lappend trigger_list "[$it getAttributeValue hardware.osys::rfg::trigger]:[getName $it]_trigger"
+                            }
+                        }
+                    }
+                  
+                    if {[$it isa osys::rfg::RegisterFile]} {
+                    
+                        $it onAttributes {hardware.osys::rfg::trigger} {
+                            set index 0
+                            foreach trigger [$it getAttributeValue hardware.osys::rfg::trigger] {
+                                lappend trigger_list "$trigger:[getName $it]_triggers\[$index\]"
+                                incr index
+                            }
+                        }
+
+                        return false
+                    
+                    } else {
+                        
+                        return true
+                    
+                    }
+
+                }
+
+                ::puts $trigger_list
+                foreach trigger $trigger_list {
+                    ::puts $trigger
+                }
+                
+                set offset 0
+
+                $object walkDepthFirst {
+                
                     if {[$it isa osys::rfg::Register]} {
                         $it onEachField {
                             $it onAttributes {hardware.osys::rfg::trigger} {
@@ -1015,8 +1058,8 @@ odfi::closures::oproc writeTriggerBlock {object} {
                             if {[llength [$object getAttributeValue hardware.osys::rfg::trigger]] == 1} {
                                 vputs "triggers <= [getName $it]_trigger"
                             } else {
-                                set trigger_width [$it getAttributeValue hardware.osys::rfg::trigger]
-                                vputs "\[[expr $trigger_width + $offset - 1]:$offset\]"
+                                set trigger_width [llength [$it getAttributeValue hardware.osys::rfg::trigger]]
+                                vputs "triggers\[[expr $trigger_width + $offset - 1]:$offset\] <= [getName $it]_triggers"
                                 incr offset $trigger_width
                             }
                         }

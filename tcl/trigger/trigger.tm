@@ -18,7 +18,7 @@ namespace eval osys::rfg::trigger {
             return true            
         }
 
-        ## Walking through the RF_List in reverse and propage the trigger Ids
+        ## Walking through the RF_List in reverse and propagate the trigger Ids
         foreach regfile [lreverse $RF_List] {
             
             set trigger_list {}
@@ -38,9 +38,21 @@ namespace eval osys::rfg::trigger {
                 }
                 
                 if {[$it isa osys::rfg::RegisterFile]} {
+                    
+                    $it onAttributes {hardware.osys::rfg::trigger} {
+                        foreach trigger [$it getAttributeValue hardware.osys::rfg::trigger] {
+                            if {[lsearch $trigger_list [$it getAttributeValue hardware.osys::rfg::trigger]] == -1} {
+                                lappend trigger_list $trigger
+                            }
+                        }
+                    }
+
                     return false
+                
                 } else {
+
                     return true
+                
                 }
 
             }
