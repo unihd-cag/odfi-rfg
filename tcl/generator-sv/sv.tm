@@ -88,6 +88,7 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "\t\tsuper.new(name);" $out
                     odfi::common::println "\t\tthis.name = name;" $out
                     odfi::common::println "\t\tset_relative_address('h[format %x [$item getAttributeValue software.osys::rfg::relative_address]]);" $out
+                    odfi::common::println "\t\tset_absolute_address('h[format %x [$item getAttributeValue software.osys::rfg::absolute_address]]);" $out
                     odfi::common::println "\tendfunction : new\n" $out
                     odfi::common::println "endclass : [getFullName $item]\n" $out
 
@@ -109,6 +110,7 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "\t\tsuper.new(name);" $out
                     odfi::common::println "\t\tthis.name = name;" $out
                     odfi::common::println "\t\tset_relative_address('h[format %x [$item getAttributeValue software.osys::rfg::relative_address]]);" $out
+                    odfi::common::println "\t\tset_absolute_address('h[format %x [$item getAttributeValue software.osys::rfg::absolute_address]]);" $out
                     odfi::common::println "\tendfunction : new\n" $out
                     odfi::common::println "\tfunction void do_pack(uvm_packer packer);" $out
                     odfi::common::println "\t\tsuper.do_pack(packer);" $out
@@ -142,6 +144,7 @@ namespace eval osys::rfg::generator::sv {
                         odfi::common::println "\t\tsuper.new(name);" $out
                         odfi::common::println "\t\tthis.name = name;" $out
                         odfi::common::println "\t\tset_relative_address('h[format %x [$item getAttributeValue software.osys::rfg::relative_address]]);" $out
+                        odfi::common::println "\t\tset_absolute_address('h[format %x [$item getAttributeValue software.osys::rfg::absolute_address]]);" $out
                         $item onEachComponent {
                             odfi::common::println "\t\t[string tolower [$it name]] = [getFullName $it]::type_id::create(\"[string tolower [$it name]]\");" $out
                             odfi::common::println "\t\t[string tolower [$it name]].set_parent(this);" $out
@@ -176,6 +179,7 @@ namespace eval osys::rfg::generator::sv {
                 odfi::common::println "\t\tthis.name = name;" $out
                 odfi::common::println "\t\tparent = null;" $out
                 odfi::common::println "\t\tset_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::absolute_address]]);" $out
+                odfi::common::println "\t\tset_absolute_address('h[format %x [$item getAttributeValue software.osys::rfg::absolute_address]]);" $out
                 $registerFile onEachComponent {
                     odfi::common::println "\t\t[string tolower [$it name]] = [getFullName $it]::type_id::create(\"[string tolower [$it name]]\");" $out
                     odfi::common::println "\t\t[string tolower [$it name]].set_parent(this);" $out
