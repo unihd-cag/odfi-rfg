@@ -46,16 +46,28 @@ namespace eval osys::rfg::generator::sv {
             }
         }
 
+        public method getGroupsName {instance} {
+            if {[[$instance parent] isa osys::rfg::Group]} {
+                if {[[$instance parent] isa osys::rfg::RegisterFile]} {
+                    return ""
+                } else {
+                    return "[getGroupsName [$instance parent]][[$instance parent] name]_"
+                }
+            } else {
+                return [getGroupsName [$instance parent]]
+            }
+        }
+
         public method getFullName instance {
             if {[$instance isa osys::rfg::RamBlock]} {
-                return "ram_[string tolower [[getEnclosingRF $instance] name]_[$instance name]]"
+                return "ram_[string tolower [[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]]"
             } elseif {[$instance isa osys::rfg::Register]} {
-                return "reg_[string tolower [[getEnclosingRF $instance] name]_[$instance name]]"
+                return "reg_[string tolower [[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]]"
             } elseif {[$instance isa osys::rfg::Group]} {
                 if {[$instance isa osys::rfg::RegisterFile]} {
                     return "rf_[string tolower [$instance name]]"
                 } else {
-                    #TODO Groups
+                    return "grp_[string tolower [[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]]"
                 }
             }
         }
@@ -136,35 +148,40 @@ namespace eval osys::rfg::generator::sv {
                 } elseif {[$item isa osys::rfg::Group]} {
                     if {[$item isa osys::rfg::RegisterFile]} {
                         odfi::common::println "class [getFullName $item] extends cag_rgm_register_file;\n" $out
-                        $item onEachComponent {
-                            odfi::common::println "\trand [getFullName $it] [string tolower [$it name]];" $out
-                        }
-                        odfi::common::println "\n\t`uvm_object_utils([getFullName $item])\n" $out
-                        odfi::common::println "\tfunction new(string name=\"[getFullName $item]\");" $out
-                        odfi::common::println "\t\tsuper.new(name);" $out
-                        odfi::common::println "\t\tthis.name = name;" $out
+                    } else {
+                        odfi::common::println "class [getFullName $item] extends cag_rgm_container;\n" $out
+                    }
+                    $item onEachComponent {
+                        odfi::common::println "\trand [getFullName $it] [string tolower [$it name]];" $out
+                    }
+                    odfi::common::println "\n\t`uvm_object_utils([getFullName $item])\n" $out
+                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\");" $out
+                    odfi::common::println "\t\tsuper.new(name);" $out
+                    odfi::common::println "\t\tthis.name = name;" $out
+                    if {[$item isa osys::rfg::RegisterFile]} {
                         odfi::common::println "\t\tset_relative_address('h[format %x [$item getAttributeValue software.osys::rfg::relative_address]]);" $out
                         odfi::common::println "\t\tset_absolute_address('h[format %x [$item getAttributeValue software.osys::rfg::absolute_address]]);" $out
-                        $item onEachComponent {
-                            odfi::common::println "\t\t[string tolower [$it name]] = [getFullName $it]::type_id::create(\"[string tolower [$it name]]\");" $out
-                            odfi::common::println "\t\t[string tolower [$it name]].set_parent(this);" $out
-                            if {[$it isa osys::rfg::RamBlock]} {
-                                odfi::common::println "\t\tadd_ramblock([string tolower [$it name]]);" $out
-                            } elseif {[$it isa osys::rfg::Register]} {
-                                odfi::common::println "\t\tadd_register([string tolower [$it name]]);" $out
-                            } elseif {[$it isa osys::rfg::Group]} {
-                                if {[$it isa osys::rfg::RegisterFile]} {
-                                    odfi::common::println "\t\tadd_register_file([string tolower [$it name]]);" $out
-                                } else {
-                                    #TODO groups
-                                }
+                    } else {
+                        odfi::common::println "\t\tset_relative_address('h0);" $out
+                        odfi::common::println "\t\tset_absolute_address('h0);" $out
+                    }
+                    $item onEachComponent {
+                        odfi::common::println "\t\t[string tolower [$it name]] = [getFullName $it]::type_id::create(\"[string tolower [$it name]]\");" $out
+                        odfi::common::println "\t\t[string tolower [$it name]].set_parent(this);" $out
+                        if {[$it isa osys::rfg::RamBlock]} {
+                            odfi::common::println "\t\tadd_ramblock([string tolower [$it name]]);" $out
+                        } elseif {[$it isa osys::rfg::Register]} {
+                            odfi::common::println "\t\tadd_register([string tolower [$it name]]);" $out
+                        } elseif {[$it isa osys::rfg::Group]} {
+                            if {[$it isa osys::rfg::RegisterFile]} {
+                                odfi::common::println "\t\tadd_register_file([string tolower [$it name]]);" $out
+                            } else {
+                                odfi::common::println "\t\tadd_group([string tolower [$it name]]);" $out
                             }
                         }
-                        odfi::common::println "\tendfunction : new\n" $out
-                        odfi::common::println "endclass : [getFullName $item]\n" $out
-                    } else {
-                        #TODO groups
                     }
+                    odfi::common::println "\tendfunction : new\n" $out
+                    odfi::common::println "endclass : [getFullName $item]\n" $out
                 }
             }
 
@@ -191,7 +208,7 @@ namespace eval osys::rfg::generator::sv {
                         if {[$it isa osys::rfg::RegisterFile]} {
                             odfi::common::println "\t\tadd_register_file([string tolower [$it name]]);" $out
                         } else {
-                            #TODO groups
+                            odfi::common::println "\t\tadd_group([string tolower [$it name]]);" $out
                         }
                     }
                 }
