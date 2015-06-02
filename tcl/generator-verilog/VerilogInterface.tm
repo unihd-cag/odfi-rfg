@@ -46,27 +46,36 @@ namespace eval osys::verilogInterface {
             odfi::closures::doClosure $cClosure
         }
         
-        public method input {name type {width 1} {offset 0}} {
-            if {$width <= 1} {
+        public method input {name type {width 1} {offset 0} {vector false}} {
+            if {($width <= 1) && ($offset == 0) && ($vector == false)} {
                 lappend in_out_list "input $type $name"
             } else {
+                if {$width - 1 < 0} {
+                    set width 1
+                }
                 lappend in_out_list "input $type\[[expr $width -1+$offset]:$offset\] $name"
             }
         }
 
-        public method output {name type {width 1} {offset 0}} {
-            if {$width <= 1} {
+        public method output {name type {width 1} {offset 0} {vector false}} {
+            if {($width <= 1) && ($offset == 0) && ($vector == false)} {
                 lappend in_out_list "output $type $name"
             } else {
+                if {$width - 1 < 0} {
+                    set width 1
+                }
                 lappend in_out_list "output $type\[[expr $width -1+$offset]:$offset\] $name"
             }
 
         }
 
-        public method inout {name type {width 1} {offset 0}} {
-            if {$width <= 1} {
+        public method inout {name type {width 1} {offset 0} {vector false}} {
+            if {($width <= 1) && ($offset == 0) && ($vector == false)} {
                 lappend in_out_list "inout $type $name"
             } else {
+                if {$width - 1 < 0} {
+                    set width 1
+                }
                 lappend in_out_list "inout $type\[[expr $width -1+$offset]:$offset\] $name"
             }
 
@@ -228,6 +237,37 @@ namespace eval osys::verilogInterface {
             odfi::common::printlnOutdent
             odfi::common::println "end" $resolve
         }
+
+        public method clocked {clk res res_type closure} {
+            if {$res_type == "async"} {
+                odfi::common::println "always @(posedge $clk or negedge $res)" $resolve
+                odfi::common::println "begin" $resolve
+                odfi::common::printlnIndent
+            } elseif {$res_type == "sync"} {
+                odfi::common::println "always @(posedge $clk)" $resolve
+                odfi::common::println "begin" $resolve
+                odfi::common::printlnIndent
+            } elseif {$res_type == "both"} {
+                odfi::common::println "`ifdef ASYNC_RES" $resolve
+                odfi::common::println "always @(posedge $clk or negedge $res) `else" $resolve
+                odfi::common::println "always @(posedge $clk) `endif" $resolve
+                odfi::common::println "begin" $resolve
+                odfi::common::printlnIndent
+            } else {
+                error "VerilogInterface: clocked expected async | sync | both as value but not $res_type"
+            }
+            
+            if {$always_context == ""} {
+                ## Create always object
+                $this always_context [::new [namespace parent]::Always #auto $closure]
+            } else {
+                $always_context do $closure
+            }
+            odfi::common::println [$always_context getResolve] $resolve
+            odfi::common::printlnOutdent
+            odfi::common::println "end" $resolve
+        }
+
     }
 
     itcl::class Module {

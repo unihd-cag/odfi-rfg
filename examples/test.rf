@@ -1,7 +1,0 @@
-registerFile ramRF {
-    ramBlock TestRAM {
-        width 16
-        depth 32
-        software rw
-    }
-}

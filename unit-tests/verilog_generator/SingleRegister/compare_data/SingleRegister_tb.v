@@ -84,9 +84,9 @@ module SingleRegister_tb();
         address <= 1;
         @(negedge(clk));
         read_en <= 1'b0;
-        if(invalid_address != 1)
+        if(invalid_address != 0)
         begin
-            $error("\nERROR (Software Read) invalid_address was not set");
+            $error("\nERROR (Software Read) invalid_address was set");
             $stop;
         end
         #100

@@ -211,14 +211,36 @@ odfi::closures::oproc writeRFModule {registerfile} {
 	set signalList {}
 	$registerfile walkDepthFirst {
 		if {[$it isa osys::rfg::RamBlock]} {
-			
-			$it onAttributes {hardware.osys::rfg::rw} { 
-				lappend signalList "	    .[getName $it]_addr([getName $it]_addr)"
-				lappend signalList "	    .[getName $it]_ren([getName $it]_ren)"
-				lappend signalList "	    .[getName $it]_rdata([getName $it]_rdata)"
-				lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
-				lappend signalList "	    .[getName $it]_wdata([getName $it]_wdata)"
-			}
+			$it onAttributes {hardware.osys::rfg::external} {
+                
+                lappend signalList "	    .[getName $it]_rf_addr([getName $it]_rf_addr)"
+                
+                $it onRead {software} {
+                    lappend signalList "	    .[getName $it]_rf_ren([getName $it]_rf_ren)"
+                    lappend signalList "	    .[getName $it]_rf_rdata([getName $it]_rf_rdata)"
+                }
+
+                $it onWrite {software} {
+                    lappend signalList "	    .[getName $it]_rf_wen([getName $it]_rf_wen)"
+                    lappend signalList "	    .[getName $it]_rf_wdata([getName $it]_rf_wdata)"
+                }
+                lappend signalList "        .[getName $it]_rf_access_complete([getName $it]_rf_access_complete)"
+
+            } otherwise {
+                
+                lappend signalList "	    .[getName $it]_addr([getName $it]_addr)"
+                
+                $it onRead {hardware} {
+                    lappend signalList "	    .[getName $it]_ren([getName $it]_ren)"
+                    lappend signalList "	    .[getName $it]_rdata([getName $it]_rdata)"
+                }
+
+                $it onWrite {hardware} {
+                    lappend signalList "	    .[getName $it]_wen([getName $it]_wen)"
+                    lappend signalList "	    .[getName $it]_wdata([getName $it]_wdata)"
+                }
+
+            }
 
 		} elseif {[$it isa osys::rfg::Register]} {
 

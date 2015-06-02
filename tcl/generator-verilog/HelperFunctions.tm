@@ -1,5 +1,55 @@
 package provide HelperFunctions 1.0.0
 
+proc getSoftAccess {object} {
+    set readable false
+    set writeable false
+    
+    if {[$object isa osys::rfg::RamBlock]} {
+        
+        $object onWrite {software} {
+            set writeable true
+        }
+
+        $object onRead {software} {
+            set readable true
+        }
+    }
+
+    if {[$object isa osys::rfg::Register]} {
+        $object onAttributes {hardware.osys::rfg::rreinit_source} {
+            set writeable true
+        }
+
+        $object onEachField {
+            
+            $it onWrite {software} {
+                set writeable true
+            }
+
+            $it onRead {software} {
+                set readable true
+            }
+        }
+
+    }
+ 
+    if {($writeable == true) && ($readable == true)} {
+        return "1'b0"
+    }
+
+    if {($writeable == true) && ($readable == false)} {
+        return "read_en"
+    }
+
+    if {($writeable == false) && ($readable == true)} {
+        return "write_en"
+    }
+
+    if {($writeable == false) && ($readable == false)} {
+        return "write_en || read_en"
+    }
+}
+
 set rb_save ""
 proc hasRamBlock {rf} {
     global rb_save 
@@ -137,6 +187,9 @@ proc CheckForRegBlock {object} {
 
 proc hasReset {object} {
     set return_value false
+    $object onAttributes {hardware.osys::rfg::rreinit_source} {
+        set return_value true
+    }
     $object onEachField {
        if {[$it reset] != ""} {
             set return_value true 
@@ -211,18 +264,7 @@ proc getRFmaxWidth {registerfile} {
 
 # function to get the address Bits for the register file 
 proc getRFsize {registerfile} {
-	set size 0
-	set offset [$registerfile getAttributeValue software.osys::rfg::absolute_address]
-	$registerfile walk {
-		if {![$item isa osys::rfg::Group]} {
-		 	if {[string is wideinteger [$item getAttributeValue software.osys::rfg::absolute_address]]} {
-		 		if {$size <= [$item getAttributeValue software.osys::rfg::absolute_address]} {
-		 			set size [expr [$item getAttributeValue software.osys::rfg::absolute_address]+[$item getAttributeValue software.osys::rfg::size]]
-		 		}
-		 	}
-		}
-	}
-	return [expr $size - $offset]
+    return [$registerfile getAttributeValue software.osys::rfg::size]
 }
 
 proc getAddrBits {registerfile} {

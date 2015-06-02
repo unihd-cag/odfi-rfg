@@ -4,7 +4,7 @@ The CAG RegisterFile Generator (RFG) is a TCL-based register file hierarchy desc
 
 The full documentation can be found at http://unihd-cag.github.io/odfi-rfg/.
 
-The current goal is to implement a new stable version document this version. There is still **work in progress**. 
+The current goal is to implement a new stable version and to document this version. There is still **work in progress**. 
 
 In the first step a register file definition is needed. Here an example (Example_RF.rf):
 
@@ -41,7 +41,7 @@ In the second step in the RFG available generators can be applied on the descrip
     readRF "Example_RF.rf"
     
     generator verilog {
-        destinationPath "doc/"
+        destinationPath "verilog/"
     }
 
     generator xmlgenerator {
