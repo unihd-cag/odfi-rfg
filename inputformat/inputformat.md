@@ -195,7 +195,7 @@ For the Attribute Group Hardware (Hardware Interface):
 |counter | the field is implemented as counter with counter signals on the hardware interface | field |
 |sticky | The hardware interface can only write to high | field |
 |clear | Adds a register clear signal on the hardware interface | field |
-|rreinit | Adds an internal rreinit signal for a counter | field with coutner attribute |
+|rreinit | Adds an internal rreinit signal for a counter | field with counter attribute |
 |rreinit_source | triggers an internal rreinit signal | register |
 |trigger | | |
 |edge_trigger | |
