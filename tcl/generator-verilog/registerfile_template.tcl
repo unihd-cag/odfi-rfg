@@ -986,7 +986,9 @@ odfi::closures::oproc writeAddrComment {object} {
 
 odfi::closures::oproc writeTriggerBlock {object} {
     $object onAttributes {hardware.osys::rfg::trigger} {
+
         comment "Trigger Block"
+        
         clocked clk res_n $res_type {
             
             vif "!res_n" {
@@ -994,18 +996,13 @@ odfi::closures::oproc writeTriggerBlock {object} {
             }
 
             velse {
-                
-                set offset 0
 
                 set trigger_list {}
-                
-                set offset 0
 
                 $object walkDepthFirst {
                     if {[$it isa osys::rfg::Register]} {
                         $it onEachField {
                             $it onAttributes {hardware.osys::rfg::trigger} {
-                                ::puts "Test..."
                                 lappend trigger_list "[$it getAttributeValue hardware.osys::rfg::trigger]:[getName $it]_trigger"
                             }
                         }
@@ -1035,12 +1032,6 @@ odfi::closures::oproc writeTriggerBlock {object} {
 
                 }
 
-                ::puts $trigger_list
-                ::puts [$object getAttributeValue hardware.osys::rfg::trigger]
-                foreach trigger $trigger_list {
-                    ::puts $trigger
-                }
-                
                 set index 0
                 
                 foreach tag [$object getAttributeValue hardware.osys::rfg::trigger] {
@@ -1052,39 +1043,6 @@ odfi::closures::oproc writeTriggerBlock {object} {
                     incr index
                 }
 
-                set offset 0
-#
-#                $object walkDepthFirst {
-#                
-#                    if {[$it isa osys::rfg::Register]} {
-#                        $it onEachField {
-#                            $it onAttributes {hardware.osys::rfg::trigger} {
-#                                if {[llength [$object getAttributeValue hardware.osys::rfg::trigger]] == 1} {
-#                                    vputs "triggers <= [getName $it]_trigger"
-#                                } else {
-#                                    vputs "triggers\[$offset\] <= [getName $it]_trigger"
-#                                    incr offset
-#                                }
-#                            }
-#                        }
-#                    }
-#                    if {[$it isa osys::rfg::RegisterFile]} {
-#                        
-#                        $it onAttributes {hardware.osys::rfg::trigger} {
-#                            if {[llength [$object getAttributeValue hardware.osys::rfg::trigger]] == 1} {
-#                                vputs "triggers <= [getName $it]_trigger"
-#                            } else {
-#                                set trigger_width [llength [$it getAttributeValue hardware.osys::rfg::trigger]]
-#                                vputs "triggers\[[expr $trigger_width + $offset - 1]:$offset\] <= [getName $it]_triggers"
-#                                incr offset $trigger_width
-#                            }
-#                        }
-#
-#                        return false
-#                    } else {
-#                        return true
-#                    }
-#                }
             }
 
 
@@ -1098,6 +1056,7 @@ osys::verilogInterface::module [$rf name] {
     writeVModuleInterface $rf
 
 } body {
+
     set res_type "sync" 
     $options onAttributes {options.::reset} {
         set res_type [$options getAttributeValue options.::reset]
