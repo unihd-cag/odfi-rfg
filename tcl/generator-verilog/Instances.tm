@@ -322,8 +322,12 @@ odfi::closures::oproc writeRFModule {registerfile} {
 		}
 
 	}
-
-	odfi::common::println [join $signalList ",\n"] $resolve
+    
+    $registerfile onAttributes {hardware.osys::rfg::trigger} {
+            lappend signalList "        .[getName $it]_triggers([getName $it]_triggers)"
+    }
+	
+    odfi::common::println [join $signalList ",\n"] $resolve
 	odfi::common::printlnIndent
     odfi::common::println ");" $resolve
 	odfi::common::println "" $resolve

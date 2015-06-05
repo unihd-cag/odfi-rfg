@@ -114,6 +114,11 @@ odfi::closures::oproc writeRegisterFileInterface {it} {
     input [getName $it]_read_data wire [getRFmaxWidth $it] 0 true
     output [getName $it]_write_en reg
     output [getName $it]_write_data reg [getRFmaxWidth $it] 0 true
+
+    $it onAttributes {hardware.osys::rfg::trigger} {
+        input [getName $it]_triggers wire [llength [$it getAttributeValue hardware.osys::rfg::trigger]]
+    }
+
 }
 
 
@@ -145,6 +150,10 @@ odfi::closures::oproc writeVModuleInterface {rf} {
         } else {
             return true
         }
+    }
+
+    $rf onAttributes {hardware.osys::rfg::trigger} {
+        output triggers reg [llength [$rf getAttributeValue hardware.osys::rfg::trigger]]
     }
 }
 
@@ -250,6 +259,11 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                 }
 
             }
+
+            $it onAttributes {hardware.osys::rfg::trigger} {
+                wire [getName $it]_trigger       
+            }
+
         }
     }
 
@@ -265,6 +279,9 @@ odfi::closures::oproc writeRegisterFileInternalSigs {rf} {
         wire [getName $it]_read_data [getRFmaxWidth $it]
         reg [getName $it]_write_en
         reg [getName $it]_write_data [getRFmaxWidth $it]
+        $it onAttributes {hardware.osys::rfg::trigger} {
+            wire [getName $it]_triggers [llength [$it getAttributeValue trigger]]
+        }
     }
 
 }
@@ -534,10 +551,17 @@ odfi::closures::oproc writeRegisterWrite {object} {
 }
 
 odfi::closures::oproc writeRegisterBlock {object} {
-
+    
     ## check if anything is generated
     if {[CheckForRegBlock $object] == true} {
         comment "Register: [getName $object]"
+        
+        $object onEachField {
+            $it onAttributes {hardware.osys::rfg::trigger} {
+                assign [getName $it]_trigger "([getName $it] != [getName $it]_next)"
+            }
+        }
+
         clocked clk res_n $res_type {
             ## write Reset
             writeRegisterReset $object
@@ -963,12 +987,79 @@ odfi::closures::oproc writeAddrComment {object} {
     setCommentHeader [join $str "\n"]
 }
 
+odfi::closures::oproc writeTriggerBlock {object} {
+    $object onAttributes {hardware.osys::rfg::trigger} {
+
+        comment "Trigger Block"
+        
+        clocked clk res_n $res_type {
+            
+            vif "!res_n" {
+                vputs "triggers <= [llength [$object getAttributeValue hardware.osys::rfg::trigger]]'b0"  
+            }
+
+            velse {
+
+                set trigger_list {}
+
+                $object walkDepthFirst {
+                    if {[$it isa osys::rfg::Register]} {
+                        $it onEachField {
+                            $it onAttributes {hardware.osys::rfg::trigger} {
+                                lappend trigger_list "[$it getAttributeValue hardware.osys::rfg::trigger]:[getName $it]_trigger"
+                            }
+                        }
+                    }
+                  
+                    if {[$it isa osys::rfg::RegisterFile]} {
+                    
+                        $it onAttributes {hardware.osys::rfg::trigger} {
+                            set index 0
+                            foreach trigger [$it getAttributeValue hardware.osys::rfg::trigger] {
+                                if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] == 1} {
+                                    lappend trigger_list "$trigger:[getName $it]_triggers"
+                                } else {
+                                    lappend trigger_list "$trigger:[getName $it]_triggers\[$index\]"
+                                }
+                                incr index
+                            }
+                        }
+
+                        return false
+                    
+                    } else {
+                        
+                        return true
+                    
+                    }
+
+                }
+
+                set index 0
+                
+                foreach tag [$object getAttributeValue hardware.osys::rfg::trigger] {
+                    if {[llength [$object getAttributeValue hardware.osys::rfg::trigger]] == 1} {
+                        vputs "triggers <= [string map [list "$tag:" ""] [join [lsearch -all -inline $trigger_list ${tag}*] " | "]]"
+                    } else {
+                        vputs "triggers\[$index\] <= [string map [list "$tag:" ""] [join [lsearch -all -inline $trigger_list ${tag}*] " | "]]"
+                    }
+                    incr index
+                }
+
+            }
+
+
+        }
+    }
+}
+
 osys::verilogInterface::module [$rf name] {
     writeAddrComment $rf
     ## Write RegisterFile Signal Interface
     writeVModuleInterface $rf
 
 } body {
+
     set res_type "sync" 
     $options onAttributes {options.::reset} {
         set res_type [$options getAttributeValue options.::reset]
@@ -982,6 +1073,10 @@ osys::verilogInterface::module [$rf name] {
     
     ## Write Hardware/Software Write Interface/Always Block
     writeWriteInterface $rf
+
+    ## Write Trigger Block
+    
+    writeTriggerBlock $rf
     
     ## Writhe the Software Read Interface/ Address Decoder
     writeSoftReadInterface $rf
