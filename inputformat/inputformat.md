@@ -161,4 +161,41 @@ Attributes define some Properties of the different objects in a registerfile, li
 
 ### Attribute Groups
 
+There are two main attribute groups, the software and the hardware attributes groups.
+The software group contains attribute properties for the software interface of the registerfile and the hardware group contains attribute properties for the hardware interface.
+
+
+| Attribute Group| Description    | Objects | 
+| ------------- |:--------------:|--------:|
+| hardware   | Attribute group for hardware properties|register,field, ramBlock|         
+| software   | Attribute group for software properties|register, field, ramBlock|
+
 ### Attribute Properties
+
+For the Attribute Group Software (Software Interface):
+
+| Attribute Property |  Description | Objects |
+|:------------------ |:------------:|--------:|
+|ro | read only permission | field, ramBlock |
+|wo | write only permission | field, ramBlock |
+|rw | read/write permission | field, ramBlock |
+|write_clear | clears the field on software write | field |
+|write_xor | Xores the register on software write with itself | field |
+
+For the Attribute Group Hardware (Hardware Interface):
+
+| Attribute Property |  Description | Objects |
+|:------------------ |:------------:|--------:|
+|ro | read only permission | field, ramBlock |
+|wo | write only permission | field, ramBlock |
+|rw | read/write permission | field, ramBlock |
+|software_written | a software written signal which is high when the field is written from the software| field |
+|changed | a changed signal which is high when the field is written or changed from a reset | field |
+|no_wen | the field is generated without a write enable signal on the hardware interface | field |
+|counter | the field is implemented as counter with counter signals on the hardware interface | field |
+|sticky | The hardware interface can only write to high | field |
+|clear | Adds a register clear signal on the hardware interface | field |
+|rreinit | Adds an internal rreinit signal for a counter | field with coutner attribute |
+|rreinit_source | triggers an internal rreinit signal | register |
+|trigger | | |
+|edge_trigger | |
