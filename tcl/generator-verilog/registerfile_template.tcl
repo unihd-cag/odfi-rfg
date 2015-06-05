@@ -807,6 +807,11 @@ odfi::closures::oproc writeRamBlockSoftRead {object} {
     set care [format %x $care]
     set care_width [expr [getAddrBits $rf] - [ld [$object depth]] - 3 - [$object getAttributeValue software.osys::rfg::address_shift]]
     set dontCare_width [expr [ld [$object depth]] + [$object getAttributeValue software.osys::rfg::address_shift]]
+    if {[getRFAddrWidth $rf] == 0} {
+        set width 1
+    } else {
+        set width [getRFAddrWidth $rf]
+    }
     if {[$object depth] != 1} {
         case_select "\{[getRBAddrssDecode $object $rf]\}" {
             $object onRead {software} {
