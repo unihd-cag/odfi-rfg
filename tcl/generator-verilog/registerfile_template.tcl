@@ -279,6 +279,9 @@ odfi::closures::oproc writeRegisterFileInternalSigs {rf} {
         wire [getName $it]_read_data [getRFmaxWidth $it]
         reg [getName $it]_write_en
         reg [getName $it]_write_data [getRFmaxWidth $it]
+        $it onAttributes {hardware.osys::rfg::trigger} {
+            wire [getName $it]_triggers [llength [$it getAttributeValue trigger]]
+        }
     }
 
 }
