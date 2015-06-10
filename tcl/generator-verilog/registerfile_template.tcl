@@ -115,7 +115,8 @@ odfi::closures::oproc writeRegisterFileInterface {it} {
     output [getName $it]_write_en reg
     output [getName $it]_write_data reg [getRFmaxWidth $it] 0 true
 
-    $it onAttributes {hardware.osys::rfg::trigger} {
+    if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
+       
         input [getName $it]_triggers wire [llength [$it getAttributeValue hardware.osys::rfg::trigger]]
     }
 
@@ -152,7 +153,7 @@ odfi::closures::oproc writeVModuleInterface {rf} {
         }
     }
 
-    $rf onAttributes {hardware.osys::rfg::trigger} {
+    if {[llength [$rf getAttributeValue hardware.osys::rfg::trigger]] != 0} {
         output triggers reg [llength [$rf getAttributeValue hardware.osys::rfg::trigger]]
     }
 }
@@ -279,7 +280,7 @@ odfi::closures::oproc writeRegisterFileInternalSigs {rf} {
         wire [getName $it]_read_data [getRFmaxWidth $it]
         reg [getName $it]_write_en
         reg [getName $it]_write_data [getRFmaxWidth $it]
-        $it onAttributes {hardware.osys::rfg::trigger} {
+        if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
             wire [getName $it]_triggers [llength [$it getAttributeValue trigger]]
         }
     }
@@ -993,7 +994,7 @@ odfi::closures::oproc writeAddrComment {object} {
 }
 
 odfi::closures::oproc writeTriggerBlock {object} {
-    $object onAttributes {hardware.osys::rfg::trigger} {
+    if {[llength [$object getAttributeValue hardware.osys::rfg::trigger]] != 0} {
 
         comment "Trigger Block"
         
@@ -1018,7 +1019,7 @@ odfi::closures::oproc writeTriggerBlock {object} {
                   
                     if {[$it isa osys::rfg::RegisterFile]} {
                     
-                        $it onAttributes {hardware.osys::rfg::trigger} {
+                            if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
                             set index 0
                             foreach trigger [$it getAttributeValue hardware.osys::rfg::trigger] {
                                 if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] == 1} {
