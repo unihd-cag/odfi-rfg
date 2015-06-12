@@ -10,4 +10,7 @@ registerFile reg_hrw_srw_swritten {
             }
         }
     }
+
+    ## Additional registerFile Objects ...
+
 }
