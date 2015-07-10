@@ -114,7 +114,7 @@ RFG Description:
 
 Block Diagramm:
 \begin{figure}[h!]
-\includegraphics[width=\textwidth]{pictures/Reg_hrw_srw_nhwen.png}
+\includegraphics[width=0.92\textwidth]{pictures/Reg_hrw_srw_nhwen.png}
 \end{figure}
 \newpage
 Generated verilog from RFG description:
@@ -149,7 +149,7 @@ In line 33 we can see that now the register is cleared when the register is writ
 \newpage
 
 \subsubsection{software\_written}
-With the software\_written signal an additional hardware output is generated which is high when the software writes the register and depending on its value also when the register is reseted. Otherwise the software\_written signal is low.\\
+With the software\_written signal an additional hardware output is generated which is high when the software writes the register. Otherwise the software\_written signal is low.\\
 \\
 RFG Description:
 \lstinputlisting{specification_descriptions/reg_hrw_srw_swritten.rf}
@@ -183,6 +183,16 @@ linebackgroundcolor={
 In this verilog output an additional hardware output signal is added (line 17). It is set when the software interface writes the field, line 34 to 38. It is reset on every cycle in which the software interface does not do a write operation.
 \newpage
 \subsubsection{changed}
+
+The changed attribute behaves like the software\_written attribute described before. The only difference is that the changed signal is also set to high when the register is changed from a reset.\\
+\\
+RFG Description:
+\lstinputlisting{specification_descriptions/reg_hrw_srw_changed.rf}
+
+Block Diagramm:
+\begin{figure}[h!]
+    \includegraphics[width=\textwidth]{pictures/Reg_changed}
+\end{figure}
 \newpage
 
 \subsubsection{sticky}
@@ -344,6 +354,7 @@ RFG Description:
 \lstinputlisting{specification_descriptions/RF.rf}
 \newpage
 Generated verilog from RFG description:
+\lstinputlisting[linewidth=\textwidth,language=verilog,firstline=23,basicstyle=\small,tabsize=4,numbers=left,breaklines=true]{specification_descriptions/verilog/RF.v}
 \newpage
 
 \end{document}
