@@ -36,6 +36,8 @@ module reg_hrw_srw_nhwen
     input wire[31:0] test_test_field_next,
 	output reg[31:0] test_test_field
 
+    // Additional Signals ...
+
 );
 
 	/* register test */
@@ -59,6 +61,8 @@ module reg_hrw_srw_nhwen
 		end
 	end
 
+    // Additional always registerFile Object blocks...
+
 	always @(posedge clk)
 	begin
 		if (!res_n)
@@ -75,6 +79,9 @@ module reg_hrw_srw_nhwen
 					invalid_address <= 1'b0;
 					access_complete <= write_en || read_en;
 				end
+
+                // Additional addresses...
+
 				default:
 				begin
 					invalid_address <= read_en || write_en;
