@@ -23,6 +23,14 @@ package uni.hd.cag.osys.rfg.rf
 import java.io._
 import java.net.URL
 import scala.language.implicitConversions
+import uni.hd.cag.osys.rfg.rf2.model.Field;
+import uni.hd.cag.osys.rfg.rf2.model.Group;
+import uni.hd.cag.osys.rfg.rf2.model.RamBlock;
+import uni.hd.cag.osys.rfg.rf2.model.RamEntry;
+import uni.hd.cag.osys.rfg.rf2.model.RamField;
+import uni.hd.cag.osys.rfg.rf2.model.Register;
+import uni.hd.cag.osys.rfg.rf2.model.RegisterFile;
+
 import com.idyria.osi.ooxoo.core.buffers.datatypes._
 import com.idyria.osi.ooxoo.core.buffers.structural._
 import com.idyria.osi.ooxoo.core.buffers.structural.io.sax._

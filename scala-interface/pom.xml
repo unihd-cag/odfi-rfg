@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>com.idyria.osi</groupId>
 		<artifactId>project-scala</artifactId>
-		<version>2.11.2.r1</version>
+		<version>2.11.7.r1</version>
 	</parent>
 
 
@@ -48,7 +48,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>3.1.0</version>
+				<version>3.1.1-SNAPSHOT</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.idyria.osi.wsb</groupId>
@@ -270,18 +270,13 @@
 		<dependency>
 		  <groupId>com.idyria.osi.ooxoo</groupId>
 		  <artifactId>ooxoo-core</artifactId>
-		  <version>3.1.0</version>
+		  <version>3.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.idyria.osi.wsb</groupId>
 			<artifactId>wsb-core</artifactId>
 			<version>3.1.0</version>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.extoll</groupId>
-			<artifactId>rma2</artifactId>
-			<version>2.2.0</version>
 		</dependency>
 	</dependencies>
 
