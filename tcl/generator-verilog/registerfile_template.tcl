@@ -317,7 +317,7 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
     if {[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1] < [getRFAddrOffset $rf]} {
         set if_cond "write_en"     
     } else {
-        set if_cond "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress [$it parent]]/8]) && write_en"
+        set if_cond "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress [$it parent]]/(2**[getRFAddrOffset $rf])]) && write_en"
     }
     vif $if_cond {
         $it onAttributes {hardware.osys::rfg::counter} {
