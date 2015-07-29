@@ -28,100 +28,95 @@ import scala.language.implicitConversions
 import com.idyria.osi.tea.listeners.ListeningSupport
 
 /**
+ *
+ * The RegisterTransactionBuffer makes the interface between the value buffers of the various
+ * Registers objects, and the Device interface that really gets the value from Device implementation
+ *
+ * It is linked to a standard Transacitno Buffer for transaction management
+ *
+ * Determining the target node is done by the transaction context, meaning this Buffer can only be used
+ * if a transaction has been started, with the target node as Initiator
+ *
+ *
+ */
+class RegisterTransactionBuffer(
 
-    The RegisterTransactionBuffer makes the interface between the value buffers of the various
-    Registers objects, and the Device interface that really gets the value from Device implementation
-
-   It is linked to a standard Transacitno Buffer for transaction management
-
-   Determining the target node is done by the transaction context, meaning this Buffer can only be used
-   if a transaction has been started, with the target node as Initiator
-
-
-*/
-class RegisterTransactionBuffer (
-
-        /*
+    /*
             The register this buffer is operating on
         */
-        var target : NamedAddressed
+    var target: NamedAddressed) extends LongBuffer with ListeningSupport {
 
-    ) extends LongBuffer with ListeningSupport {
+  // Chain: -> TransactionBuffer -> DeviceInterfaceBuffer
+  //------------
+  this.appendBuffer(new TransactionBuffer)
+  this.appendBuffer(new DeviceInterfaceBuffer)
 
+  // Transaction Context
+  //-----------------------
 
-    // Chain: -> TransactionBuffer -> DeviceInterfaceBuffer
-    //------------
-    this.appendBuffer(new TransactionBuffer )
-    this.appendBuffer(new DeviceInterfaceBuffer)
+  /**
+   * Get Current Node or throw an exception
+   */
+  def getContextNode: RegisterFileHost = {
 
+    // Try to get the Target node from Transaction Context
+    //----------------
+    var currentTransaction = Transaction()
 
-    // Transaction Context
-    //-----------------------
+    currentTransaction.initiator match {
 
-    /**
-        Get Current Node or throw an exception
-    */
-    def getContextNode : RegisterFileHost = {
+      case null =>
 
-        // Try to get the Target node from Transaction Context
-        //----------------
-        var currentTransaction = Transaction()
+        throw new RegisterTransactionException(target, s"No initiator provided in current transaction, cannot used registerfile without a node initiator")
 
-        currentTransaction.initiator match {
+      case initiator if (!initiator.isInstanceOf[RegisterFileHost]) =>
 
-            case null =>
+        throw new RegisterTransactionException(target, s"The transaction initiator is not a Node type (Detected: ${initiator.getClass.getName}), which is mandatory to be able to send read/writes to the correct node")
 
-                    throw new RegisterTransactionException(target,s"No initiator provided in current transaction, cannot used registerfile without a node initiator")
-
-            case initiator if (!initiator.isInstanceOf[RegisterFileHost]) =>
-
-                    throw new RegisterTransactionException(target,s"The transaction initiator is not a Node type (Detected: ${initiator.getClass.getName}), which is mandatory to be able to send read/writes to the correct node")
-
-            // Success :)
-            case _ =>
-        }
-
-        currentTransaction.initiator.asInstanceOf[RegisterFileHost]
-
+      // Success :)
+      case _ =>
     }
 
+    currentTransaction.initiator.asInstanceOf[RegisterFileHost]
 
-    // Get (Override pull for this)
-    //---------
+  }
 
-    override def pull(du : DataUnit) : DataUnit = {
+  // Get (Override pull for this)
+  //---------
 
-        // Set DataUnit Context
-        //---------------
+  override def pull(du: DataUnit): DataUnit = {
 
-        du( "node" -> this.getContextNode)
-        du( "target" -> this.target)
+    // Set DataUnit Context
+    //---------------
 
-        // Delegate To Parent
-        //--------------
-        super.pull(du)
+    du("node" -> this.getContextNode)
+    du("target" -> this.target)
+
+    // Delegate To Parent
+    //--------------
+    super.pull(du)
+
+  }
+
+  /**
+   * If no value returned, set to register reset value
+   */
+  override def importDataUnit(du: DataUnit) = {
+
+    if (du.value == null) {
+
+      //println(s"Reading register: ${this.register.name} , got no value, so setting to reset: ${this.register.getResetValue}")
+      du.value = this.target match {
+        case r: Register => r.getResetValue.toString
+        case _ => "0"
+      }
 
     }
+    super.importDataUnit(du)
 
-    /**
-        If no value returned, set to register reset value
-    */
-    override def importDataUnit( du : DataUnit) = {
+  }
 
-        if (du.value==null) {
-
-            //println(s"Reading register: ${this.register.name} , got no value, so setting to reset: ${this.register.getResetValue}")
-            du.value = this.target match {
-              case r: Register => r.getResetValue.toString
-              case _ => "0"
-            }
-
-        }
-        super.importDataUnit(du)
-
-    }
-
-    /*def get() : Long = {
+  /*def get() : Long = {
 
 
         // Get initiator
@@ -141,57 +136,53 @@ class RegisterTransactionBuffer (
         this.data
     }*/
 
+  // Put (catch push operation for this)
+  //---------------
 
-    // Put (catch push operation for this)
+  /**
+   * Added Register + Node context to data Unit
+   */
+  override def push(du: DataUnit) = {
+
+    this.@->("push")
+
+    // Set DataUnit Context
     //---------------
-
-    /**
-        Added Register + Node context to data Unit
-    */
-    override def push( du : DataUnit) = {
-
-    	 this.@->("push")
-      
-        // Set DataUnit Context
-        //---------------
-
-        du( "node" -> this.getContextNode)
-        du( "target" -> this.target)
-
-
-        // Delegate to parent
-        //----------
-        super.push(du)
-
+    var targetDU = du match {
+      case null =>
+        var d = this.createDataUnit
+        //d.setValue(this.data.toString())
+        d
+      case d => d
     }
+    
+    targetDU("node" -> this.getContextNode)
+    targetDU("target" -> this.target)
 
+    // Delegate to parent
+    //----------
+    super.push(targetDU)
 
-
+  }
 
 }
 
 /**
-
-    The companion object of the register transaction buffer is used to retain current running transaction informations,
-    so that single RegisterTransactionBuffers can determine if they are part of a transaction at the moment
-
-
-*/
+ *
+ * The companion object of the register transaction buffer is used to retain current running transaction informations,
+ * so that single RegisterTransactionBuffers can determine if they are part of a transaction at the moment
+ *
+ *
+ */
 object RegisterTransactionBuffer {
 
-    def apply(target : NamedAddressed) = new RegisterTransactionBuffer(target)
+  def apply(target: NamedAddressed) = new RegisterTransactionBuffer(target)
 
-    // Conversion to/from long
-    implicit def convertValueBufferToLong( b : RegisterTransactionBuffer) : Long = {b.pull();b.data }
-
+  // Conversion to/from long
+  implicit def convertValueBufferToLong(b: RegisterTransactionBuffer): Long = { b.pull(); b.data }
 
 }
 
-
-class RegisterTransactionException(target : NamedAddressed,message : String)  extends Exception(s"On Register: ${target.name}, happened: $message") {
-
-
-
-
+class RegisterTransactionException(target: NamedAddressed, message: String) extends Exception(s"On Register: ${target.name}, happened: $message") {
 
 }
