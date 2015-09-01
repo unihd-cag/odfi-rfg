@@ -37,7 +37,6 @@ module reg_hrw_srw_rreinit_source
 	output wire[31:0] example_test_field,
 	input wire example_test_field_wen,
 	input wire example_test_field_countup
-
 );
 
 	reg rreinit;

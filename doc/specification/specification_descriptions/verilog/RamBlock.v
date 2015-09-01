@@ -40,7 +40,6 @@ module RamBlock
 	output wire[31:0] test_ram_rdata,
 	input wire test_ram_wen,
 	input wire[31:0] test_ram_wdata
-
 );
 
 	reg[6:0] test_ram_rf_addr;

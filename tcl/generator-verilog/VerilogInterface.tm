@@ -23,9 +23,14 @@ namespace eval osys::verilogInterface {
 
     itcl::class Common {
 
-        odfi::common::classField private resolve [odfi::common::newStringChannel]
+        odfi::common::classField private resolve ""
         
-        public method getResolve {} {
+        constructor args {
+            #puts "In Common constructor"
+            set resolve [odfi::common::newStringChannel]
+        }
+
+        public method getResolve args {
             flush $resolve
             return [read $resolve]
         }
@@ -108,6 +113,10 @@ namespace eval osys::verilogInterface {
         
         inherit Common
 
+        constructor args {Common::constructor} {
+            
+        }
+
         public method vputs {str} {
             odfi::common::println "$str;" $resolve    
         }
@@ -156,7 +165,7 @@ namespace eval osys::verilogInterface {
         
         inherit CommonVDesc
 
-        constructor {cClosure} {
+        constructor {cClosure} {CommonVDesc::constructor}  {
             odfi::closures::doClosure $cClosure
         }
         
@@ -175,7 +184,7 @@ namespace eval osys::verilogInterface {
         
         inherit CommonVDesc
 
-        constructor {cClosure} {
+        constructor {cClosure} {CommonVDesc::constructor} {
             odfi::closures::doClosure $cClosure
         }
         
@@ -191,7 +200,7 @@ namespace eval osys::verilogInterface {
         inherit Common
         odfi::common::classField private always_context ""        
         
-        constructor {cClosure} {
+        constructor {cClosure} {Common::constructor} {
             odfi::closures::doClosure $cClosure
         }
 
@@ -234,6 +243,7 @@ namespace eval osys::verilogInterface {
                 $always_context do $closure
             }
             odfi::common::println [$always_context getResolve] $resolve
+            set always_context ""
             odfi::common::printlnOutdent
             odfi::common::println "end" $resolve
         }
@@ -264,6 +274,7 @@ namespace eval osys::verilogInterface {
                 $always_context do $closure
             }
             odfi::common::println [$always_context getResolve] $resolve
+            set always_context ""
             odfi::common::printlnOutdent
             odfi::common::println "end" $resolve
         }
@@ -274,8 +285,9 @@ namespace eval osys::verilogInterface {
         
         inherit Common
 
-        constructor {cName cClosure1 cClosure2} {
+        constructor {cName cClosure1 cClosure2} {Common::constructor} {
             set module_interface [::new [namespace parent]::ModuleInterface ::${cName}_Interface $cClosure1]
+           
             ## Verilog Comment Block
             odfi::common::println "" $resolve
             odfi::common::println "/*" $resolve
@@ -286,22 +298,28 @@ namespace eval osys::verilogInterface {
             odfi::common::println ");" $resolve
             odfi::common::println "*/" $resolve
             
+
+
             ## Module Interface definitions 
             odfi::common::println "\nmodule $cName (" $resolve
             odfi::common::printlnIndent
             odfi::common::println [$module_interface getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println ");" $resolve
-            
+             
             ## Module body 
             odfi::common::printlnIndent
             set module_body [::new [namespace parent]::ModuleBody ::${cName}_Body $cClosure2]
             odfi::common::println [$module_body getResolve] $resolve
             odfi::common::printlnOutdent
             odfi::common::println "endmodule" $resolve
+
+
+            
         }
 
         public method generate {destination} {
+      
             odfi::files::writeToFile ${destination} [$this getResolve]
         }
 

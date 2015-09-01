@@ -24,6 +24,7 @@ import org.scalatest._
 import uni.hd.cag.osys.rfg.rf.device.Device
 import uni.hd.cag.osys.rfg.rf.device.simulation.SimpleSimulationDevice
 import com.idyria.osi.ooxoo.core.buffers.extras.transaction.Transaction
+import uni.hd.cag.osys.rfg.rf2.language.RFLanguage
 
 class RegisterFileLanguageTest extends FunSuite with ShouldMatchers with GivenWhenThen {
 

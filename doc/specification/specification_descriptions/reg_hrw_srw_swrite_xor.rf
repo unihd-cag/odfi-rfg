@@ -12,4 +12,7 @@ registerFile reg_hrw_srw_swrite_xor {
             }
         }
     }
+
+    ## Additional registerFile Objects ...
+
 }
