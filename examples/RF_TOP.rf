@@ -5,22 +5,31 @@ registerFile RF_TOP {
             width        16
             reset        16'h0
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
+                clear
+                edge_trigger
             }
         }
         field field_1 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
+                clear
             }
         }
         field field_2 {
             width        8
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
         reserved 8
@@ -30,36 +39,44 @@ registerFile RF_TOP {
         field field_0 {
             width        16
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
         reserved 16
         field field_1 {
             width        16
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
         reserved 16
     }
 
-    external RF_BOTTOM.rf RF_BOTTOM
+    internal RF_BOTTOM.rf RF_BOTTOM
 
     register REG_4 {
         field field_0 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
         field field_1 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
     }
@@ -68,18 +85,22 @@ registerFile RF_TOP {
         field field_0 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
         field field_1 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
     }
 
-    external RF_GROUP.rf RF_GROUP
+    internal RF_GROUP.rf RF_GROUP
 }

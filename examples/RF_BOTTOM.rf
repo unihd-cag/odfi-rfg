@@ -4,15 +4,19 @@ registerFile RF_BOTTOM {
         field field_0 {
             width        16
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
         field field_1 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
     }
@@ -21,15 +25,19 @@ registerFile RF_BOTTOM {
         field field_0 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
         field field_1 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
             }
         }
     }

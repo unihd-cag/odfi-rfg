@@ -7,22 +7,28 @@ registerFile RF_GROUP {
                 width        16
                 reset        16'h0
                 attributes software {
+                    rw
                 }    
                 attributes hardware {
+                    rw
                 }
             }
             field field_1 {
                 width        32
                 attributes software {
+                    rw
                 }    
                 attributes hardware {
+                    rw
                 }
             }
             field field_2 {
                 width        16
                 attributes software {
+                    rw
                 }    
                 attributes hardware {
+                    rw
                 }
             }
         }
@@ -40,15 +46,19 @@ registerFile RF_GROUP {
                 field field_0 {
                     width        32
                     attributes software {
+                        rw
                     }    
                     attributes hardware {
+                        rw
                     }
                 }
                 field field_1 {
                     width        32
                     attributes software {
+                        rw
                     }    
                     attributes hardware {
+                        rw
                     }
                 }
             }
