@@ -77,6 +77,24 @@ class Field extends FieldTrait with ListeningSupport {
 
   }
 
+  /**
+   * Update value in parent, but without triggering a push
+   */
+  def setMemory(newData: Long) = {
+    
+    // Read
+    var actualValue: Long = parentRegister.valueBuffer.data
+    
+   // println(s"Update field form $actualValue to , with @ $offset -> $width")
+    //var resultingValue = TeaBitUtil.setBits(actualValue, offset, offset + (width - 1), newData)
+    var scalResult = Field.setBits(actualValue, offset, offset + (width - 1), newData)
+
+    // Modify / Write
+    this.parentRegister.setMemory(scalResult)
+
+    this.@->("value.updated")
+
+  }
 }
 
 object Field {

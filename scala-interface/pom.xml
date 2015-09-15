@@ -2,7 +2,7 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>uni.hd.cag.rfg</groupId>
-	<artifactId>rf-interface</artifactId>
+	<artifactId>rfg-core</artifactId>
 	<version>1.5.0-SNAPSHOT</version>
 
 	<!-- use OSI Scala Parent pom to have scala enabled -->
@@ -227,16 +227,21 @@
 
 	<!-- Distribution -->
 	<!-- ############ -->
+	
 	<distributionManagement>
+    	<site>
+          <id>idyria.central</id>
+          <url>scpexe://buddy.idyria.com/access/odfi/${project.groupId}/${project.artifactId}/maven-site</url>
+        </site>
 		<repository>
-			<id>dev</id>
-			<name>dev-releases</name>
-			<url>http://dev:8081/artifactory/libs-release-local</url>
+			<id>idyria.central</id>
+			<name>Idyria Public Release Repository</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-release-local</url>
 		</repository>
 		<snapshotRepository>
-			<id>dev</id>
-			<name>dev-snapshots</name>
-			<url>http://dev:8081/artifactory/libs-snapshot-local</url>
+			<id>idyria.snapshot</id>
+			<name>Idyria Public Snapshot Repository</name>
+			<url>http://www.idyria.com/access/osi/artifactory/libs-snapshot-local</url>
 		</snapshotRepository>
 	</distributionManagement>
 

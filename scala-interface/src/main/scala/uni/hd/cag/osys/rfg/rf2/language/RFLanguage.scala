@@ -90,6 +90,8 @@ trait RFLanguage {
 
   }
   
+  
+  
   /**
    * Creates a Blocking Nested transaction and commits it at the end of the closure
    */
@@ -97,6 +99,21 @@ trait RFLanguage {
     Transaction.doBlocking {
       cl
     }
+  }
+  
+  /**
+   * Opens a transaction on a node, must be called before any operation using a RF language instance
+   * The transaction is running in blocking mode, which allows to use the registerfile without any device interaction
+   */
+  def onBuffering[T <: Any](rf: RegisterFileHost = currentHost)(cl: => T) : T = {
+
+    rf.onRegisterFile {
+      rf =>
+        Transaction.doBuffering {
+          cl
+        }
+    }
+
   }
   
   /**
@@ -319,6 +336,12 @@ trait RFLanguage {
     currentHost.registerFile.search(s)
   }
   
+  
+  // Register 
+  //-------------------
+  def register(s:String) : Register = {
+    currentHost.registerFile.register(s)
+  }
 
   // Explain
   //------------

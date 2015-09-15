@@ -43,12 +43,12 @@ trait Device {
     Should Return a Long value for the register @ provided address
 
   */
-  def readRegister( nodeId : Short, address : Long) : Option[Long]
+  def readRegister( nodeId : Short, address : Long, size: Int) : Option[Array[Long]]
 
   /**
     Writes the register value @ provided address
   */
-  def writeRegister( nodeId : Short, address : Long, value : Long)
+  def writeRegister( nodeId : Short, address : Long, value :Array[Long])
 
 
 
@@ -78,16 +78,16 @@ object Device extends Device {
        
      }
     
-    def readRegister( nodeId : Short, address : Long) : Option[Long] = {
+    def readRegister( nodeId : Short, address : Long,size: Int) : Option[Array[Long]] = {
 
           if (this.targetDevice==null)
               throw new RuntimeException("Cannot use Device before that a Device.targetDevice has been properly set up")
 
-          this.targetDevice.readRegister(nodeId,address)
+          this.targetDevice.readRegister(nodeId,address,size)
 
     }
 
-    def writeRegister( nodeId : Short, address : Long, value : Long) = {
+    def writeRegister( nodeId : Short, address : Long, value : Array[Long]) = {
 
           if (this.targetDevice==null)
               throw new RuntimeException("Cannot use Device before that a Device.targetDevice has been properly set up")

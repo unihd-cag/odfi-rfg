@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RegisterFile name="test_rf">
+	<Register name="test">
+		<Attributes for="rfg">
+			<Attribute name="osys::rfg::file">/home/rleys/git/bsp-atlys/example/general_test/hw/rfg/general_test_rf.rfg
+			</Attribute>
+			<Attribute name="osys::rfg::line">2</Attribute>
+		</Attributes>
+		<Attributes for="software">
+			<Attribute name="osys::rfg::size">1</Attribute>
+			<Attribute name="osys::rfg::relative_address">0</Attribute>
+			<Attribute name="osys::rfg::absolute_address">0</Attribute>
+		</Attributes>
+		<Field name="a" width="1" reset="8'd0">
+			<Attributes for="rfg">
+				<Attribute name="osys::rfg::file">/home/rleys/git/bsp-atlys/example/general_test/hw/rfg/general_test_rf.rfg
+				</Attribute>
+				<Attribute name="osys::rfg::line">2</Attribute>
+			</Attributes>
+			<Attributes for="hardware">
+				<Attribute name="osys::rfg::ro" />
+			</Attributes>
+			<Attributes for="software">
+				<Attribute name="osys::rfg::rw" />
+			</Attributes>
+		</Field>
+		<Field name="b" width="1" reset="8'd0">
+			<Attributes for="rfg">
+				<Attribute name="osys::rfg::file">/home/rleys/git/bsp-atlys/example/general_test/hw/rfg/general_test_rf.rfg
+				</Attribute>
+				<Attribute name="osys::rfg::line">2</Attribute>
+			</Attributes>
+			<Attributes for="hardware">
+				<Attribute name="osys::rfg::ro" />
+			</Attributes>
+			<Attributes for="software">
+				<Attribute name="osys::rfg::rw" />
+			</Attributes>
+		</Field>
+	</Register>
+</RegisterFile>

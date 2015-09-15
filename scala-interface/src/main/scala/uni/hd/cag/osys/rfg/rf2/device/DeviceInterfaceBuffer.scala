@@ -57,18 +57,23 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
   //--------------------
 
   override def pull(du: DataUnit) = {
-
+  
+     var readSize = du("size").asInstanceOf[Option[Int]].getOrElse(1)
+     
     // Gather context and perform
     //---------------
     this.getNodeAndTarget(du) match {
 
       // Host is a Device also, map to it instead of global singleton device
       //----------------
+      
       case Some((host: Device, target)) =>
 
         var absoluteAddress = target.findAttributeLong("software.osys::rfg::absolute_address").get
-        host.readRegister(host.id, absoluteAddress) match {
-          case Some(value) => du.value = value.toString
+        host.readRegister(host.id, absoluteAddress,readSize) match {
+          case Some(value) => 
+              du.value = value(0).toString
+              du("buffer" -> value)
           case _ =>
         }
         du
@@ -78,8 +83,10 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
       case Some((host, target)) =>
 
         var absoluteAddress = target.findAttributeLong("software.osys::rfg::absolute_address").get
-        Device.readRegister(host.id, absoluteAddress) match {
-          case Some(value) => du.value = value.toString
+        Device.readRegister(host.id, absoluteAddress,readSize) match {
+          case Some(value) => 
+              du.value = value(0).toString
+              du("buffer" -> value)
           case _ =>
         }
         du
@@ -97,6 +104,13 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
    */
   override def pushRight(du: DataUnit) = {
 
+    var value = du("buffer") match {
+      case Some( values) => values.asInstanceOf[Array[String]].map(_.toLong) 
+      case None => Array(java.lang.Long.decode(du.value).toLong)
+        
+    }
+    //println(s"Push to driver: "+value.length)
+    
     // Gather context and perform
     //---------------
     this.getNodeAndTarget(du) match {
@@ -106,14 +120,14 @@ class DeviceInterfaceBuffer extends BaseBufferTrait {
       case Some((host: Device, target)) =>
 
         var absoluteAddress = target.findAttributeLong("software.osys::rfg::absolute_address").get
-        host.writeRegister(host.id, absoluteAddress, java.lang.Long.decode(du.value))
+        host.writeRegister(host.id, absoluteAddress, value)
 
       // Host and Register, Use global Singleton Device
       //--------
       case Some((host, target)) =>
 
         var absoluteAddress = target.findAttributeLong("software.osys::rfg::absolute_address").get
-        Device.writeRegister(host.id, absoluteAddress, java.lang.Long.decode(du.value))
+        Device.writeRegister(host.id, absoluteAddress,value)
       case None =>
         throw new IllegalArgumentException("Cannot Perform Device write from Data Unit because Node and/or register are missing from DataUnit context")
     }
