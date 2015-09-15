@@ -21,7 +21,7 @@ itcl::body Egenerator::produceHwTb args {
     odfi::common::println "\tlogic write_en;" $out
     odfi::common::println "\tlogic write_data;" $out
     odfi::common::println "\tlogic invalid_address;" $out
-    odfi::common::println "\tlogic access_complete;" $out
+    odfi::common::println "\tlogic access_complete;\n" $out
     $registerFile walkDepthFirst {
         if {[$it isa osys::rfg::RamBlock]} {
             $it onAttributes {hardware.osys::rfg::rw} {
@@ -41,6 +41,7 @@ itcl::body Egenerator::produceHwTb args {
                 odfi::common::println "\tlogic [getName $it]_wen;" $out
                 odfi::common::println "\tlogic [getName $it]_wdata;" $out
             }
+            odfi::common::println "" $out
         } elseif {[$it isa osys::rfg::Register]} {
             $it onEachField {
                 if {[$it name] != "Reserved"} {
@@ -65,10 +66,10 @@ itcl::body Egenerator::produceHwTb args {
                     $it onAttributes {hardware.osys::rfg::changed} {
                         odfi::common::println "\tlogic [getName $it]_changed;" $out
                     }
+                    odfi::common::println "" $out
                 }
             }
         }
-
         return true
     }
 
