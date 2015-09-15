@@ -57,8 +57,8 @@ itcl::body Egenerator::produceHwTopFile args {
                     $it onAttributes {hardware.osys::rfg::software_written} {
                         odfi::common::println "\t\tkeep [getName $it]_env.smp.as_a(TRUE'written REG_FIELD rfg_hw_inf_signal_map_u).written_p.hdl_path() == \"[getName $it]_written\";" $out
                     }
-                    $it onAttributes {hardware.osys::rfg::hclear} {
-                        odfi::common::println "\t\tkeep [getName $it]_env.smp.as_a(TRUE'hclear REG_FIELD rfg_hw_inf_signal_map_u).hclear_p.hdl_path() == \"[getName $it]_hclear\";" $out
+                    $it onAttributes {hardware.osys::rfg::clear} {
+                        odfi::common::println "\t\tkeep [getName $it]_env.smp.as_a(TRUE'clear REG_FIELD rfg_hw_inf_signal_map_u).clear_p.hdl_path() == \"[getName $it]_clear\";" $out
                     }
                     $it onAttributes {hardware.osys::rfg::counter} {
                         odfi::common::println "\t\tkeep [getName $it]_env.smp.as_a(TRUE'countup REG_FIELD rfg_hw_inf_signal_map_u).countup_p.hdl_path() == \"[getName $it]_countup\";" $out

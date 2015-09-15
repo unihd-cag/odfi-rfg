@@ -20,7 +20,6 @@ package require Itcl 3.4
 package require odfi::common
 package require odfi::list 2.0.0
 package require odfi::files 1.0.0
-#source [file dirname [file normalize [info script]]]/hwTopFile.tm
 
 namespace eval osys::rfg::generator::egenerator {
 
@@ -37,6 +36,7 @@ namespace eval osys::rfg::generator::egenerator {
         public method getGroupsName {instance} {}
         public method produceSwRfModel args {}
         public method produceHwTopFile args {}
+        public method produceHwTb args {}
 
         public method produce {destinationPath {generator ""}} {
             file mkdir $destinationPath
@@ -46,10 +46,12 @@ namespace eval osys::rfg::generator::egenerator {
             ::puts "eGenerator processing $registerFile > ${destinationPath}top.e"
             set res [produceHwTopFile ]
             odfi::files::writeToFile ${destinationPath}top.e $res
-    #        ::puts "eGenerator processing $registerFile > ${destinationPath}tb_top.sv"
-     #       set res [produce_hw_tb ]
-      #      odfi::files::writeToFile ${destinationPath}tb_top.sv $res
+            ::puts "eGenerator processing $registerFile > ${destinationPath}tb_top.sv"
+            set res [produceHwTb ]
+            odfi::files::writeToFile ${destinationPath}tb_top.sv $res
         }
     }
     source [file dirname [file normalize [info script]]]/swRfModel.tm
+    source [file dirname [file normalize [info script]]]/hwTopFile.tm
+    source [file dirname [file normalize [info script]]]/hwTb.tm
 }
