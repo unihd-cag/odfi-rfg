@@ -28,7 +28,7 @@ trait Valued extends AttributesContainer {
    */
   def value_=(data: Long) = this.valueBuffer.set(data)
   
-  
+  def setMemory(data:Long) = this.valueBuffer.data = data
   
   
   

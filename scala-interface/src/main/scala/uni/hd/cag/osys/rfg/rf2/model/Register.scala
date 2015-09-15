@@ -1,12 +1,15 @@
 package uni.hd.cag.osys.rfg.rf2.model
 
-import uni.hd.cag.osys.rfg.rf2.value.Valued
 import com.idyria.osi.ooxoo.core.buffers.structural.DataUnit
+import uni.hd.cag.osys.rfg.rf2.value.Valued
+import scala.language.dynamics
+import com.idyria.osi.ooxoo.core.buffers.structural.xelement
 
 /**
  * @author zm4632
  */
-class Register extends RegisterTrait with Valued {
+@xelement(name="RegisterTrait")
+class Register extends RegisterTrait with Valued with Dynamic {
 
   // End of parsing
   //-------------------------
@@ -48,7 +51,13 @@ class Register extends RegisterTrait with Valued {
   
   // Fields
   //------------------
+  def selectDynamic(name: String) : Field = {
+    this.field(name)
+  }
   
+  def updateDynamic(name:String)(v:Long) = {
+    this.field(name).setMemory(v)
+  }
   
   /**
    * Search string format:
@@ -77,6 +86,18 @@ class Register extends RegisterTrait with Valued {
                 """)
     }
 
+  }
+  
+  
+  // IO 
+  //---------------------
+  
+  def write() = {
+    this.valueBuffer.push(null)
+  }
+  
+  def read() = {
+    this.valueBuffer.pull()
   }
 }
 object Register {

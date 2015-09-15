@@ -21,16 +21,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 package uni.hd.cag.osys.rfg.rf
 
 import org.scalatest._
-
 import com.idyria.osi.ooxoo.core.buffers.extras.transaction._
 import com.idyria.osi.ooxoo.core.buffers.structural._
 import com.idyria.osi.ooxoo.core.buffers.datatypes._
-
 import uni.hd.cag.osys.rfg.rf._
 import uni.hd.cag.osys.rfg.rf.device._
 import uni.hd.cag.osys.rfg.rf.device.simulation._
-
-import scala.language.implicitConversions
+import com.idyria.osi.ooxoo.core.buffers.datatypes.LongBuffer.convertLongBufferToLong2
+import uni.hd.cag.osys.rfg.rf.RegisterTransactionBuffer.convertValueBufferToLong
 
 // Test Purpose Implementation classes
   //------------------

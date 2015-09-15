@@ -164,6 +164,7 @@ class RegisterTransactionBuffer(
 
     targetDU("node" -> this.getContextNode)
     targetDU("target" -> this.target)
+    //targetDU("buffer" -> Array(this.data.toLong))
 
     // Delegate to parent
     //----------
