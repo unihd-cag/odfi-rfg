@@ -16,13 +16,16 @@ itcl::body Egenerator::produceHwTb args {
     odfi::common::println "//--------------------------------------------------" $out
     odfi::common::println "//-- DUT -------------------------------------------" $out
     odfi::common::println "//--------------------------------------------------\n" $out
+    odfi::common::println "//--software interface" $out
     odfi::common::println "\tlogic address;" $out
-    odfi::common::println "\tlogic read_data;" $out
     odfi::common::println "\tlogic read_en;" $out
+    odfi::common::println "\tlogic read_data;" $out
     odfi::common::println "\tlogic write_en;" $out
     odfi::common::println "\tlogic write_data;" $out
-    odfi::common::println "\tlogic invalid_address;" $out
-    odfi::common::println "\tlogic access_complete;\n" $out
+    odfi::common::println "\tlogic access_complete;" $out
+    odfi::common::println "\tlogic invalid_address;\n" $out
+    odfi::common::println "//--hardware interface" $out
+
     $registerFile walkDepthFirst {
         if {[$it isa osys::rfg::RamBlock]} {
             $it onAttributes {hardware.osys::rfg::rw} {
@@ -78,12 +81,64 @@ itcl::body Egenerator::produceHwTb args {
 	lappend signalList "\t\t.res_n(res_n)"
 	lappend signalList "\t\t.clk(clk)"
 	lappend signalList "\t\t.address(address)"
-	lappend signalList "\t\t.read_data(read_data)"
-	lappend signalList "\t\t.invalid_address(invalid_address)"
-	lappend signalList "\t\t.access_complete(access_complete)"
 	lappend signalList "\t\t.read_en(read_en)"
+	lappend signalList "\t\t.read_data(read_data)"
 	lappend signalList "\t\t.write_en(write_en)"
 	lappend signalList "\t\t.write_data(write_data)"
+	lappend signalList "\t\t.access_complete(access_complete)"
+	lappend signalList "\t\t.invalid_address(invalid_address)"
+
+    $registerFile walkDepthFirst {
+        if {[$it isa osys::rfg::RamBlock]} {
+            lappend signalList ""
+            $it onAttributes {hardware.osys::rfg::rw} {
+                lappend signalList "\t\t.[getName $it]_addr"
+                lappend signalList "\t\t.[getName $it]_ren"
+                lappend signalList "\t\t.[getName $it]_rdata"
+                lappend signalList "\t\t.[getName $it]_wen"
+                lappend signalList "\t\t.[getName $it]_wdata"
+            }
+            $it onAttributes {hardware.osys::rfg::ro} {
+                lappend signalList "\t\t.[getName $it]_addr"
+                lappend signalList "\t\t.[getName $it]_ren"
+                lappend signalList "\t\t.[getName $it]_rdata"
+            }
+            $it onAttributes {hardware.osys::rfg::wo} {
+                lappend signalList "\t\t.[getName $it]_addr"
+                lappend signalList "\t\t.[getName $it]_wen"
+                lappend signalList "\t\t.[getName $it]_wdata"
+            }
+        } elseif {[$it isa osys::rfg::Register]} {
+            $it onEachField {
+                if {[$it name] != "Reserved"} {
+                    lappend signalList ""
+                    if {![$it hasAttribute hardware.osys::rfg::no_wen] && ([$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::wo])} {
+                        lappend signalList "\t\t.[getName $it]_wen"
+                    }
+                    if {[$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::wo]} {
+                        lappend signalList "\t\t.[getName $it]_next"
+                    }
+                    if {[$it hasAttribute hardware.osys::rfg::rw] || [$it hasAttribute software.osys::rfg::ro]} {
+                        lappend signalList "\t\t.[getName $it]"
+                    }
+                    $it onAttributes {hardware.osys::rfg::software_written} {
+                        lappend signalList "\t\t.[getName $it]_written"
+                    }
+                    $it onAttributes {hardware.osys::rfg::clear} {
+                        lappend signalList "\t\t.[getName $it]_clear"
+                    }
+                    $it onAttributes {hardware.osys::rfg::counter} {
+                        lappend signalList "\t\t.[getName $it]_countup"
+                    }
+                    $it onAttributes {hardware.osys::rfg::changed} {
+                        lappend signalList "\t\t.[getName $it]_changed"
+                    }
+                }
+            }
+        }
+        return true
+    }
+
 
     odfi::common::println [join $signalList ",\n"] $out
     odfi::common::println "\t);\n" $out
