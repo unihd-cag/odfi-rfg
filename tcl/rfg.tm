@@ -17,6 +17,7 @@
 
 ## Provides the base API interface for OSYS Register File Generator
 package provide osys::rfg 1.0.0
+package require Itcl 3.4 4.0
 package require odfi::common
 package require odfi::list 2.0.0
 
