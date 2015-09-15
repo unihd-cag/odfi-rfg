@@ -43,10 +43,10 @@ namespace eval osys::rfg {
             #########
             set packageName "osys::rfg::generator::[string tolower $name]"
             set generatorName "::${packageName}::[string toupper $name 0 0]"
-            if {[catch "package require $packageName"]} {
+            if {[catch "package require $packageName" res ]} {
                 
                 ## Error 
-                error "Generator class $name was not found, and no package having conventional name $packageName could be found"
+                error "Generator class $name was not found, and no package having conventional name $packageName could be found: $res"
 
             } else {
 
