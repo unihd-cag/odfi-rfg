@@ -1,5 +1,6 @@
 itcl::body Egenerator::produceHwTb args {
     set out [odfi::common::newStringChannel]
+    set signalList {}
 
     odfi::common::println "module tb_top;\n" $out
     odfi::common::println "\tlogic clk;" $out
@@ -73,18 +74,20 @@ itcl::body Egenerator::produceHwTb args {
         return true
     }
 
-	odfi::common::println "[$registerFile name] [$registerFile name]_I (" $out
-	odfi::common::println "	.res_n(res_n)," $out
-	odfi::common::println "	.clk(clk)," $out
-	odfi::common::println "	.address(address)," $out
-	odfi::common::println "	.read_data(read_data)," $out
-	odfi::common::println "	.invalid_address(invalid_address)," $out
-	odfi::common::println "	.access_complete(access_complete)," $out
-	odfi::common::println "	.read_en(read_en)," $out
-	odfi::common::println "	.write_en(write_en)," $out
-	odfi::common::println "	.write_data(write_data)," $out
+	odfi::common::println "\t[$registerFile name] [$registerFile name]_I (" $out
+	lappend signalList "\t\t.res_n(res_n)"
+	lappend signalList "\t\t.clk(clk)"
+	lappend signalList "\t\t.address(address)"
+	lappend signalList "\t\t.read_data(read_data)"
+	lappend signalList "\t\t.invalid_address(invalid_address)"
+	lappend signalList "\t\t.access_complete(access_complete)"
+	lappend signalList "\t\t.read_en(read_en)"
+	lappend signalList "\t\t.write_en(write_en)"
+	lappend signalList "\t\t.write_data(write_data)"
 
-
+    odfi::common::println [join $signalList ",\n"] $out
+    odfi::common::println "\t);\n" $out
+	odfi::common::println "endmodule : tb_top" $out
     flush $out
     set res [read $out]
     close $out
