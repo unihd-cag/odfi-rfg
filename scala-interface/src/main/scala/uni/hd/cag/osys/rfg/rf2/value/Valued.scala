@@ -26,9 +26,11 @@ trait Valued extends AttributesContainer {
    *
    * @group rf
    */
-  def value_=(data: Long) = this.valueBuffer.set(data)
+  def value_=(data: Double) = this.valueBuffer.set(data)
   
-  def setMemory(data:Long) = this.valueBuffer.data = data
+  def setMemory(data:Double) = this.valueBuffer.data = data
+  
+  def getMemory = this.valueBuffer.data
   
   
   

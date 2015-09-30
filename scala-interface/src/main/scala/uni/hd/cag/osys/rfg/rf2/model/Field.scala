@@ -29,7 +29,7 @@ class Field extends FieldTrait with ListeningSupport {
     var actualValue = parentRegister.value
 
     // Extract
-    TeaBitUtil.extractBits(actualValue, offset, offset + width - 1)
+    TeaBitUtil.extractBits(actualValue.toLong, offset, offset + width - 1)
   }
 
   /**
@@ -41,7 +41,7 @@ class Field extends FieldTrait with ListeningSupport {
     var actualValue = parentRegister.value
 
     // Extract
-    TeaBitUtil.extractBits(actualValue.data, offset, offset + width - 1)
+    TeaBitUtil.extractBits(actualValue.data.toLong, offset, offset + width - 1)
 
   }
 
@@ -57,7 +57,7 @@ class Field extends FieldTrait with ListeningSupport {
   def value_=(newData: java.lang.Long) = {
 
     // Read
-    var actualValue: Long = parentRegister.value
+    var actualValue: Long = parentRegister.value.toLong
 
     //java.lang.Long.toHexString(node.value)
 
@@ -83,7 +83,7 @@ class Field extends FieldTrait with ListeningSupport {
   def setMemory(newData: Long) = {
     
     // Read
-    var actualValue: Long = parentRegister.valueBuffer.data
+    var actualValue: Long = parentRegister.valueBuffer.data.toLong
     
    // println(s"Update field form $actualValue to , with @ $offset -> $width")
     //var resultingValue = TeaBitUtil.setBits(actualValue, offset, offset + (width - 1), newData)

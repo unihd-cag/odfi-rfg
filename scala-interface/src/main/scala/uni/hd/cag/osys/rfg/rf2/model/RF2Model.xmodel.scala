@@ -75,7 +75,8 @@ object RF2Model extends ModelBuilder {
   var ramBlock = "RamBlockTrait" is {
     
     withTrait(common)
-    importElement(attributes).setMultiple
+    withTrait("AttributesContainer")
+    //importElement(attributes).setMultiple
     importElement("RamField").setMultiple
     
   }

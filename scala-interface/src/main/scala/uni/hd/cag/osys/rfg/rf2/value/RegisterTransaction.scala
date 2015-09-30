@@ -32,6 +32,7 @@ import uni.hd.cag.osys.rfg.rf2.device.DeviceInterfaceBuffer
 import uni.hd.cag.osys.rfg.rf2.language.RegisterFileHost
 import com.idyria.osi.ooxoo.core.buffers.datatypes.LongBuffer
 import uni.hd.cag.osys.rfg.rf2.language.RegisterFileNode
+import com.idyria.osi.ooxoo.core.buffers.datatypes.DoubleBuffer
 
 /**
  *
@@ -50,7 +51,7 @@ class RegisterTransactionBuffer(
     /*
             The register this buffer is operating on
         */
-    var target: AttributesContainer) extends LongBuffer with ListeningSupport {
+    var target: AttributesContainer) extends DoubleBuffer with ListeningSupport {
 
   // Chain: -> TransactionBuffer -> DeviceInterfaceBuffer
   //------------
@@ -157,7 +158,7 @@ class RegisterTransactionBuffer(
     var targetDU = du match {
       case null =>
         var d = new DataUnit
-        d.setValue(this.data.toString())
+        d.setValue(this.data.toLong.toString())
         d
       case d => d
     }
@@ -186,7 +187,7 @@ object RegisterTransactionBuffer {
   def apply(target: AttributesContainer) = new RegisterTransactionBuffer(target)
 
   // Conversion to/from long
-  implicit def convertValueBufferToLong(b: RegisterTransactionBuffer): Long = { b.pull(); b.data }
+  implicit def convertValueBufferToLong(b: RegisterTransactionBuffer): Double = { b.pull(); b.data }
 
 }
 

@@ -244,10 +244,10 @@ trait RFLanguage {
   def read(str: String): Long = {
 
     currentHost.registerFile.search(str) match {
-      case r: Register  => r.value
+      case r: Register  => r.value.toLong
       case f: Field     => f.value
       case rf: RamField => rf.value
-      case re: RamEntry =>  re.value
+      case re: RamEntry =>  re.value.toLong
       case _            => throw new RuntimeException(s"unsupported path: $str")
     }
 
@@ -256,10 +256,10 @@ trait RFLanguage {
   def read(destination: (Group, String)): Long = {
 
     destination._1.search(destination._2) match {
-      case r: Register  => r.value
+      case r: Register  => r.value.toLong
       case f: Field     => f.value
       case rf: RamField => rf.value
-      case re: RamEntry => re.value
+      case re: RamEntry => re.value.toLong
       case _            => throw new RuntimeException(s"unsupported path: ${destination._1}/${destination._2}")
     }
 
