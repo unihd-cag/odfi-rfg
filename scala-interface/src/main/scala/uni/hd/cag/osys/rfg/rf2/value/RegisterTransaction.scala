@@ -90,7 +90,12 @@ class RegisterTransactionBuffer(
 
   // Get (Override pull for this)
   //---------
-
+  var buffer : Array[Long] = Array(0)
+  
+  /**
+   * Call classical Data buffer pull
+   * Check for Size requirements
+   */
   override def pull(du: DataUnit): DataUnit = {
 
     // Set DataUnit Context
@@ -101,7 +106,16 @@ class RegisterTransactionBuffer(
 
     // Delegate To Parent
     //--------------
-    super.pull(du)
+    var res = super.pull(du)
+    
+    // Handle Size
+    //-----------
+    du("buffer") match {
+      case Some( b : Array[Long]) => buffer = b
+      case _ => 
+    }
+    
+    res
 
   }
 
@@ -119,6 +133,9 @@ class RegisterTransactionBuffer(
       }
 
     }
+    
+    
+    
     super.importDataUnit(du)
 
   }

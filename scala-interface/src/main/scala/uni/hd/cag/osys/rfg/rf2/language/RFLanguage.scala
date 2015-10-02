@@ -264,6 +264,15 @@ trait RFLanguage {
     }
 
   }
+  
+  def readBulk(str: String,size : Int) : Array[Long] = {
+    currentHost.registerFile.search(str) match {
+      case r: Register  => 
+        r.value(size)
+        r.valueBuffer.buffer
+      case _            => throw new RuntimeException(s"readBulk unsupported path: $str,  only available on register entries")
+    } 
+  }
 
   // Write Language
   //-----------------------

@@ -175,6 +175,14 @@ namespace eval osys::rfg {
             }
         }
 
+        public method isRead {group} {
+             if {[hasAttribute ${group}.osys::rfg::ro] || [hasAttribute ${group}.osys::rfg::rw]} {
+                return true
+            } else {
+                return false
+            }
+        }
+
         public method onWrite {group closure1 {keyword ""} {closure2 ""}} {
             if {[hasAttribute ${group}.osys::rfg::wo] || [hasAttribute ${group}.osys::rfg::rw]} {
                 odfi::closures::doClosure $closure1 1
@@ -182,6 +190,14 @@ namespace eval osys::rfg {
                 if {$closure2 != ""} {
                     odfi::closures::doClosure $closure2 1
                 }
+            }
+        }
+
+        public method isWrite {group} {
+            if {[hasAttribute ${group}.osys::rfg::wo] || [hasAttribute ${group}.osys::rfg::rw]} {
+                return true
+            } else {
+                return false
             }
         }
 
