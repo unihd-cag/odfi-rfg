@@ -21,7 +21,7 @@ package require odfi::common
 package require odfi::list 2.0.0
 package require odfi::files
 
-package require odfi::ewww::webdata 1.0.0
+#package require odfi::ewww::webdata 1.0.0
 
 # function to getRFmaxWidth
 proc getRFmaxWidth {registerfile} {
@@ -117,6 +117,9 @@ namespace eval osys::rfg::generator::rfgheader {
                     }
                     odfi::common::println "`define RFS_[string toupper [$it name]]_RWIDTH [getRFmaxWidth $it]" $out
                     odfi::common::println "`define RFS_[string toupper [$it name]]_WWIDTH [getRFmaxWidth $it]" $out
+
+                } elseif {[$it isa osys::rfg::Register]} {
+                    odfi::common::println "`define RFS_[string toupper [$it name]]_ADDR [$it getAttributeValue software.osys::rfg::absolute_address]" $out
                 }
                 return true
             }
