@@ -117,6 +117,15 @@ trait RFLanguage {
   }
   
   /**
+   * Creates a Blocking Nested transaction and commits it at the end of the closure
+   */
+  def onBuffering[T <: Any](cl: => T) : T = {
+    Transaction.doBuffering {
+      cl
+    }
+  }
+  
+  /**
    * Creates a Blocking Nested transaction and discards it at the end of the closure
    */
   def noIO[T <: Any](rf: RegisterFileHost)(cl: => T) : T= {
