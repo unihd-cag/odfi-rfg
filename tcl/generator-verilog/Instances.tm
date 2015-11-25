@@ -1,7 +1,11 @@
 # write counter instance
 odfi::closures::oproc writeCounterModule {register field} {
+
+	## Copy Dependency to output 
+	file copy -force ${osys::rfg::generator::verilog::location}/building_blocks/counter48.v $destinationPath/
+
 	odfi::common::println "" $resolve
-	odfi::common::println "counter48 #(" $resolve
+	odfi::common::println "counter48  #(" $resolve
 	odfi::common::println "	.DATASIZE([$field width])" $resolve
 	odfi::common::println ") [getName $field]_I (" $resolve
 	odfi::common::println "	.clk(clk)," $resolve

@@ -17,7 +17,7 @@
 
 ## Provides the base API interface for OSYS Register File Generator
 package provide osys::rfg 1.0.0
-package require Itcl  3.4
+package require Itcl 3.4 4.0
 package require odfi::common
 package require odfi::list 2.0.0
 
@@ -43,10 +43,10 @@ namespace eval osys::rfg {
             #########
             set packageName "osys::rfg::generator::[string tolower $name]"
             set generatorName "::${packageName}::[string toupper $name 0 0]"
-            if {[catch "package require $packageName"]} {
+            if {[catch "package require $packageName" res ]} {
                 
                 ## Error 
-                error "Generator class $name was not found, and no package having conventional name $packageName could be found"
+                error "Generator class $name was not found, and no package having conventional name $packageName could be found: $res"
 
             } else {
 
@@ -343,7 +343,7 @@ namespace eval osys::rfg {
                 uplevel "set attr [lindex $attrContent 0]"
                 uplevel "set value \"\""
                 if {[llength $attrContent]>1} {
-                    uplevel "set value [lindex $attrContent 1]"
+                    uplevel [list set value [lindex $attrContent 1]]
                 }
 
                 odfi::closures::doClosure $closure 1

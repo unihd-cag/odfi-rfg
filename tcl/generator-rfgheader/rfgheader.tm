@@ -16,7 +16,7 @@
 
 package provide osys::rfg::generator::rfgheader 1.0.0
 package require osys::rfg
-package require Itcl 3.4
+
 package require odfi::common
 package require odfi::list 2.0.0
 package require odfi::files
@@ -107,6 +107,10 @@ namespace eval osys::rfg::generator::rfgheader {
             odfi::common::println "`define RFS_[string toupper [$registerFile name]]_RWIDTH [getRFmaxWidth $registerFile]" $out
             odfi::common::println "`define RFS_[string toupper [$registerFile name]]_WWIDTH [getRFmaxWidth $registerFile]" $out
             
+            if {[llength [$registerFile getAttributeValue hardware.osys::rfg::trigger]] != 0} {
+                odfi::common::println "`define RFS_[string toupper [$registerFile name]]_TWIDTH [llength [$registerFile getAttributeValue hardware.osys::rfg::trigger]]" $out
+            }
+            
             $registerFile walkDepthFirst {
 
                 if {[$it isa osys::rfg::RegisterFile]} {
@@ -117,6 +121,11 @@ namespace eval osys::rfg::generator::rfgheader {
                     }
                     odfi::common::println "`define RFS_[string toupper [$it name]]_RWIDTH [getRFmaxWidth $it]" $out
                     odfi::common::println "`define RFS_[string toupper [$it name]]_WWIDTH [getRFmaxWidth $it]" $out
+
+                    if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
+                        odfi::common::println "`define RFS_[string toupper [$it name]]_TWIDTH [llength [$it getAttributeValue hardware.osys::rfg::trigger]]" $out
+                    }
+
                 }
                 return true
             }

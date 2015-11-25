@@ -17,7 +17,7 @@
 * ===========================================================*/
 
 `timescale 1ns/10ps
-`include "technology.h"
+//`include "technology.h"
 
 module counter48 #(
 		parameter DATASIZE	= 16,	// width of the counter, must be <=48 bits!
