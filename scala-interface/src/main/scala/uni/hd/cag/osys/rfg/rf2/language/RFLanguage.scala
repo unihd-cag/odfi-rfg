@@ -117,6 +117,15 @@ trait RFLanguage {
   }
   
   /**
+   * Creates a Blocking Nested transaction and commits it at the end of the closure
+   */
+  def onBuffering[T <: Any](cl: => T) : T = {
+    Transaction.doBuffering {
+      cl
+    }
+  }
+  
+  /**
    * Creates a Blocking Nested transaction and discards it at the end of the closure
    */
   def noIO[T <: Any](rf: RegisterFileHost)(cl: => T) : T= {
@@ -263,6 +272,15 @@ trait RFLanguage {
       case _            => throw new RuntimeException(s"unsupported path: ${destination._1}/${destination._2}")
     }
 
+  }
+  
+  def readBulk(str: String,size : Int) : Array[Long] = {
+    currentHost.registerFile.search(str) match {
+      case r: Register  => 
+        r.value(size)
+        r.valueBuffer.buffer
+      case _            => throw new RuntimeException(s"readBulk unsupported path: $str,  only available on register entries")
+    } 
   }
 
   // Write Language

@@ -63,3 +63,7 @@ attributeFunction ::address_shift
 ############
 attributeFunction file 
 attributeFunction line
+
+## HW Type
+#######################
+attributeFunction ::fifo

@@ -65,6 +65,8 @@
 					</execution>
 				</executions>
 			</plugin>
+			
+			<!-- Add Scala Doc To Site -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-site-plugin</artifactId>
@@ -94,47 +96,26 @@
 					</reportPlugins>
 				</configuration>
 			</plugin>
+
+			<!-- Add Sources to upload -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
-		<pluginManagement>
-			<plugins>
-				<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-				<plugin>
-					<groupId>org.eclipse.m2e</groupId>
-					<artifactId>lifecycle-mapping</artifactId>
-					<version>1.0.0</version>
-					<configuration>
-						<lifecycleMappingMetadata>
-							<pluginExecutions>
-								<pluginExecution>
-									<pluginExecutionFilter>
-										<groupId>
-											org.apache.maven.plugins
-										</groupId>
-										<artifactId>
-											maven-ooxoo-plugin
-										</artifactId>
-										<versionRange>
-											[3.1.0,)
-										</versionRange>
-										<goals>
-											<goal>
-												generate-sources
-											</goal>
-										</goals>
-									</pluginExecutionFilter>
-									<action>
-										<ignore></ignore>
-									</action>
-								</pluginExecution>
-							</pluginExecutions>
-						</lifecycleMappingMetadata>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+
 	</build>
 
-
+	
 	<!-- Repositories to find packages -->
 	<!-- ############################################## -->
 	<pluginRepositories>
@@ -165,20 +146,6 @@
 			<name>plugins-snapshot</name>
 			<url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
 		</pluginRepository>
-		<pluginRepository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>central</id>
-			<name>plugins-release</name>
-			<url>http://dev:8081/artifactory/plugins-release</url>
-		</pluginRepository>
-		<pluginRepository>
-			<snapshots />
-			<id>snapshots</id>
-			<name>plugins-snapshot</name>
-			<url>http://dev:8081/artifactory/plugins-snapshot</url>
-		</pluginRepository>
 	</pluginRepositories>
 	<repositories>
 		<repository>
@@ -208,31 +175,17 @@
 			<name>libs-snapshot</name>
 			<url>http://www.idyria.com/access/osi/artifactory/libs-snapshot</url>
 		</repository>
-		<repository>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-			<id>central</id>
-			<name>libs-release</name>
-			<url>http://dev:8081/artifactory/libs-release</url>
-		</repository>
-		<repository>
-			<snapshots />
-			<id>snapshots</id>
-			<name>libs-snapshot</name>
-			<url>http://dev:8081/artifactory/libs-snapshot</url>
-		</repository>
 	</repositories>
 
 
 	<!-- Distribution -->
 	<!-- ############ -->
-	
+
 	<distributionManagement>
-    	<site>
-          <id>idyria.central</id>
-          <url>scpexe://buddy.idyria.com/access/odfi/${project.groupId}/${project.artifactId}/maven-site</url>
-        </site>
+		<site>
+			<id>idyria.central</id>
+			<url>scpexe://buddy.idyria.com/access/odfi/${project.groupId}/${project.artifactId}/maven-site</url>
+		</site>
 		<repository>
 			<id>idyria.central</id>
 			<name>Idyria Public Release Repository</name>
@@ -273,9 +226,9 @@
 			<version>3.1.0</version>
 		</dependency>
 		<dependency>
-		  <groupId>com.idyria.osi.ooxoo</groupId>
-		  <artifactId>ooxoo-core</artifactId>
-		  <version>3.1.1-SNAPSHOT</version>
+			<groupId>com.idyria.osi.ooxoo</groupId>
+			<artifactId>ooxoo-core</artifactId>
+			<version>3.1.1-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>com.idyria.osi.wsb</groupId>
