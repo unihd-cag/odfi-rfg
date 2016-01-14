@@ -72,14 +72,6 @@ namespace eval osys::rfg::generator::sv {
             }
         }
 
-        public method reverseList lst {
-            set reversed [list]
-            for {set i [expr {[llength $lst]-1}]} {$i >= 0} {incr i -1} {
-                lappend reversed [lindex $lst $i]
-            }
-            return $reversed
-        }
-
         public method ld  x {
             return [expr {int(ceil(log($x)/[expr log(2)]))}]
         }
@@ -96,7 +88,7 @@ namespace eval osys::rfg::generator::sv {
                 }
                 return true
             }
-            set comp [reverseList $comp]
+            set comp [lreverse $comp]
             foreach item $comp {
                 if {[$item isa osys::rfg::RamBlock]} {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_ramblock #(.WIDTH([$item width]), .ADDR_SIZE([ld [$item depth]]));\n" $out
