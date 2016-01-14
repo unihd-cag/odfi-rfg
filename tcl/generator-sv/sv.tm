@@ -226,7 +226,6 @@ namespace eval osys::rfg::generator::sv {
                         }
                     }
                 }
-                odfi::common::println "\t\tset_address_type(address_type);" $out
                 odfi::common::println "\tendfunction : new\n" $out
                 odfi::common::println "endclass : [getFullName $registerFile]\n" $out
             }
