@@ -111,13 +111,13 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_register;\n" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\tbit \[[expr {[$it width] - 1}]:0\] [$it name];" $out
+                            odfi::common::println "\t\tbit \[[expr {[$it width] - 1}]:0\] [$it name]_;" $out
                         }
                     }
                     odfi::common::println "\n\t`uvm_object_utils_begin([getFullName $item])" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\t`uvm_field_int([$it name],UVM_ALL_ON | UVM_NOPACK)" $out
+                            odfi::common::println "\t\t`uvm_field_int([$it name]_,UVM_ALL_ON | UVM_NOPACK)" $out
                         }
                     }
                     odfi::common::println "\t`uvm_object_utils_end\n" $out
@@ -129,7 +129,7 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "\t\tsuper.do_pack(packer);" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\tpacker.pack_field([$it name],[$it width]);" $out
+                            odfi::common::println "\t\tpacker.pack_field([$it name]_,[$it width]);" $out
                         } else {
                             odfi::common::println "\t\tpacker.pack_field([$it width]'b0,[$it width]);" $out
                         }
@@ -139,7 +139,7 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "\t\tsuper.do_unpack(packer);" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\t[$it name] = packer.unpack_field([$it width]);" $out
+                            odfi::common::println "\t\t[$it name]_ = packer.unpack_field([$it width]);" $out
                         } else {
                             odfi::common::println "\t\tvoid'(packer.unpack_field([$it width]));" $out
                         }
