@@ -87,8 +87,13 @@ namespace eval osys::rfg::generator::sv {
         public method produce_RegisterFile args {
             set out [odfi::common::newStringChannel]
             set comp [list]
+            set comp_name [list]
             $registerFile walkDepthFirst {
-                lappend comp $it
+                #assure that classes are declared only once
+                if {[lsearch $comp_name [getFullName $it]] == -1} {
+                    lappend comp_name "[getFullName $it]"
+                    lappend comp $it
+                }
                 return true
             }
             set comp [reverseList $comp]
@@ -200,7 +205,7 @@ namespace eval osys::rfg::generator::sv {
                 odfi::common::println "\t\tthis.name = name;" $out
                 odfi::common::println "\t\tparent = null;" $out
                 odfi::common::println "\t\tset_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::absolute_address]]);" $out
-                odfi::common::println "\t\tset_absolute_address('h[format %x [$item getAttributeValue software.osys::rfg::absolute_address]]);" $out
+                odfi::common::println "\t\tset_absolute_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::absolute_address]]);" $out
                 $registerFile onEachComponent {
                     odfi::common::println "\t\t[string tolower [$it name]] = [getFullName $it]::type_id::create(\"[string tolower [$it name]]\");" $out
                     odfi::common::println "\t\t[string tolower [$it name]].set_parent(this);" $out
