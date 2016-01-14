@@ -81,14 +81,23 @@ namespace eval osys::rfg::generator::sv {
             set comp [list]
             set comp_name [list]
             $registerFile walkDepthFirst {
-                #assure that classes are declared only once
-                if {[lsearch $comp_name [getFullName $it]] == -1} {
-                    lappend comp_name "[getFullName $it]"
-                    lappend comp $it
-                }
+                lappend comp $it
+                lappend comp_name [getFullName $it]
                 return true
             }
+
+            foreach item $comp_name {
+                #-- while there are dublicates in comp
+                while {[llength [lsearch -all $comp_name $item]] > 1} {
+                    #-- delete the first dublicate
+                    set index [lsearch $comp_name $item]
+                    set comp [lreplace $comp $index $index]
+                    set comp_name [lreplace $comp_name $index $index]
+                }
+            }
+            #-- reverse list so classes are declared before use
             set comp [lreverse $comp]
+
             foreach item $comp {
                 if {[$item isa osys::rfg::RamBlock]} {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_ramblock #(.WIDTH([$item width]), .ADDR_SIZE([ld [$item depth]]));\n" $out
