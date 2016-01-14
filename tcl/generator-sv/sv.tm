@@ -168,14 +168,11 @@ namespace eval osys::rfg::generator::sv {
                         if {[$it isa osys::rfg::Group]} {
                             if {[$it isa osys::rfg::RegisterFile]} {
                                 odfi::common::println "\t\t[string tolower [$it name]].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
-                                odfi::common::println "\t\t[string tolower [$it name]].set_absolute_address('h[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]);" $out
                             } else {
                                 odfi::common::println "\t\tset_relative_address('h0);" $out
-                                odfi::common::println "\t\tset_absolute_address('h0);" $out
                             }
                         } else {
                             odfi::common::println "\t\t[string tolower [$it name]].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
-                            odfi::common::println "\t\t[string tolower [$it name]].set_absolute_address('h[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]);" $out
                         }
                         if {[$it isa osys::rfg::RamBlock]} {
                             odfi::common::println "\t\tadd_ramblock([string tolower [$it name]]);" $out
@@ -204,22 +201,18 @@ namespace eval osys::rfg::generator::sv {
                 odfi::common::println "\t\tsuper.new(name);" $out
                 odfi::common::println "\t\tthis.name = name;" $out
                 odfi::common::println "\t\tparent = null;" $out
-                odfi::common::println "\t\tset_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::absolute_address]]);" $out
-                odfi::common::println "\t\tset_absolute_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::absolute_address]]);" $out
+                odfi::common::println "\t\tset_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::relative_address]]);" $out
                 $registerFile onEachComponent {
                     odfi::common::println "\t\t[string tolower [$it name]] = [getFullName $it]::type_id::create(\"[string tolower [$it name]]\");" $out
                     odfi::common::println "\t\t[string tolower [$it name]].set_parent(this);" $out
                     if {[$it isa osys::rfg::Group]} {
                         if {[$it isa osys::rfg::RegisterFile]} {
                             odfi::common::println "\t\t[string tolower [$it name]].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
-                            odfi::common::println "\t\t[string tolower [$it name]].set_absolute_address('h[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]);" $out
                         } else {
                             odfi::common::println "\t\tset_relative_address('h0);" $out
-                            odfi::common::println "\t\tset_absolute_address('h0);" $out
                         }
                     } else {
                         odfi::common::println "\t\t[string tolower [$it name]].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
-                        odfi::common::println "\t\t[string tolower [$it name]].set_absolute_address('h[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]);" $out
                     }
                     if {[$it isa osys::rfg::RamBlock]} {
                         odfi::common::println "\t\tadd_ramblock([string tolower [$it name]]);" $out
