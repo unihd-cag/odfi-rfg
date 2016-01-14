@@ -60,14 +60,14 @@ namespace eval osys::rfg::generator::sv {
 
         public method getFullName instance {
             if {[$instance isa osys::rfg::RamBlock]} {
-                return "ram_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]"
+                return "ram_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]_c"
             } elseif {[$instance isa osys::rfg::Register]} {
-                return "reg_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]"
+                return "reg_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]_c"
             } elseif {[$instance isa osys::rfg::Group]} {
                 if {[$instance isa osys::rfg::RegisterFile]} {
-                    return "rf_[$instance name]"
+                    return "rf_[$instance name]_c"
                 } else {
-                    return "grp_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]"
+                    return "grp_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]_c"
                 }
             }
         }
