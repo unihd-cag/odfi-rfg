@@ -214,7 +214,7 @@ namespace eval osys::rfg::generator::rfsbackport {
                 if {[$field name] != "Reserved"} {
                     odfi::common::println "<hwreg name=\"[$field name]\"  width=\"[$field width]\" desc=\"[$field description]\" $reset [join $attributes] />"  $out 
                 } else {
-                    odfi::common::println "<reserved width=\"[$field width]\"/" $out
+                    odfi::common::println "<reserved width=\"[$field width]\"/>" $out
                 }
             }
             
