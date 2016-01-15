@@ -132,7 +132,9 @@ namespace eval osys::rfg::generator::sv {
                         if {[$it name] != "Reserved"} {
                             odfi::common::println "\t\tpacker.pack_field([$it name]_,[$it width]);" $out
                         } else {
-                            odfi::common::println "\t\tpacker.pack_field([$it width]'b0,[$it width]);" $out
+                            if {[$it width] != 0} {
+                                odfi::common::println "\t\tpacker.pack_field([$it width]'b0,[$it width]);" $out
+                            }
                         }
                     }
                     odfi::common::println "\tendfunction : do_pack\n" $out
@@ -142,7 +144,9 @@ namespace eval osys::rfg::generator::sv {
                         if {[$it name] != "Reserved"} {
                             odfi::common::println "\t\t[$it name]_ = packer.unpack_field([$it width]);" $out
                         } else {
-                            odfi::common::println "\t\tvoid'(packer.unpack_field([$it width]));" $out
+                            if {[$it width] != 0} {
+                                odfi::common::println "\t\tvoid'(packer.unpack_field([$it width]));" $out
+                            }
                         }
                     }
                     odfi::common::println "\tendfunction : do_unpack\n" $out
