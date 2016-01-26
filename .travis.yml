@@ -1,0 +1,6 @@
+language: generic
+sudo: true
+before_script:
+    - chmod +x build.sh
+script: 
+    - ./build/build.sh
