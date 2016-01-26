@@ -1,6 +1,7 @@
 language: generic
 sudo: true
 before_script:
-    - chmod +x build.sh
+    - chmod +x /build/build.sh
+    - chmod +x /build/basekit
 script: 
     - ./build/build.sh
