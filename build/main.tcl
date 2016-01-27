@@ -1,6 +1,9 @@
 #provide a tclsh-ish main for a starpack which contains libraries
+puts "Argv0: [file dirname $argv0]"
 lappend auto_path [file join [file dirname $argv0] lib odfi-dev-tcl tcl]
 lappend auto_path [file join [file dirname $argv0] lib odfi-rfg tcl]
+
+puts "Autopath: $auto_path"
 
 package require osys::rfg
 package require osys::generator
