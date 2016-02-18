@@ -71,9 +71,11 @@ namespace eval osys::rfg::generator::rfsbackport {
             if {[$group parent]==""} {
                 odfi::common::println "<regfile>" $out
             } 
-
-            odfi::common::println "<regroot $name desc=\"[$group description]\">"  $out
-            
+            if {[$group isa osys::rfg::RegisterFile]} {
+                odfi::common::println "<regroot $name desc=\"[$group description]\" _baseAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\"  _absoluteAddress=\"0x[format %x [$group getAttributeValue software.osys::rfg::absolute_address]]\">" $out $out
+            } else {
+                odfi::common::println "<regroot $name desc=\"[$group description]\">"  $out
+            }
             odfi::common::printlnIndent
             
 
@@ -207,8 +209,11 @@ namespace eval osys::rfg::generator::rfsbackport {
                 odfi::common::println "<field name=\"[$field name]\"  width=\"[$field width]\" desc=\"[$field description]\" $reset [join $attributes] />"  $out 
 
             }  else {
-
-                odfi::common::println "<hwreg name=\"[$field name]\"  width=\"[$field width]\" desc=\"[$field description]\" $reset [join $attributes] />"  $out 
+                if {[$field name] != "Reserved"} {
+                    odfi::common::println "<hwreg name=\"[$field name]\"  width=\"[$field width]\" desc=\"[$field description]\" $reset [join $attributes] />"  $out 
+                } else {
+                    odfi::common::println "<reserved width=\"[$field width]\"/>" $out
+                }
             }
             
         }
