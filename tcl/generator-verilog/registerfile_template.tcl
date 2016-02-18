@@ -1025,7 +1025,7 @@ odfi::closures::oproc writeSoftReadInterface {object} {
             ## Control signals resets 
             $rf walkDepthFirst {
                 if {[$it isa osys::rfg::Register]} {
-                    puts "Searching for FIFO field"
+                    ##puts "Searching for FIFO field"
                     $it onEachField {
                     
                         ## Reset FIFO shiftout
@@ -1045,7 +1045,7 @@ odfi::closures::oproc writeSoftReadInterface {object} {
             ## Control signals resets 
             $rf walkDepthFirst {
                 if {[$it isa osys::rfg::Register]} {
-                    puts "Searching for FIFO field"
+                    ##puts "Searching for FIFO field"
                     $it onEachField {
                     
                         ## Reset FIFO shiftout
