@@ -1073,7 +1073,6 @@ odfi::closures::oproc writeSoftReadInterface {object} {
                     set case_cond "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" 
                 }
 
-                vif "read_en || write_en" {
                 case $case_cond {
                     $rf walkDepthFirst {
                         ##RamBlock
@@ -1100,9 +1099,8 @@ odfi::closures::oproc writeSoftReadInterface {object} {
                 }
             }
         }
+    
     }
-
-}
 
 odfi::closures::oproc writeInstances {object} {
     $object walkDepthFirst {
