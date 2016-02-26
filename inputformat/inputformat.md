@@ -145,6 +145,20 @@ Real example:
       }
       
     }
+    
+## Aligner 
+
+A aligner is a tool to place objects at address ofsets. It can be used to align registers to the next boundary of a defined power of two.
+    
+    ## Align test ram to the next 4k page 
+    aligner 12
+    ramBlock test_ram {
+      description "Test ram"
+      width 16
+      depth 32
+      hardware rw
+      software rw	
+    }
 
 ## Attributes
 
