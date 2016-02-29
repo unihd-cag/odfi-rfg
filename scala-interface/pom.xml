@@ -48,7 +48,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>3.1.1-SNAPSHOT</version>
+				<version>3.1.1</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.idyria.osi.wsb</groupId>
@@ -221,14 +221,9 @@
 			<version>3.1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.idyria.osi.tea</groupId>
-			<artifactId>tea</artifactId>
-			<version>3.1.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.idyria.osi.ooxoo</groupId>
 			<artifactId>ooxoo-core</artifactId>
-			<version>3.1.1-SNAPSHOT</version>
+			<version>3.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.idyria.osi.wsb</groupId>
