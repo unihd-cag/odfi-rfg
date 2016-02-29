@@ -17,9 +17,9 @@
 	<!-- SCM -->
 	<!-- #### -->
 	<scm>
-		<connection>scm:git:git://gitlab@lebleu/cag-osys/rfg.git</connection>
-		<developerConnection>scm:git:gitlab@lebleu:cag-osys/rfg.git</developerConnection>
-		<url>http://http://lebleu/gitlab/cag-osys/rfg</url>
+		<connection>scm:git:git@github.com:unihd-cag/odfi-rfg.git</connection>
+		<developerConnection>scm:git:git@github.com:unihd-cag/odfi-rfg.git</developerConnection>
+		<url>https://github.com/unihd-cag/odfi-rfg</url>
 		<tag>HEAD</tag>
 	</scm>
 
