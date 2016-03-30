@@ -108,7 +108,7 @@ namespace eval osys::rfg::generator::sv {
                     odfi::common::println "\tendfunction : new\n" $out
                     odfi::common::println "endclass : [getFullName $item]\n" $out
 
-			    } elseif {[$item isa osys::rfg::Register]} {
+	        } elseif {[$item isa osys::rfg::Register]} {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_register;\n" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
@@ -158,7 +158,9 @@ namespace eval osys::rfg::generator::sv {
                         odfi::common::println "class [getFullName $item] extends cag_rgm_container;\n" $out
                     }
                     $item onEachComponent {
-                        odfi::common::println "\trand [getFullName $it] [$it name];" $out
+                        if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
+                            odfi::common::println "\trand [getFullName $it] [$it name];" $out
+                        }
                     }
                     odfi::common::println "\n\t`uvm_object_utils([getFullName $item])\n" $out
                     odfi::common::println "\tfunction new(string name=\"[getFullName $item]\");" $out
@@ -168,26 +170,30 @@ namespace eval osys::rfg::generator::sv {
                     } else {
                     }
                     $item onEachComponent {
-                        odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\");" $out
-                        odfi::common::println "\t\t[$it name].set_parent(this);" $out
-                        if {[$it isa osys::rfg::Group]} {
-                            if {[$it isa osys::rfg::RegisterFile]} {
-                                odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                        if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
+                            odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\");" $out
+                            odfi::common::println "\t\t[$it name].set_parent(this);" $out
+                            if {[$it isa osys::rfg::Group]} {
+                                if {[$it isa osys::rfg::RegisterFile]} {
+                                    odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                                } else {
+                                    odfi::common::println "\t\tset_relative_address('h0);" $out
+                                }
                             } else {
-                                odfi::common::println "\t\tset_relative_address('h0);" $out
+                                if { [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
+                                    odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                                }
                             }
-                        } else {
-                            odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
-                        }
-                        if {[$it isa osys::rfg::RamBlock]} {
-                            odfi::common::println "\t\tadd_ramblock([$it name]);" $out
-                        } elseif {[$it isa osys::rfg::Register]} {
-                            odfi::common::println "\t\tadd_register([$it name]);" $out
-                        } elseif {[$it isa osys::rfg::Group]} {
-                            if {[$it isa osys::rfg::RegisterFile]} {
-                                odfi::common::println "\t\tadd_register_file([$it name]);" $out
-                            } else {
-                                odfi::common::println "\t\tadd_group([$it name]);" $out
+                            if {[$it isa osys::rfg::RamBlock]} {
+                                odfi::common::println "\t\tadd_ramblock([$it name]);" $out
+                            } elseif {[$it isa osys::rfg::Register]} {
+                                odfi::common::println "\t\tadd_register([$it name]);" $out
+                            } elseif {[$it isa osys::rfg::Group]} {
+                                if {[$it isa osys::rfg::RegisterFile]} {
+                                    odfi::common::println "\t\tadd_register_file([$it name]);" $out
+                                } else {
+                                    odfi::common::println "\t\tadd_group([$it name]);" $out
+                                }
                             }
                         }
                     }
@@ -199,7 +205,10 @@ namespace eval osys::rfg::generator::sv {
             if {[$registerFile isa osys::rfg::RegisterFile]} {
                 odfi::common::println "class [getFullName $registerFile] extends cag_rgm_register_file;\n" $out
                 $registerFile onEachComponent {
-                    odfi::common::println "\trand [getFullName $it] [$it name];" $out
+                    ## TODO concept for groups
+                    if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
+                        odfi::common::println "\trand [getFullName $it] [$it name];" $out
+                    }
                 }
                 odfi::common::println "\n\t`uvm_object_utils([getFullName $registerFile])\n" $out
                 odfi::common::println "\tfunction new(string name=\"[getFullName $registerFile]\");" $out
@@ -208,28 +217,35 @@ namespace eval osys::rfg::generator::sv {
                 odfi::common::println "\t\tparent = null;" $out
                 odfi::common::println "\t\tset_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::relative_address]]);" $out
                 $registerFile onEachComponent {
-                    odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\");" $out
-                    odfi::common::println "\t\t[$it name].set_parent(this);" $out
-                    if {[$it isa osys::rfg::Group]} {
-                        if {[$it isa osys::rfg::RegisterFile]} {
-                            odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                     ## TODO concept for groups
+                    if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
+                        odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\");" $out
+                        odfi::common::println "\t\t[$it name].set_parent(this);" $out
+                  
+                        if {[$it isa osys::rfg::Group]} {
+                            if {[$it isa osys::rfg::RegisterFile]} {
+                                odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                            } else {
+			    	## Check this Groups would now have relative addresses but they are just helpers for hierarchies
+                                odfi::common::println "\t\tset_relative_address('h0);" $out
+                            }
                         } else {
-                            odfi::common::println "\t\tset_relative_address('h0);" $out
+			    if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+                        	odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+			    }
                         }
-                    } else {
-                        odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
-                    }
-                    if {[$it isa osys::rfg::RamBlock]} {
-                        odfi::common::println "\t\tadd_ramblock([$it name]);" $out
-                    } elseif {[$it isa osys::rfg::Register]} {
-                        odfi::common::println "\t\tadd_register([$it name]);" $out
-                    } elseif {[$it isa osys::rfg::Group]} {
-                        if {[$it isa osys::rfg::RegisterFile]} {
-                            odfi::common::println "\t\tadd_register_file([$it name]);" $out
-                        } else {
-                            odfi::common::println "\t\tadd_group([$it name]);" $out
-                        }
-                    }
+                        if {[$it isa osys::rfg::RamBlock]} {
+                            odfi::common::println "\t\tadd_ramblock([$it name]);" $out
+                        } elseif {[$it isa osys::rfg::Register]} {
+                            odfi::common::println "\t\tadd_register([$it name]);" $out
+                        } elseif {[$it isa osys::rfg::Group]} {
+                            if {[$it isa osys::rfg::RegisterFile]} {
+                                odfi::common::println "\t\tadd_register_file([$it name]);" $out
+                            } else {
+                                odfi::common::println "\t\tadd_group([$it name]);" $out
+                            }
+                       }
+                   }
                 }
                 odfi::common::println "\tendfunction : new\n" $out
                 odfi::common::println "endclass : [getFullName $registerFile]\n" $out
