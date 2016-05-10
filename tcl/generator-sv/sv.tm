@@ -101,10 +101,9 @@ namespace eval osys::rfg::generator::sv {
             foreach item $comp {
                 if {[$item isa osys::rfg::RamBlock]} {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_ramblock #(.WIDTH([$item width]), .ADDR_SIZE([ld [$item depth]]));\n" $out
-                    odfi::common::println "\t`uvm_object_utils([getFullName $item])\n" $out
-                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\");" $out
-                    odfi::common::println "\t\tsuper.new(name);" $out
-                    odfi::common::println "\t\tthis.name = name;" $out
+                    odfi::common::println "\t`uvm_component_utils([getFullName $item])\n" $out
+                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\", uvm_component parent);" $out
+                    odfi::common::println "\t\tsuper.new(name, parent);" $out
                     odfi::common::println "\tendfunction : new\n" $out
                     odfi::common::println "endclass : [getFullName $item]\n" $out
 
@@ -115,16 +114,15 @@ namespace eval osys::rfg::generator::sv {
                             odfi::common::println "\t\tbit \[[expr {[$it width] - 1}]:0\] [$it name]_;" $out
                         }
                     }
-                    odfi::common::println "\n\t`uvm_object_utils_begin([getFullName $item])" $out
+                    odfi::common::println "\n\t`uvm_component_utils_begin([getFullName $item])" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
                             odfi::common::println "\t\t`uvm_field_int([$it name]_,UVM_ALL_ON | UVM_NOPACK)" $out
                         }
                     }
-                    odfi::common::println "\t`uvm_object_utils_end\n" $out
-                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\");" $out
-                    odfi::common::println "\t\tsuper.new(name);" $out
-                    odfi::common::println "\t\tthis.name = name;" $out
+                    odfi::common::println "\t`uvm_component_utils_end\n" $out
+                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\", uvm_component parent);" $out
+                    odfi::common::println "\t\tsuper.new(name, parent);" $out
                     odfi::common::println "\tendfunction : new\n" $out
                     odfi::common::println "\tfunction void do_pack(uvm_packer packer);" $out
                     odfi::common::println "\t\tsuper.do_pack(packer);" $out
@@ -162,17 +160,15 @@ namespace eval osys::rfg::generator::sv {
                             odfi::common::println "\trand [getFullName $it] [$it name];" $out
                         }
                     }
-                    odfi::common::println "\n\t`uvm_object_utils([getFullName $item])\n" $out
-                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\");" $out
-                    odfi::common::println "\t\tsuper.new(name);" $out
-                    odfi::common::println "\t\tthis.name = name;" $out
+                    odfi::common::println "\n\t`uvm_component_utils([getFullName $item])\n" $out
+                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\", uvm_component parent);" $out
+                    odfi::common::println "\t\tsuper.new(name, parent);" $out
                     if {[$item isa osys::rfg::RegisterFile]} {
                     } else {
                     }
                     $item onEachComponent {
                         if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
-                            odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\");" $out
-                            odfi::common::println "\t\t[$it name].set_parent(this);" $out
+                            odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\", this);" $out
                             if {[$it isa osys::rfg::Group]} {
                                 if {[$it isa osys::rfg::RegisterFile]} {
                                     odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
@@ -210,17 +206,14 @@ namespace eval osys::rfg::generator::sv {
                         odfi::common::println "\trand [getFullName $it] [$it name];" $out
                     }
                 }
-                odfi::common::println "\n\t`uvm_object_utils([getFullName $registerFile])\n" $out
-                odfi::common::println "\tfunction new(string name=\"[getFullName $registerFile]\");" $out
-                odfi::common::println "\t\tsuper.new(name);" $out
-                odfi::common::println "\t\tthis.name = name;" $out
-                odfi::common::println "\t\tparent = null;" $out
+                odfi::common::println "\n\t`uvm_component_utils([getFullName $registerFile])\n" $out
+                odfi::common::println "\tfunction new(string name=\"[getFullName $registerFile]\", uvm_component parent);" $out
+                odfi::common::println "\t\tsuper.new(name, parent);" $out
                 odfi::common::println "\t\tset_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::relative_address]]);" $out
                 $registerFile onEachComponent {
                      ## TODO concept for groups
                     if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
-                        odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\");" $out
-                        odfi::common::println "\t\t[$it name].set_parent(this);" $out
+                        odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\", this);" $out
                   
                         if {[$it isa osys::rfg::Group]} {
                             if {[$it isa osys::rfg::RegisterFile]} {
