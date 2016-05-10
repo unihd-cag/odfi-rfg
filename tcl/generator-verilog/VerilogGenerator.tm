@@ -61,8 +61,6 @@ namespace eval osys::rfg::generator::verilog {
                 namespace eval :: {
                     catch {source ${::osys::rfg::generator::verilog::location}/registerfile_template.tcl} result
                     set name [lindex [split [file tail [$rf getAttributeValue rfg.osys::rfg::file]] "."] 0]
-                    ::puts $name
-                    ## Something is wrong here !!! ToDo`
                     $result generate ${dP}${name}.v
                 }
             }
