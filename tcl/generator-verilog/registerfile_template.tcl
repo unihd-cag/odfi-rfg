@@ -1216,7 +1216,7 @@ odfi::closures::oproc writeTriggerBlock {object} {
     }
 }
 
-osys::verilogInterface::module [$rf name] {
+osys::verilogInterface::module [lindex [split [file tail [$rf getAttributeValue rfg.osys::rfg::file]] "."] 0] {
     writeAddrComment $rf
     ## Write RegisterFile Signal Interface
     writeVModuleInterface $rf

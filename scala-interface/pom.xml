@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>uni.hd.cag.rfg</groupId>
 	<artifactId>rfg-core</artifactId>
-	<version>1.5.0-SNAPSHOT</version>
+	<version>1.5.1-SNAPSHOT</version>
 
 	<!-- use OSI Scala Parent pom to have scala enabled -->
 	<!-- ################# -->
@@ -17,9 +16,9 @@
 	<!-- SCM -->
 	<!-- #### -->
 	<scm>
-		<connection>scm:git:git://gitlab@lebleu/cag-osys/rfg.git</connection>
-		<developerConnection>scm:git:gitlab@lebleu:cag-osys/rfg.git</developerConnection>
-		<url>http://http://lebleu/gitlab/cag-osys/rfg</url>
+		<connection>scm:git:git@github.com:unihd-cag/odfi-rfg.git</connection>
+		<developerConnection>scm:git:git@github.com:unihd-cag/odfi-rfg.git</developerConnection>
+		<url>https://github.com/unihd-cag/odfi-rfg</url>
 		<tag>HEAD</tag>
 	</scm>
 
@@ -48,7 +47,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-ooxoo-plugin</artifactId>
-				<version>3.1.1-SNAPSHOT</version>
+				<version>3.1.1</version>
 				<dependencies>
 					<dependency>
 						<groupId>com.idyria.osi.wsb</groupId>
@@ -221,14 +220,9 @@
 			<version>3.1.0</version>
 		</dependency>
 		<dependency>
-			<groupId>com.idyria.osi.tea</groupId>
-			<artifactId>tea</artifactId>
-			<version>3.1.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.idyria.osi.ooxoo</groupId>
 			<artifactId>ooxoo-core</artifactId>
-			<version>3.1.1-SNAPSHOT</version>
+			<version>3.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.idyria.osi.wsb</groupId>

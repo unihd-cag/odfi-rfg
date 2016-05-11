@@ -244,7 +244,7 @@ odfi::closures::oproc writeRamModule {ramBlock} {
 # write RF instance
 odfi::closures::oproc writeRFModule {registerfile} {
     odfi::common::println "" $resolve
-	odfi::common::println "[$registerfile name] [$registerfile name]_I (" $resolve
+	odfi::common::println "[lindex [split [file tail [$registerfile getAttributeValue rfg.osys::rfg::file]] "."] 0] [$registerfile name]_I (" $resolve
 	odfi::common::println "	.res_n(res_n)," $resolve
 	odfi::common::println "	.clk(clk)," $resolve
 	odfi::common::println "	.address([$registerfile name]_address)," $resolve
