@@ -35,6 +35,50 @@ odfi::closures::oproc writeCounterModule {register field} {
 	odfi::common::println "" $resolve
 }
 
+# write counter instance
+odfi::closures::oproc writeFifoModule {register field} {
+
+
+	## Copy Dependency to output 
+	file copy -force ${osys::rfg::generator::verilog::location}/building_blocks/fifo_reg.v $destinationPath/
+	file copy -force ${osys::rfg::generator::verilog::location}/building_blocks/srl_fifo_wrapper.v $destinationPath/
+
+
+	## 
+	odfi::common::println "" $resolve
+	odfi::common::println "srl_fifo_wrapper  #(" $resolve
+	odfi::common::println "	.WIDTH([$field width])," $resolve
+	odfi::common::println "	.DEPTH([$field getAttributeValue hardware.osys::rfg::fifo])" $resolve
+	odfi::common::println ") [getName $field]_fifo_I (" $resolve
+	odfi::common::println "	.clk(clk)," $resolve
+	odfi::common::println "	.res_n(res_n)," $resolve
+
+	## DIN 
+	odfi::common::println "	.din([getName $field]_fifo_din)," $resolve
+	odfi::common::println "	.shiftin([getName $field]_fifo_shiftin)," $resolve
+
+	## Dout 
+	odfi::common::println "	.dout([getName $field]_fifo_dout)," $resolve
+	odfi::common::println "	.shiftout([getName $field]_fifo_shiftout)," $resolve
+	
+
+	## Control 
+	odfi::common::println "	.full([getName $field]_fifo_full)," $resolve
+	odfi::common::println "	.empty([getName $field]_fifo_empty)," $resolve
+	odfi::common::println "	.almost_full([getName $field]_fifo_almost_full)," $resolve
+	odfi::common::println "	.almost_empty([getName $field]_fifo_almost_empty)," $resolve
+
+	## Ignores
+	odfi::common::println "	.almost_full_nxt([getName $field]_fifo_almost_full_nxt)," $resolve
+	odfi::common::println "	.dout_nxt()" $resolve
+	
+
+	odfi::common::println ");" $resolve
+	odfi::common::println "" $resolve
+
+
+}
+
 # write Ram Instance
 odfi::closures::oproc writeRamModule {ramBlock} {
 	
@@ -336,3 +380,6 @@ odfi::closures::oproc writeRFModule {registerfile} {
     odfi::common::println ");" $resolve
 	odfi::common::println "" $resolve
 }
+
+
+

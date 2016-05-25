@@ -101,7 +101,7 @@ trait RegisterFileHost extends RegisterFileNode {
 
             rf =>
                var reg = rf.register(search)
-               value = reg.value
+               value = reg.value.toLong
 
         }
         value

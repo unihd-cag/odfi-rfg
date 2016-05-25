@@ -48,7 +48,8 @@ odfi::closures::oproc writeRamBlockInterface {it} {
 odfi::closures::oproc writeRegisterInterface {it} {
     $it onEachField {
         if {[$it name] != "Reserved"} {
-            $it onAttributes {hardware.osys::rfg::counter} {
+
+            if {[$it hasAttribute hardware.osys::rfg::counter]} {
                 $it onRead {hardware} {
                     output [getName $it] wire [$it width]
                 }
@@ -72,8 +73,34 @@ odfi::closures::oproc writeRegisterInterface {it} {
                     input [getName $it]_countup wire
                 }
 
-            } otherwise {
+            } elseif {[$it hasAttribute hardware.osys::rfg::fifo]} {
 
+                ## SO/DO
+                $it onRead {hardware} {
+                    output [getName $it]_fifo_dout wire [$it width]
+                    input  [getName $it]_fifo_shiftout wire
+
+                    
+                }
+
+                ## SI/DIN
+                $it onWrite {hardware} {
+                    input [getName $it]_fifo_din wire [$it width]
+                    input [getName $it]_fifo_shiftin wire
+                }
+
+                ## Common 
+                output [getName $it]_fifo_full wire 
+                output [getName $it]_fifo_empty wire 
+
+                output [getName $it]_fifo_almost_full wire 
+                output [getName $it]_fifo_almost_full_nxt wire 
+                output [getName $it]_fifo_almost_empty wire 
+
+                
+
+                
+            } else {
                 $it onRead {hardware} {
                     output [getName $it] [find_internalRF $it $rf] [$it width]
                 }
@@ -101,6 +128,8 @@ odfi::closures::oproc writeRegisterInterface {it} {
                 }
             
             }
+
+            
         }
     }
 }
@@ -226,8 +255,10 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
 
     $it onEachField {
         if {[$it name] != "Reserved"} {
-            $it onAttributes {hardware.osys::rfg::counter} {
-                
+
+
+            if {[$it hasAttribute hardware.osys::rfg::counter]} {
+
                 ## Check if this is equivilant
                 $it onWrite {hardware} {
                     reg [getName $it]_load_enable
@@ -247,10 +278,24 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                     ![$it hasAttribute hardware.osys::rfg::rw]} {
                     wire [getName $it] [$it width]
                 }
-                    
-            } otherwise {
+
+            } elseif {[$it hasAttribute hardware.osys::rfg::fifo]} {
+
+                ## On Sofware Read/Write and Hardware Read/write, Mitigate SW/HW signals
+                #if { [$it isRead hardware] && [$it isRead software]} {
+                #    wire [getName $it]_fifo_shiftout
+                #    wire [getName $it]_fifo_dout [$it width]
+                #}
+                if {[$it isRead software]} {
+                    reg [getName $it]_fifo_shiftout
+                    wire [getName $it]_fifo_dout [$it width]
+                }
                 
-                $it onAttributes {hardware.osys::rfg::changed} {
+
+                
+            } else {
+
+               $it onAttributes {hardware.osys::rfg::changed} {
                         reg [getName $it]_res_in_last_cycle
                 }
 
@@ -258,8 +303,9 @@ odfi::closures::oproc writeRegisterInternalSigs {it} {
                     ![$it hasAttribute hardware.osys::rfg::rw] } {
                     reg [getName $it] [$it width]
                 }
-
+            
             }
+
 
             $it onAttributes {hardware.osys::rfg::trigger} {
                 wire [getName $it]_trigger       
@@ -320,12 +366,25 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
         set if_cond "(address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] - 1]:[getRFAddrOffset $rf]\] == [expr [getRelAddress [$it parent]]/(2**[getRFAddrOffset $rf])]) && write_en"
     }
     vif $if_cond {
-        $it onAttributes {hardware.osys::rfg::counter} {
-            vputs "[getName $it]_load_enable <= 1'b1"
-            vputs "[getName $it]_load_value <= write_data\[[expr [$it width] + $offset -1]:$offset\]"
-        } otherwise {
-            $it onAttributes {software.osys::rfg::write_clear} {
-                vputs "[getName $it] <= [$it width]'b0"
+
+
+        if {[$it hasAttribute hardware.osys::rfg::counter]} {
+
+                vputs "[getName $it]_load_enable <= 1'b1"
+                vputs "[getName $it]_load_value <= write_data\[[expr [$it width] + $offset -1]:$offset\]"
+
+        } elseif {[$it hasAttribute hardware.osys::rfg::fifo]} {
+
+            ## Use Shift in 
+            ##[getName $it]_fifo_shiftin_sw <= 1'b1;
+            #[getName $it]_fifo_din_sw <= 1'b1;
+                
+
+                
+        } else {
+            
+           $it onAttributes {software.osys::rfg::write_clear} {
+            vputs "[getName $it] <= [$it width]'b0"
             } otherwise {
             
                 $it onAttributes {software.osys::rfg::write_xor} {
@@ -342,7 +401,10 @@ odfi::closures::oproc writeFieldSoftWrite {it offset} {
             $it onAttributes {hardware.osys::rfg::changed} {
                 vputs "[getName $it]_changed <= 1'b1"
             }
+        
         }
+
+        
 
     }
 }
@@ -367,7 +429,9 @@ odfi::closures::oproc writeHardFieldFunction {it} {
 }
 
 odfi::closures::oproc writeFieldHardWrite {object} { 
-    $object onAttributes {hardware.osys::rfg::counter} {
+
+    if {[$it hasAttribute hardware.osys::rfg::counter]} {
+
         if {$condition == "ifcond"} {
             
             vif "[getName $object]_wen" {
@@ -393,7 +457,21 @@ odfi::closures::oproc writeFieldHardWrite {object} {
             }
 
         }
-    } otherwise {
+
+    } elseif {[$it hasAttribute hardware.osys::rfg::fifo]} {
+
+        ## SW REad 
+        #if {[$it isRead software]} {
+        #    vputs "[getName $it]_fifo_shiftout <=1'b0"
+        #}  
+         #if {[$it isWrite hardware]} {#
+#
+         #}
+            
+
+            
+    } else {
+        
         $object onAttributes {hardware.osys::rfg::clear} {
             if {$condition == "ifcond"} {
                 vif "[getName $object]_clear" {
@@ -431,7 +509,10 @@ odfi::closures::oproc writeFieldHardWrite {object} {
                 }
             }
         }
+
     }
+
+
 }
 
 odfi::closures::oproc writeRegisterReset {object} {
@@ -443,8 +524,9 @@ odfi::closures::oproc writeRegisterReset {object} {
             }
 
             $object onEachField {
-                $it onAttributes {hardware.osys::rfg::counter} {
-                    
+
+                if {[$it hasAttribute hardware.osys::rfg::counter]} {
+
                     $it onWrite {software} {
                         vputs "[getName $it]_load_value <= [$it reset]"
                         vputs "[getName $it]_load_enable <= 1'b0"
@@ -470,7 +552,17 @@ odfi::closures::oproc writeRegisterReset {object} {
                         vputs "[getName $it]_res_in_last_cycle <= 1'b1"
                     }
 
-                } ohterwise {
+                } elseif {[$it hasAttribute hardware.osys::rfg::fifo]} {
+
+                    ## SW REad 
+                    #if {[$it isRead software]} {
+                    #    vputs "[getName $it]_fifo_shiftout <=1'b0"
+                    #}   
+                        
+
+                        
+                } else {
+                    
                     if {[$it name] != "Reserved"} {
                         vputs "[getName $it] <= [$it reset]"
                     }
@@ -483,7 +575,9 @@ odfi::closures::oproc writeRegisterReset {object} {
                         vputs "[getName $it]_changed <=1'b0"
                         vputs "[getName $it]_res_in_last_cycle <= 1'b1"
                     }
+                
                 }
+
             }
         }
     } 
@@ -555,6 +649,8 @@ odfi::closures::oproc writeRegisterBlock {object} {
     
     ## check if anything is generated
     if {[CheckForRegBlock $object] == true} {
+
+
         comment "Register: [getName $object]"
         
         $object onEachField {
@@ -583,6 +679,7 @@ odfi::closures::oproc writeRegisterBlock {object} {
                 }
             }
         }
+        
     }
 
 }
@@ -784,12 +881,26 @@ odfi::closures::oproc writeRegisterSoftRead {object} {
     } else {
         set select "[getRFAddrWidth $rf]'h[format %x [expr [$object getAttributeValue software.osys::rfg::relative_address] / ([$rf register_size]/8)]]"
     }
+
+
+
+    ## Case For address select 
     case_select "$select" {
         set offset 0
         $object onEachField {
             
+            ## Normal REgister 
+            ##  FIFO 
+            ############
+
             $it onRead {software} {
-                vputs "read_data\[[expr [$it width] + $offset - 1]:$offset\] <= [getName $it]"
+                if {[$it hasAttribute hardware.osys::rfg::fifo] } {
+                    vputs "read_data\[[expr [$it width] + $offset - 1]:$offset\] <= [getName $it]_fifo_dout"
+                    vputs "[getName $it]_fifo_shiftout  <= 1'b1"
+                } else {
+                    vputs "read_data\[[expr [$it width] + $offset - 1]:$offset\] <= [getName $it]"
+                }
+            
             }
             incr offset [$it width]
             
@@ -890,6 +1001,9 @@ odfi::closures::oproc writeRFSoftRead {object} {
     } else {
         set select "$care_width'h$care" 
     }
+
+
+
     case_select "$select" {
         vputs "read_data\[[expr [getRFmaxWidth $object] - 1]:0\] <= [getName $object]_read_data"
         if {[getRFmaxWidth $object] != [getRFmaxWidth $rf]} {
@@ -907,8 +1021,45 @@ odfi::closures::oproc writeSoftReadInterface {object} {
             vputs "invalid_address <= 1'b0"
             vputs "access_complete <= 1'b0"
             vputs "read_data <= [getRFmaxWidth $rf]'b0"
+
+            ## Control signals resets 
+            $rf walkDepthFirst {
+                if {[$it isa osys::rfg::Register]} {
+                    ##puts "Searching for FIFO field"
+                    $it onEachField {
+                    
+                        ## Reset FIFO shiftout
+
+                        if {[$it hasAttribute hardware.osys::rfg::fifo] && [$it isRead software] } {
+
+                            vputs "[getName $it]_fifo_shiftout  <= 1'b0"
+                        }
+                    }
+                }  
+                return true 
+            }
         }
         velse {
+
+
+            ## Control signals resets 
+            $rf walkDepthFirst {
+                if {[$it isa osys::rfg::Register]} {
+                    ##puts "Searching for FIFO field"
+                    $it onEachField {
+                    
+                        ## Reset FIFO shiftout
+
+                        if {[$it hasAttribute hardware.osys::rfg::fifo] && [$it isRead software] } {
+
+                            vputs "[getName $it]_fifo_shiftout  <= 1'b0"
+                        }
+                    }
+                }  
+                return true 
+            }
+            
+
             if {[hasRamBlock $rf]} {
                 vputs "read_en_dly0 <= read_en"
                 vputs "read_en_dly1 <= read_en_dly0"
@@ -921,34 +1072,35 @@ odfi::closures::oproc writeSoftReadInterface {object} {
                 } else {
                     set case_cond "address\[[expr [getRFAddrWidth $rf] + [getRFAddrOffset $rf] -1]:[getRFAddrOffset $rf]\]" 
                 }
-            case $case_cond {
-                $rf walkDepthFirst {
-                    ##RamBlock
-                    if {[$it isa osys::rfg::RamBlock]} {
-                        writeRamBlockSoftRead $it
-                    }
-                    ##Register
-                    if {[$it isa osys::rfg::Register]} {
-                        writeRegisterSoftRead $it       
-                    }
-                    if {[$it isa osys::rfg::RegisterFile]} {
-                        writeRFSoftRead $it
-                        return false
-                    } else {
-                        return true
+
+                case $case_cond {
+                    $rf walkDepthFirst {
+                        ##RamBlock
+                        if {[$it isa osys::rfg::RamBlock]} {
+                            writeRamBlockSoftRead $it
+                        }
+                        ##Register
+                        if {[$it isa osys::rfg::Register]} {
+                            writeRegisterSoftRead $it       
+                        }
+                        if {[$it isa osys::rfg::RegisterFile]} {
+                            writeRFSoftRead $it
+                            return false
+                        } else {
+                            return true
+                        }
+
                     }
 
-                }
-
-                case_select "default" {
-                    vputs "invalid_address <= read_en || write_en"
-                    vputs "access_complete <= read_en || write_en"
+                    case_select "default" {
+                        vputs "invalid_address <= read_en || write_en"
+                        vputs "access_complete <= read_en || write_en"
+                    }
                 }
             }
         }
+    
     }
-
-}
 
 odfi::closures::oproc writeInstances {object} {
     $object walkDepthFirst {
@@ -957,6 +1109,11 @@ odfi::closures::oproc writeInstances {object} {
             $it onEachField {
                 $it onAttributes {hardware.osys::rfg::counter} {
                     writeCounterModule $register $it
+                }
+                ## FIFO Register 
+                $it  onAttributes {hardware.osys::rfg::fifo} {
+                    #puts "************ FIFO *************"
+                    writeFifoModule $register $it
                 }
             }
         }
