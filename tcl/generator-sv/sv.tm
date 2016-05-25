@@ -101,53 +101,68 @@ namespace eval osys::rfg::generator::sv {
             foreach item $comp {
                 if {[$item isa osys::rfg::RamBlock]} {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_ramblock #(.WIDTH([$item width]), .ADDR_SIZE([ld [$item depth]]));\n" $out
-                    odfi::common::println "\t`uvm_component_utils([getFullName $item])\n" $out
-                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\", uvm_component parent);" $out
-                    odfi::common::println "\t\tsuper.new(name, parent);" $out
-                    odfi::common::println "\tendfunction : new\n" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "`uvm_component_utils([getFullName $item])\n" $out
+                    odfi::common::println "function new(string name=\"[getFullName $item]\", uvm_component parent);" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "super.new(name, parent);" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "endfunction : new\n" $out
+                    odfi::common::printlnOutdent
                     odfi::common::println "endclass : [getFullName $item]\n" $out
 
 	        } elseif {[$item isa osys::rfg::Register]} {
                     odfi::common::println "class [getFullName $item] extends cag_rgm_register;\n" $out
+                    odfi::common::printlnIndent
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\tbit \[[expr {[$it width] - 1}]:0\] [$it name]_;" $out
+                            odfi::common::println "bit \[[expr {[$it width] - 1}]:0\] [$it name]_;" $out
                         }
                     }
-                    odfi::common::println "\n\t`uvm_component_utils_begin([getFullName $item])" $out
+                    odfi::common::println "" $out
+                    odfi::common::println "`uvm_component_utils_begin([getFullName $item])" $out
+                    odfi::common::printlnIndent
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\t`uvm_field_int([$it name]_,UVM_ALL_ON | UVM_NOPACK)" $out
+                            odfi::common::println "`uvm_field_int([$it name]_,UVM_ALL_ON | UVM_NOPACK)" $out
                         }
                     }
-                    odfi::common::println "\t`uvm_component_utils_end\n" $out
-                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\", uvm_component parent);" $out
-                    odfi::common::println "\t\tsuper.new(name, parent);" $out
-                    odfi::common::println "\tendfunction : new\n" $out
-                    odfi::common::println "\tfunction void do_pack(uvm_packer packer);" $out
-                    odfi::common::println "\t\tsuper.do_pack(packer);" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "`uvm_component_utils_end\n" $out
+                    odfi::common::println "function new(string name=\"[getFullName $item]\", uvm_component parent);" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "super.new(name, parent);" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "endfunction : new\n" $out
+                    odfi::common::println "function void do_pack(uvm_packer packer);" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "super.do_pack(packer);" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\tpacker.pack_field([$it name]_,[$it width]);" $out
+                            odfi::common::println "packer.pack_field([$it name]_,[$it width]);" $out
                         } else {
                             if {[$it width] != 0} {
-                                odfi::common::println "\t\tpacker.pack_field([$it width]'b0,[$it width]);" $out
+                                odfi::common::println "packer.pack_field([$it width]'b0,[$it width]);" $out
                             }
                         }
                     }
-                    odfi::common::println "\tendfunction : do_pack\n" $out
-                    odfi::common::println "\tfunction void do_unpack(uvm_packer packer);" $out
-                    odfi::common::println "\t\tsuper.do_unpack(packer);" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "endfunction : do_pack\n" $out
+                    odfi::common::println "function void do_unpack(uvm_packer packer);" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "super.do_unpack(packer);" $out
                     $item onEachField {
                         if {[$it name] != "Reserved"} {
-                            odfi::common::println "\t\t[$it name]_ = packer.unpack_field([$it width]);" $out
+                            odfi::common::println "[$it name]_ = packer.unpack_field([$it width]);" $out
                         } else {
                             if {[$it width] != 0} {
-                                odfi::common::println "\t\tvoid'(packer.unpack_field([$it width]));" $out
+                                odfi::common::println "void'(packer.unpack_field([$it width]));" $out
                             }
                         }
                     }
-                    odfi::common::println "\tendfunction : do_unpack\n" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "endfunction : do_unpack\n" $out
+                    odfi::common::printlnOutdent
                     odfi::common::println "endclass : [getFullName $item]\n" $out
                 } elseif {[$item isa osys::rfg::Group]} {
                     if {[$item isa osys::rfg::RegisterFile]} {
@@ -155,92 +170,102 @@ namespace eval osys::rfg::generator::sv {
                     } else {
                         odfi::common::println "class [getFullName $item] extends cag_rgm_container;\n" $out
                     }
+                    odfi::common::printlnIndent
                     $item onEachComponent {
                         if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
-                            odfi::common::println "\trand [getFullName $it] [$it name];" $out
+                            odfi::common::println "rand [getFullName $it] [$it name];" $out
                         }
                     }
-                    odfi::common::println "\n\t`uvm_component_utils([getFullName $item])\n" $out
-                    odfi::common::println "\tfunction new(string name=\"[getFullName $item]\", uvm_component parent);" $out
-                    odfi::common::println "\t\tsuper.new(name, parent);" $out
+                    odfi::common::println "" $out
+                    odfi::common::println "`uvm_component_utils([getFullName $item])\n" $out
+                    odfi::common::println "function new(string name=\"[getFullName $item]\", uvm_component parent);" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "super.new(name, parent);" $out
                     if {[$item isa osys::rfg::RegisterFile]} {
                     } else {
                     }
                     $item onEachComponent {
                         if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
-                            odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\", this);" $out
+                            odfi::common::println "[$it name] = [getFullName $it]::type_id::create(\"[$it name]\", this);" $out
                             if {[$it isa osys::rfg::Group]} {
                                 if {[$it isa osys::rfg::RegisterFile]} {
-                                    odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                                    odfi::common::println "[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
                                 } else {
-                                    odfi::common::println "\t\tset_relative_address('h0);" $out
+                                    odfi::common::println "set_relative_address('h0);" $out
                                 }
                             } else {
                                 if { [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
-                                    odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                                    odfi::common::println "[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
                                 }
                             }
                             if {[$it isa osys::rfg::RamBlock]} {
-                                odfi::common::println "\t\tadd_ramblock([$it name]);" $out
+                                odfi::common::println "add_ramblock([$it name]);" $out
                             } elseif {[$it isa osys::rfg::Register]} {
-                                odfi::common::println "\t\tadd_register([$it name]);" $out
+                                odfi::common::println "add_register([$it name]);" $out
                             } elseif {[$it isa osys::rfg::Group]} {
                                 if {[$it isa osys::rfg::RegisterFile]} {
-                                    odfi::common::println "\t\tadd_register_file([$it name]);" $out
+                                    odfi::common::println "add_register_file([$it name]);" $out
                                 } else {
-                                    odfi::common::println "\t\tadd_group([$it name]);" $out
+                                    odfi::common::println "add_group([$it name]);" $out
                                 }
                             }
                         }
                     }
-                    odfi::common::println "\tendfunction : new\n" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "endfunction : new\n" $out
+                    odfi::common::printlnOutdent
                     odfi::common::println "endclass : [getFullName $item]\n" $out
                 }
             }
 
             if {[$registerFile isa osys::rfg::RegisterFile]} {
                 odfi::common::println "class [getFullName $registerFile] extends cag_rgm_register_file;\n" $out
+                odfi::common::printlnIndent
                 $registerFile onEachComponent {
                     ## TODO concept for groups
                     if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
-                        odfi::common::println "\trand [getFullName $it] [$it name];" $out
+                        odfi::common::println "rand [getFullName $it] [$it name];" $out
                     }
                 }
-                odfi::common::println "\n\t`uvm_component_utils([getFullName $registerFile])\n" $out
-                odfi::common::println "\tfunction new(string name=\"[getFullName $registerFile]\", uvm_component parent);" $out
-                odfi::common::println "\t\tsuper.new(name, parent);" $out
-                odfi::common::println "\t\tset_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::relative_address]]);" $out
+                    odfi::common::println "" $out
+                odfi::common::println "`uvm_component_utils([getFullName $registerFile])\n" $out
+                odfi::common::println "function new(string name=\"[getFullName $registerFile]\", uvm_component parent);" $out
+                odfi::common::printlnIndent
+                odfi::common::println "super.new(name, parent);" $out
+                odfi::common::println "set_relative_address('h[format %x [$registerFile getAttributeValue software.osys::rfg::relative_address]]);" $out
                 $registerFile onEachComponent {
                      ## TODO concept for groups
                     if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Register]} {
-                        odfi::common::println "\t\t[$it name] = [getFullName $it]::type_id::create(\"[$it name]\", this);" $out
+                        odfi::common::println "[$it name] = [getFullName $it]::type_id::create(\"[$it name]\", this);" $out
                   
                         if {[$it isa osys::rfg::Group]} {
                             if {[$it isa osys::rfg::RegisterFile]} {
-                                odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                                odfi::common::println "[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
                             } else {
 			    	## Check this Groups would now have relative addresses but they are just helpers for hierarchies
-                                odfi::common::println "\t\tset_relative_address('h0);" $out
+                                odfi::common::println "set_relative_address('h0);" $out
                             }
                         } else {
 			    if {[$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
-                        	odfi::common::println "\t\t[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
+                        	odfi::common::println "[$it name].set_relative_address('h[format %x [$it getAttributeValue software.osys::rfg::relative_address]]);" $out
 			    }
                         }
                         if {[$it isa osys::rfg::RamBlock]} {
-                            odfi::common::println "\t\tadd_ramblock([$it name]);" $out
+                            odfi::common::println "add_ramblock([$it name]);" $out
                         } elseif {[$it isa osys::rfg::Register]} {
-                            odfi::common::println "\t\tadd_register([$it name]);" $out
+                            odfi::common::println "add_register([$it name]);" $out
                         } elseif {[$it isa osys::rfg::Group]} {
                             if {[$it isa osys::rfg::RegisterFile]} {
-                                odfi::common::println "\t\tadd_register_file([$it name]);" $out
+                                odfi::common::println "add_register_file([$it name]);" $out
                             } else {
-                                odfi::common::println "\t\tadd_group([$it name]);" $out
+                                odfi::common::println "add_group([$it name]);" $out
                             }
                        }
                    }
                 }
-                odfi::common::println "\tendfunction : new\n" $out
+                odfi::common::printlnOutdent
+                odfi::common::println "endfunction : new\n" $out
+                odfi::common::printlnOutdent
                 odfi::common::println "endclass : [getFullName $registerFile]\n" $out
             }
 
