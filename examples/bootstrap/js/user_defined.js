@@ -1,7 +1,7 @@
 $(function() {
         
-  $('.list-group-item').on('click', function() {
-    $('.glyphicon', this)
+  $('.list-group-item .glyphicon').on('click', function() {
+    $(this)
       .toggleClass('glyphicon-chevron-right')
       .toggleClass('glyphicon-chevron-down');
   });
