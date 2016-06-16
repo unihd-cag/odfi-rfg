@@ -41,8 +41,8 @@ namespace eval osys::rfg::generator::htmlbrowser {
 
         public method copyDependenciesTo destination {
 
-            odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/bs/ *.css
-            odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/bs/ *.js
+            odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/css/ *.css
+            odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/js/ *.js
             odfi::common::copy $osys::rfg::generator::htmlbrowser::location/fonts $destination/fonts *
 
         }
@@ -50,13 +50,17 @@ namespace eval osys::rfg::generator::htmlbrowser {
         public method produce {destinationPath {generator ""}} {
             
             file mkdir $destinationPath
-            ::puts "Htmlbrowser processing $registerFile > ${destinationPath}[$registerFile name].html"
-            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html.tcl]
-            odfi::files::writeToFile ${destinationPath}[$registerFile name].html $html
+            file mkdir [file join $destinationPath html]
+            ::puts "Htmlbrowser processing $registerFile > [file join ${destinationPath} [$registerFile name].html]"
+            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl]
+            odfi::files::writeToFile [file join ${destinationPath} [$registerFile name].html] $html
+            $registerFile walkDepthFirst {
+                ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} html] [$it name].html]"
+                set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl]
+                odfi::files::writeToFile [file join [file join ${destinationPath} html] [$it name].html] $html
+                return true
+            }
             copyDependenciesTo $destinationPath
-
         }
-    
     }
-
 }
