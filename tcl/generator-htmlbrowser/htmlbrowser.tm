@@ -52,11 +52,11 @@ namespace eval osys::rfg::generator::htmlbrowser {
             file mkdir $destinationPath
             file mkdir [file join $destinationPath html]
             ::puts "Htmlbrowser processing $registerFile > [file join ${destinationPath} [$registerFile name].html]"
-            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl]
+            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $registerFile]
             odfi::files::writeToFile [file join ${destinationPath} [$registerFile name].html] $html
             $registerFile walkDepthFirst {
                 ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} html] [$it name].html]"
-                set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl]
+                set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $it]
                 odfi::files::writeToFile [file join [file join ${destinationPath} html] [$it name].html] $html
                 return true
             }
