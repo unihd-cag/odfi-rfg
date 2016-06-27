@@ -28,8 +28,8 @@ One recommanded way to do this is to create a bin folder in your home directory 
 
 ## Install from Source
 
-1. Clone the repository 
+1.Clone the repository 
 
-2. Move to the build folder in the repo and invoke the build script:
+2.Move to the build folder in the repo and invoke the build script:
 
     sh build.sh
