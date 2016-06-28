@@ -128,10 +128,8 @@ namespace eval osys::rfg::generator::rfgheader {
                     }
 
 
-                } elseif {[$it isa osys::rfg::Register]} {
-                    odfi::common::println "`define RFS_[string toupper [$it name]]_ADDR [$it getAttributeValue software.osys::rfg::absolute_address]" $out
+                } 
 
-                }
                 return true
             }
             
