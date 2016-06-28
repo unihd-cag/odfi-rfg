@@ -1,4 +1,5 @@
 <%
+variable indent_count
 ## returns a string composed of the name of the item and the names of its parents up to the top register file seperated by "seperator"
 proc getAbsoluteName {item {seperator " "}} {
     set result {}
@@ -44,8 +45,16 @@ proc getFileName {item caller} {
             return "../RF_TOP.html"
         }
     } else {
-        return "html/[getAbsolute $item _].html"
+        return "html/[getAbsoluteName $item _].html"
     }
+}
+
+proc getRoot item {
+    set current $item
+    while {[string compare [$current parent] ""]} {
+        set current [$current parent]
+    }
+    return $current
 }
 
 proc generateBreadcrumb item {
@@ -62,6 +71,284 @@ proc generateBreadcrumb item {
     }
     puts "                        <li class=\"active\">[$item name]</li>"
     puts -nonewline "                    </ul>"
+}
+
+proc subCompIsActive {item activeItem} {
+    set current $activeItem
+    ## while the root is not reached
+    while {[string compare $current ""]} {
+        if {!([string compare $current $item])} {
+            return true
+        } else {
+            set current [$current parent]
+        }
+    }
+    return false
+}
+
+proc indent count {
+    set result {}
+    while {$count > 0} {
+        set result "$result    "
+        set count [expr {$count - 1}]
+    }
+    return $result
+}
+
+proc generateNavigationRec {current activeItem count} {
+    ## if $current is a group or registerfile
+    if {[$current isa osys::rfg::Group]} {
+        if {!([string compare $current $activeItem])} {
+            puts "[indent $count]<a href=\"#\" class=\"list-group-item active\">"
+        } else {
+            puts "[indent $count]<a href=\"[getFileName $current $activeItem]\" class=\"list-group-item\">"
+        }
+        set count [expr {$count + 1}]
+        if {[subCompIsActive $current $activeItem]} {
+            puts "[indent $count]<span class=\"glyphicon glyphicon-chevron-down\" data-toggle=\"collapse\" href=\"#[getAbsoluteName $current _]\"></span>[$current name]"
+        } else {
+            puts "[indent $count]<span class=\"glyphicon glyphicon-chevron-right\" data-toggle=\"collapse\" href=\"#[getAbsoluteName $current _]\"></span>[$current name]"
+        }
+        puts "[indent $count]<span class=\"badge\">0x[format %x [$current getAttributeValue software.osys::rfg::absolute_address]]</span>"
+        set count [expr {$count - 1}]
+        puts "[indent $count]</a>"
+        if {[subCompIsActive $current $activeItem]} {
+            puts "[indent $count]<div class=\"list-group collapse in\" id=\"[getAbsoluteName $current _]\">"
+        } else {
+            puts "[indent $count]<div class=\"list-group collapse\" id=\"[getAbsoluteName $current _]\">"
+        }
+        $current onEachComponent {
+            generateNavigationRec $it $activeItem [expr {$count + 1}]
+        }
+        puts "[indent $count]</div>"
+    } else {
+        ## if $current is the active component
+        if {!([string compare $current $activeItem])} {
+            puts "[indent $count]<a href=\"#\" class=\"list-group-item active\">[$current name]"
+        } else {
+            puts "[indent $count]<a href=\"[getFileName $current $activeItem]\" class=\"list-group-item\">[$current name]"
+        }
+        set count [expr {$count + 1}]
+        puts "[indent $count]<span class=\"badge\">0x[format %x [$current getAttributeValue software.osys::rfg::absolute_address]]</span>"
+        set count [expr {$count - 1}]
+        puts "[indent $count]</a>"
+    }
+}
+
+proc getType item {
+    if {[$item isa osys::rfg::Register]} {
+        return "Register"
+    } elseif {[$item isa osys::rfg::RamBlock]} {
+        return "RAM Block"
+    } elseif {[$item isa osys::rfg::Group]} {
+        if {[$item isa osys::rfg::RegisterFile]} {
+            return "Register File"
+        } else {
+            return "Group"
+        }
+    } else {
+        return "-"
+    }
+}
+
+proc generateSwAttr item {
+    $item onAttributes {software.osys::rfg::rw} {
+        puts "                                                                <li>rw</li>"
+    }
+    $item onAttributes {software.osys::rfg::ro} {
+        puts "                                                                <li>ro</li>"
+    }
+    $item onAttributes {software.osys::rfg::wo} {
+        puts "                                                                <li>wo</li>"
+    }
+    $item onAttributes {software.osys::rfg::write_clear} {
+        puts "                                                                <li>write_clear</li>"
+    }
+    $item onAttributes {software.osys::rfg::write_xor} {
+        puts "                                                                <li>write_xor</li>"
+    }
+}
+
+proc generateHwAttr item {
+    $item onAttributes {hardware.osys::rfg::rw} {
+        puts "                                                                <li>rw</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::ro} {
+        puts "                                                                <li>ro</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::wo} {
+        puts "                                                                <li>wo</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::changed} {
+        puts "                                                                <li>changed</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::clear} {
+        puts "                                                                <li>clear</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::counter} {
+        puts "                                                                <li>counter</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::edge_trigger} {
+        puts "                                                                <li>edge_trigger</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::external} {
+        puts "                                                                <li>external</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::internal} {
+        puts "                                                                <li>internal</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::no_wen} {
+        puts "                                                                <li>no_wen</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::rreinit} {
+        puts "                                                                <li>rreinit</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::rreinit_source} {
+        puts "                                                                <li>rreinit_source</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::shared_bus} {
+        puts "                                                                <li>shared_bus</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::software_written} {
+        puts "                                                                <li>software_written</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::sticky} {
+        puts "                                                                <li>sticky</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::trigger} {
+        puts "                                                                <li>trigger</li>"
+    }
+    $item onAttributes {hardware.osys::rfg::wen} {
+        puts "                                                                <li>wen</li>"
+    }
+}
+
+proc generateDescTable activeItem {
+    puts "<table class=\"table table-hover\">"
+    puts "                            <thead>"
+    puts "                                <tr>"
+    puts "                                    <th>Name</th>"
+    puts "                                    <th>Type</th>"
+    if {[$activeItem isa osys::rfg::RamBlock]} {
+    puts "                                    <th>Width</th>"
+    puts "                                    <th>Size</th>"
+    }
+    puts "                                    <th>Address</th>"
+    puts "                                    <th>Path</th>"
+    puts "                                </tr>"
+    puts "                            </thead>"
+    puts "                            <tbody>"
+    if {[$activeItem isa osys::rfg::Group]} {
+        $activeItem onEachComponent {
+            puts "                                <tr class=\"clickable-row\" data-href=\"[getFileName $it $activeItem]\">"
+            puts "                                    <td>[$it name]</td>"
+            puts "                                    <td>[getType $it]</td>"
+            puts "                                    <td>0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
+            puts "                                    <td>[getAbsoluteName $it /]</td>"
+            puts "                                </tr>"
+        }
+    } elseif {[$activeItem isa osys::rfg::Register]} {
+        puts "                                <tr>"
+        puts "                                    <td>[$activeItem name]</td>"
+        puts "                                    <td>[getType $activeItem]</td>"
+        puts "                                    <td>0x[format %x [$activeItem getAttributeValue software.osys::rfg::absolute_address]]</td>"
+        puts "                                    <td>[getAbsoluteName $activeItem /]</td>"
+        puts "                                </tr>"
+    } elseif {[$activeItem isa osys::rfg::RamBlock]} {
+        puts "                                <tr>"
+        puts "                                    <td><span data-toggle=\"collapse\" data-target=\"#[getAbsoluteName $activeItem _]\" class=\"glyphicon glyphicon-chevron-right clickable\"></span> [$activeItem name]</td>"
+        puts "                                    <td>[getType $activeItem]</td>"
+        puts "                                    <td>[$activeItem width] bit</td>"
+        puts "                                    <td>[$activeItem depth]</td>"
+        puts "                                    <td>0x[format %x [$activeItem getAttributeValue software.osys::rfg::absolute_address]]</td>"
+        puts "                                    <td>[getAbsoluteName $activeItem /]</td>"
+        puts "                                </tr>"
+        puts "                                <tr>"
+        puts "                                    <td class=\"hidden-row\" colspan=\"6\">"
+        puts "                                        <div id=\"[getAbsoluteName $activeItem _]\" class=\"collapse\">"
+        puts "                                            <table class=\"table\">"
+        puts "                                                <tbody>"
+        puts "                                                    <tr>"
+        puts "                                                        <td>Software attributes:"
+        puts "                                                            <ul>"
+        generateSwAttr $activeItem
+        puts "                                                            </ul>"
+        puts "                                                        </td>"
+        puts "                                                        <td>Hardware attributes:"
+        puts "                                                            <ul>"
+        generateHwAttr $activeItem
+        puts "                                                            </ul>"
+        puts "                                                        </td>"
+        puts "                                                    </tr>"
+        puts "                                                </tbody>"
+        puts "                                            </table>"
+        puts "                                        </div>"
+        puts "                                    </td>"
+        puts "                                </tr>"
+    }
+    puts "                            </tbody>"
+    puts "                        </table>"
+}
+
+proc generateFieldTable item {
+    puts "<h4>Fields:</h4>"
+    puts "                        <table class=\"table table-hover\">"
+    puts "                            <thead>"
+    puts "                                <tr>"
+    puts "                                    <th>Name</th>"
+    puts "                                    <th>Width</th>"
+    puts "                                    <th>Reset</th>"
+    puts "                                    <th>Path</th>"
+    puts "                                </tr>"
+    puts "                            </thead>"
+    puts "                            <tbody>"
+    $item onEachField {
+        if {[string compare [$it name] "Reserved"]} {
+            puts "                                <tr>"
+            puts "                                    <td><span class=\"glyphicon glyphicon-chevron-right clickable\" data-toggle=\"collapse\" data-target=\"#[getAbsoluteName $item _]_[$it name]\"></span> [$it name]</td>"
+            puts "                                    <td>[$it width] bit</td>"
+            puts "                                    <td>[$it reset]</td>"
+            puts "                                    <td>[getAbsoluteName $item /]/[$it name]</td>"
+            puts "                                </tr>"
+            puts "                                <tr>"
+            puts "                                    <td class=\"hidden-row\" colspan=\"4\">"
+            puts "                                        <div id=\"[getAbsoluteName $item _]_[$it name]\" class=\"collapse\">"
+            puts "                                            <table class=\"table\">"
+            puts "                                                <tbody>"
+            puts "                                                    <tr>"
+            puts "                                                        <td>Software attributes:"
+            puts "                                                            <ul>"
+            generateSwAttr $it
+            puts "                                                            </ul>"
+            puts "                                                        </td>"
+            puts "                                                        <td>Hardware Attributes:"
+            puts "                                                            <ul>"
+            generateHwAttr $it
+            puts "                                                            </ul>"
+            puts "                                                        </td>"
+            puts "                                                    </tr>"
+            puts "                                                </tbody>"
+            puts "                                            </table>"
+            puts "                                        </div>"
+            puts "                                    </td>"
+            puts "                                </tr>"
+        } else {
+            puts "                                <tr>"
+            puts "                                    <td>[$it name]</td>"
+            puts "                                    <td>[$it width] bit</td>"
+            puts "                                    <td>-</td>"
+            puts "                                    <td>-</td>"
+            puts "                                </tr>"
+        }
+    }
+        puts "                            </tbody>"
+        puts "                        </table>"
+}
+
+proc generateNavigation {activeItem} {
+    puts "<div class=\"list-group list-group-root\">"
+    generateNavigationRec [getRoot $activeItem] $activeItem 7
+    puts -nonewline "[indent 6]</div>"
 }
 
 proc getCssFolder item {
@@ -96,97 +383,27 @@ proc getJsFolder item {
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-12">
-                    <h3><% puts -nonewline "[getAbsoluteName $caller]"%> Documentation</h3>
-                    <% generateBreadcrumb $caller%>
+                    <div class="margin-15px">
+                        <h3><% puts -nonewline "[getAbsoluteName $caller]"%> Documentation</h3>
+                        <% generateBreadcrumb $caller%>
+                    </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-sm-4">
-                    <div class="just-padding">
-                        <div class="list-group list-group-root">
-                            <a href="#" class="list-group-item active">
-                            <span class="glyphicon glyphicon-chevron-down" data-toggle="collapse" href="#RF_TOP"></span>RF_TOP
-                            <span class="badge">0x0</span>
-                            </a>
-                            <div class="list-group collapse in" id="RF_TOP">
-                                <a href="html/RF_TOP_REG_0.html" class="list-group-item">REG_0
-                                <span class="badge">0x0</span>
-                                </a>
-                                <a href="#" class="list-group-item">REG_1
-                                <span class="badge">0x8</span>
-                                </a>
-                                <a href="html/RF_BOTTOM.html" class="list-group-item">
-                                <span class="glyphicon glyphicon-chevron-right" data-toggle="collapse" href="#RF_BOTTOM"></span>RF_BOTTOM
-                                <span class="badge">0x40</span>
-                                </a>
-                                <div class="list-group collapse" id="RF_BOTTOM">
-                                    <a href="#" class="list-group-item">REG_2
-                                    <span class="badge">0x40</span>
-                                    </a>
-                                    <a href="#" class="list-group-item">REG_3
-                                    <span class="badge">0x48</span>
-                                    </a>
-                                    <a href="html/RF_BOTTOM_RAM_0.html" class="list-group-item">RAM_0
-                                    <span class="badge">0x50</span>
-                                    </a>
-                                    <a href="#" class="list-group-item">RAM_1
-                                    <span class="badge">0x60</span>
-                                    </a>
-                                </div>
-                                <a href="#" class="list-group-item">REG_4
-                                <span class="badge">0x80</span>
-                                </a>
-                                <a href="#" class="list-group-item">REG_5
-                                <span class="badge">0x88</span>
-                                </a>
-                            </div>
-                        </div>
+                    <div class="margin-15px">
+                        <% generateNavigation $caller%>
                     </div>
                 </div>
                 <div class="col-sm-8">
-                    <h3 class="vspace-30px">RF_TOP</h3>
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Type</th>
-                                <th>Address</th>
-                                <th>Path</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr class="clickable-row" data-href="html/RF_TOP_REG_0.html">
-                                <td>REG_0</td>
-                                <td>Register</td>
-                                <td>0x0</td>
-                                <td>RF_TOP/REG_0</td>
-                            </tr>
-                            <tr class="clickable-row" data-href="#">
-                                <td>REG_1</td>
-                                <td>Register</td>
-                                <td>0x8</td>
-                                <td>RF_TOP/REG_1</td>
-                            </tr>
-                            <tr class="clickable-row" data-href="html/RF_BOTTOM.html">
-                                <td>RF_BOTTOM</td>
-                                <td>Register File</td>
-                                <td>0x40</td>
-                                <td>RF_TOP/RF_BOTTOM</td>
-                            </tr>
-                            <tr class="clickable-row" data-href="#">
-                                <td>REG_4</td>
-                                <td>Register</td>
-                                <td>0x80</td>
-                                <td>RF_TOP/REG_4</td>
-                            </tr>
-                            <tr class="clickable-row" data-href="#">
-                                <td>REG_5</td>
-                                <td>Register</td>
-                                <td>0x88</td>
-                                <td>RF_TOP/REG_4</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                    <div class="margin-15px">
+                        <h3 class="vspace-30px"><% $caller name%></h3>
+                        <h4>Description:</h4>
+                        <% generateDescTable $caller%>
+                        <%  if {[$caller isa osys::rfg::Register]} {
+                                generateFieldTable $caller
+                            }%>
+                    </div>
                 </div>
             </div>
         </div>
