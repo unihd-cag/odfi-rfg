@@ -5,15 +5,20 @@ registerFile RF_TOP {
             width        16
             reset        16'h0
             attributes software {
+                rw
             }    
             attributes hardware {
+                ro
             }
         }
         field field_1 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
+                clear
             }
         }
         field field_2 {
@@ -80,6 +85,4 @@ registerFile RF_TOP {
             }
         }
     }
-
-    external RF_GROUP.rf RF_GROUP
 }
