@@ -39,6 +39,23 @@ namespace eval osys::rfg::generator::htmlbrowser {
             set registerFile $cRegisterFile
         }
 
+        ## returns a string composed of the name of the item and the names of its parents up to the top register file seperated by "seperator"
+        public method getAbsoluteName_m {item {seperator " "}} {
+            set result {}
+            if {[string compare [$item parent] ""]} {
+                set current [$item parent]
+                set parents {}
+                while {[string compare $current ""]} {
+                    lappend parents $current
+                    set current [$current parent]
+                }
+                foreach p $parents {
+                    set result "[$p name]$seperator$result"
+                }
+            }
+            return "$result[$item name]"
+        }
+
         public method copyDependenciesTo destination {
 
             odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/css/ *.css
@@ -48,16 +65,15 @@ namespace eval osys::rfg::generator::htmlbrowser {
         }
 
         public method produce {destinationPath {generator ""}} {
-            
             file mkdir $destinationPath
             file mkdir [file join $destinationPath html]
             ::puts "Htmlbrowser processing $registerFile > [file join ${destinationPath} [$registerFile name].html]"
             set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $registerFile]
             odfi::files::writeToFile [file join ${destinationPath} [$registerFile name].html] $html
             $registerFile walkDepthFirst {
-                ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} html] [$it name].html]"
+                ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html]"
                 set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $it]
-                odfi::files::writeToFile [file join [file join ${destinationPath} html] [$it name].html] $html
+                odfi::files::writeToFile [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html] $html
                 return true
             }
             copyDependenciesTo $destinationPath
