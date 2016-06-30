@@ -1,7 +1,9 @@
 registerFile RF_TOP {
-
+    description "this is the top rf"
     register REG_0 {
+        description "this is a csr"
         field field_0 {
+            description "this is a field"
             width        16
             reset        16'h0
             attributes software {

@@ -316,6 +316,9 @@ proc generateFieldTable item {
             puts "                                            <table class=\"table\">"
             puts "                                                <tbody>"
             puts "                                                    <tr>"
+            puts "                                                        <td colspan=\"2\">Description: [$it description]</td>"
+            puts "                                                    </tr>"
+            puts "                                                    <tr>"
             puts "                                                        <td>Software attributes:"
             puts "                                                            <ul>"
             generateSwAttr $it
@@ -398,7 +401,7 @@ proc getJsFolder item {
                 <div class="col-sm-8">
                     <div class="margin-15px">
                         <h3 class="vspace-30px"><% $caller name%></h3>
-                        <h4>Description:</h4>
+                        <h4>Description: <% $caller description%></h4>
                         <% generateDescTable $caller%>
                         <%  if {[$caller isa osys::rfg::Register]} {
                                 generateFieldTable $caller
