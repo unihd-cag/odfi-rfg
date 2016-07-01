@@ -49,8 +49,6 @@ namespace eval osys::rfg::generator::verilog {
                     if {[lsearch $file_list [$it getAttributeValue rfg.osys::rfg::file]] == -1} {
                         lappend file_list [$it getAttributeValue rfg.osys::rfg::file]
                         lappend registerfiles $it
-                        ::puts "This is the file name:"
-                        ::puts [$it getAttributeValue rfg.osys::rfg::file]
                     }
                 }
                 return true

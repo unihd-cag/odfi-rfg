@@ -111,24 +111,31 @@ namespace eval osys::rfg::generator::rfgheader {
                 odfi::common::println "`define RFS_[string toupper [$registerFile name]]_TWIDTH [llength [$registerFile getAttributeValue hardware.osys::rfg::trigger]]" $out
             }
             
+            set rf_list {}
             $registerFile walkDepthFirst {
-
+            
                 if {[$it isa osys::rfg::RegisterFile]} {
-                    if {[expr [getAddrBits $it]-3] == 0} {
-                        odfi::common::println "`define RFS_[string toupper [$it name]]_AWIDTH 1" $out
-                    } else {
-                        odfi::common::println "`define RFS_[string toupper [$it name]]_AWIDTH [expr [getAddrBits $it]-3]" $out
-                    }
-                    odfi::common::println "`define RFS_[string toupper [$it name]]_RWIDTH [getRFmaxWidth $it]" $out
-                    odfi::common::println "`define RFS_[string toupper [$it name]]_WWIDTH [getRFmaxWidth $it]" $out
+                    set name [lindex [split [file tail [$it getAttributeValue rfg.osys::rfg::file]] "."] 0]
+                    if {[lsearch $rf_list [$it getAttributeValue rfg.osys::rfg::file]] == -1} {
+                        
+                        lappend rf_list [$it getAttributeValue rfg.osys::rfg::file]
+                        
+                        if {[expr [getAddrBits $it]-3] == 0} {
+                            odfi::common::println "`define RFS_[string toupper $name]_AWIDTH 1" $out
+                        } else {
+                            odfi::common::println "`define RFS_[string toupper $name]_AWIDTH [expr [getAddrBits $it]-3]" $out
+                        }
+
+                        odfi::common::println "`define RFS_[string toupper $name]_RWIDTH [getRFmaxWidth $it]" $out
+                        odfi::common::println "`define RFS_[string toupper $name]_WWIDTH [getRFmaxWidth $it]" $out
 
 
-                    if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
-                        odfi::common::println "`define RFS_[string toupper [$it name]]_TWIDTH [llength [$it getAttributeValue hardware.osys::rfg::trigger]]" $out
-                    }
+                        if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
+                            odfi::common::println "`define RFS_[string toupper $name]_TWIDTH [llength [$it getAttributeValue hardware.osys::rfg::trigger]]" $out
+                        }
+                    } 
 
-
-                } 
+                }
 
                 return true
             }
