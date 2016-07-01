@@ -280,12 +280,16 @@ proc getName {object} {
 	
 	foreach element $list {
 		if {[$element isa osys::rfg::RegisterFile] && [$element hasAttribute hardware.osys::rfg::external]} {
-			set deleteIndex [expr $i+1]
+            set deleteIndex [expr $i+1]
 		}
 
 		incr i 1
 	}
 
+    if {[$object isa osys::rfg::RegisterFile] && [$object hasAttribute hardware.osys::rfg::external]} {
+        set deleteIndex [expr $deleteIndex-1]
+    }
+    
 	if {$deleteIndex == [llength $list]} {
 		foreach element $list {
 			lappend name [$element name]
