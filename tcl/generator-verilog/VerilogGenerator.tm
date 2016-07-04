@@ -49,15 +49,13 @@ namespace eval osys::rfg::generator::verilog {
                     if {[lsearch $file_list [$it getAttributeValue rfg.osys::rfg::file]] == -1} {
                         lappend file_list [$it getAttributeValue rfg.osys::rfg::file]
                         lappend registerfiles $it
-                        ::puts "This is the file name:"
-                        ::puts [$it getAttributeValue rfg.osys::rfg::file]
                     }
                 }
                 return true
             }
             
             foreach ::rf $registerfiles {
-                ::puts "VerilogGenerator processing: $::rf > ${destinationPath}[$::rf name].v"
+                ::puts "VerilogGenerator processing: $::rf > ${destinationPath}[lindex [split [file tail [$::rf getAttributeValue rfg.osys::rfg::file]] "."] 0].v"
                 namespace eval :: {
                     catch {source ${::osys::rfg::generator::verilog::location}/registerfile_template.tcl} result
                     set name [lindex [split [file tail [$rf getAttributeValue rfg.osys::rfg::file]] "."] 0]
