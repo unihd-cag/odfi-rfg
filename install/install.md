@@ -30,6 +30,6 @@ One recommanded way to do this is to create a bin folder in your home directory 
 
 1.Clone the repository 
 
-2.Move to the build folder in the repo and invoke the build script:
+2.Move into the repository
 
-    sh build.sh
+    sh build/build.sh
