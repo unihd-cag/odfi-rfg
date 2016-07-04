@@ -86,11 +86,15 @@ namespace eval osys::rfg::generator::rfgheader {
             return [ld [getRFsize $registerfile]]
         }
 
-        public method produce {destinationPath {generator ""}} {
+        public method produce {destinationPath {generator}} {
 
-            file mkdir $destinationPath 
-            puts "Rfgheader processing $registerFile > ${destinationPath}[$registerFile name].h"
-            
+            file mkdir $destinationPath
+            set options $generator
+            $options onAttributes {options.::filename} {
+                puts "Rfgheader processing $registerFile > ${destinationPath}[$options getAttributeValue options.::filename]"
+            } otherwise {
+                puts "Rfgheader processing $registerFile > ${destinationPath}[$registerFile name].h"
+            }
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
             
@@ -145,7 +149,12 @@ namespace eval osys::rfg::generator::rfgheader {
             flush $out
             set res [read $out]
             close $out
-            odfi::files::writeToFile ${destinationPath}[$registerFile name].h $res
+
+            $options onAttributes {options.::filename} {
+                odfi::files::writeToFile ${destinationPath}[$options getAttributeValue options.::filename] $res
+            } otherwise {
+                odfi::files::writeToFile ${destinationPath}[$registerFile name].h $res
+            }
         }
     }
 }

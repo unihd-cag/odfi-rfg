@@ -55,7 +55,7 @@ namespace eval osys::rfg::generator::verilog {
             }
             
             foreach ::rf $registerfiles {
-                ::puts "VerilogGenerator processing: $::rf > ${destinationPath}[$::rf name].v"
+                ::puts "VerilogGenerator processing: $::rf > ${destinationPath}[lindex [split [file tail [$::rf getAttributeValue rfg.osys::rfg::file]] "."] 0].v"
                 namespace eval :: {
                     catch {source ${::osys::rfg::generator::verilog::location}/registerfile_template.tcl} result
                     set name [lindex [split [file tail [$rf getAttributeValue rfg.osys::rfg::file]] "."] 0]
