@@ -354,6 +354,19 @@ proc generateNavigation {activeItem} {
     puts -nonewline "[indent 6]</div>"
 }
 
+proc generateSource {activeItem} {
+    set root [getRoot $activeItem]
+    puts "{ value: \"[getAbsoluteName $root /]\","
+    puts "                          url: \"[getFileName $root $activeItem]\""
+    puts "                        },"
+    $root walkDepthFirst {
+        puts "                        { value: \"[getAbsoluteName $it /]\","
+        puts "                          url: \"[getFileName $it $activeItem]\""
+        puts "                        },"
+        return true
+    }
+}
+
 proc getCssFolder item {
     if {[string compare [$item parent] ""]} {
         return "../css"
@@ -394,6 +407,10 @@ proc getJsFolder item {
             </div>
             <div class="row">
                 <div class="col-sm-4">
+                    <div class="form-group ui-widget right-inner-addon margin-15px">
+                        <i class="glyphicon glyphicon-search"></i>
+                        <input id="autocomplete" type="search" class="form-control" placeholder="Search" />
+                    </div>
                     <div class="margin-15px">
                         <% generateNavigation $caller%>
                     </div>
@@ -411,8 +428,21 @@ proc getJsFolder item {
             </div>
         </div>
         <script <% puts -nonewline "src=\"[file join [getJsFolder $caller] jquery-1.10.2.min.js]\""%>></script>
+        <script <% puts -nonewline "src=\"[file join [getJsFolder $caller] jquery-ui.min.js]\""%>></script>
         <script <% puts -nonewline "src=\"[file join [getJsFolder $caller] bootstrap.min.js]\""%>></script>
         <!-- User defined javascript -->
         <script <% puts -nonewline "src=\"[file join [getJsFolder $caller] user_defined.js]\""%>></script>
+        <script>
+            $(document).ready(function() {
+                $("input#autocomplete").autocomplete({
+                    source: [
+                        <% generateSource $caller%>
+                    ],
+                    select: function( event, ui ) { 
+                    window.location = ui.item.url;
+                    }
+                });
+            });
+        </script>
     </body>
 </html>
