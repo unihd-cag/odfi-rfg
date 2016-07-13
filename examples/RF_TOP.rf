@@ -32,7 +32,7 @@ registerFile RF_TOP {
         }
         reserved 8
     }
-
+    aligner 8
     register REG_1 {
         field field_0 {
             width        16

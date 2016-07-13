@@ -118,7 +118,9 @@ proc generateNavigationRec {current activeItem count} {
             puts "[indent $count]<div class=\"list-group collapse\" id=\"[getAbsoluteName $current _]\">"
         }
         $current onEachComponent {
-            generateNavigationRec $it $activeItem [expr {$count + 1}]
+            if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+                generateNavigationRec $it $activeItem [expr {$count + 1}]
+            }
         }
         puts "[indent $count]</div>"
     } else {
@@ -240,12 +242,14 @@ proc generateDescTable activeItem {
     puts "                            <tbody>"
     if {[$activeItem isa osys::rfg::Group]} {
         $activeItem onEachComponent {
-            puts "                                <tr class=\"clickable-row\" data-href=\"[getFileName $it $activeItem]\">"
-            puts "                                    <td>[$it name]</td>"
-            puts "                                    <td>[getType $it]</td>"
-            puts "                                    <td>0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
-            puts "                                    <td>[getAbsoluteName $it /]</td>"
-            puts "                                </tr>"
+            if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+                puts "                                <tr class=\"clickable-row\" data-href=\"[getFileName $it $activeItem]\">"
+                puts "                                    <td>[$it name]</td>"
+                puts "                                    <td>[getType $it]</td>"
+                puts "                                    <td>0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
+                puts "                                    <td>[getAbsoluteName $it /]</td>"
+                puts "                                </tr>"
+            }
         }
     } elseif {[$activeItem isa osys::rfg::Register]} {
         puts "                                <tr>"
