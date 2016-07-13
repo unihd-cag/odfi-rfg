@@ -58,17 +58,16 @@ namespace eval osys::rfg::generator::htmlbrowser {
 
         public method copyDependenciesTo destination {
 
-            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/dependencies/css $destination/dependencies/css *.css
-            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/dependencies/js $destination/dependencies/js *.js
-            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/dependencies/fonts $destination/dependencies/fonts *
+            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/css $destination/css *.css
+            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/js $destination/js *.js
+            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/fonts $destination/fonts *
 
         }
 
         public method produce {destinationPath {generator ""}} {
             file mkdir $destinationPath
             file mkdir [file join $destinationPath html]
-            file mkdir [file join $destinationPath dependencies]
-            file mkdir [file join [file join $destinationPath dependencies] js]
+            file mkdir [file join $destinationPath js]
             ::puts "Htmlbrowser processing $registerFile > [file join ${destinationPath} [$registerFile name].html]"
             set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $registerFile]
             odfi::files::writeToFile [file join ${destinationPath} [$registerFile name].html] $html
@@ -78,9 +77,9 @@ namespace eval osys::rfg::generator::htmlbrowser {
                 odfi::files::writeToFile [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html] $html
                 return true
             }
-            ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} dependencies] user_defined.js]"
+            ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} js] user_defined.js]"
             set js [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/js_template.tcl $registerFile]
-            odfi::files::writeToFile [file join [file join [file join ${destinationPath} dependencies] js] user_defined.js] $js
+            odfi::files::writeToFile [file join [file join ${destinationPath} js] user_defined.js] $js
             copyDependenciesTo $destinationPath
         }
     }

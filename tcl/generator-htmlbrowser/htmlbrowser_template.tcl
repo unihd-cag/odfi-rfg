@@ -356,17 +356,17 @@ proc generateNavigation {activeItem} {
 
 proc getJsFolder item {
     if {[string compare [$item parent] ""]} {
-        return "../dependencies/js"
+        return "../js"
     } else {
-        return "dependencies/js"
+        return "js"
     }
 }
 
 proc getCssFolder item {
     if {[string compare [$item parent] ""]} {
-        return "../dependencies/css"
+        return "../css"
     } else {
-        return "dependencies/css"
+        return "css"
     }
 }
 
