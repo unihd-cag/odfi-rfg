@@ -105,9 +105,9 @@ proc generateNavigationRec {current activeItem count} {
         }
         set count [expr {$count + 1}]
         if {[subCompIsActive $current $activeItem]} {
-            puts "[indent $count]<span class=\"glyphicon glyphicon-chevron-down\" data-toggle=\"collapse\" href=\"#[getAbsoluteName $current _]\"></span>[$current name]"
+            puts "[indent $count]<span class=\"glyphicon glyphicon-chevron-down clickable\" data-toggle=\"collapse\" href=\"#[getAbsoluteName $current _]\"></span>[$current name]"
         } else {
-            puts "[indent $count]<span class=\"glyphicon glyphicon-chevron-right\" data-toggle=\"collapse\" href=\"#[getAbsoluteName $current _]\"></span>[$current name]"
+            puts "[indent $count]<span class=\"glyphicon glyphicon-chevron-right clickable\" data-toggle=\"collapse\" href=\"#[getAbsoluteName $current _]\"></span>[$current name]"
         }
         puts "[indent $count]<span class=\"badge\">0x[format %x [$current getAttributeValue software.osys::rfg::absolute_address]]</span>"
         set count [expr {$count - 1}]
