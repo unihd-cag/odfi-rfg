@@ -20,3 +20,4 @@
 attributeGroup ::options
 
 attributeFunction ::reset
+attributeFunction ::filename
