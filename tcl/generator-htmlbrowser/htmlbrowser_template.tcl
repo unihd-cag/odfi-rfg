@@ -154,74 +154,27 @@ proc getType item {
 }
 
 proc generateSwAttr item {
-    $item onAttributes {software.osys::rfg::rw} {
-        puts "                                                                <li>rw</li>"
-    }
-    $item onAttributes {software.osys::rfg::ro} {
-        puts "                                                                <li>ro</li>"
-    }
-    $item onAttributes {software.osys::rfg::wo} {
-        puts "                                                                <li>wo</li>"
-    }
-    $item onAttributes {software.osys::rfg::write_clear} {
-        puts "                                                                <li>write_clear</li>"
-    }
-    $item onAttributes {software.osys::rfg::write_xor} {
-        puts "                                                                <li>write_xor</li>"
+    $item onEachAttributes {
+        if {![string compare [$attrs name] "software"]} {
+            $attrs onEachAttribute {
+                set attr_name [string range $attr 11 end]
+                if {[string compare $attr_name "address_shift"] && [string compare $attr_name "size"] \
+                    && [string compare $attr_name "relative_address"] && [string compare $attr_name "absolute_address"]} {
+                    puts "                                                                <li>$attr_name</li>"
+                }
+            }
+        }
     }
 }
 
 proc generateHwAttr item {
-    $item onAttributes {hardware.osys::rfg::rw} {
-        puts "                                                                <li>rw</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::ro} {
-        puts "                                                                <li>ro</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::wo} {
-        puts "                                                                <li>wo</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::changed} {
-        puts "                                                                <li>changed</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::clear} {
-        puts "                                                                <li>clear</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::counter} {
-        puts "                                                                <li>counter</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::edge_trigger} {
-        puts "                                                                <li>edge_trigger</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::external} {
-        puts "                                                                <li>external</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::internal} {
-        puts "                                                                <li>internal</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::no_wen} {
-        puts "                                                                <li>no_wen</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::rreinit} {
-        puts "                                                                <li>rreinit</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::rreinit_source} {
-        puts "                                                                <li>rreinit_source</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::shared_bus} {
-        puts "                                                                <li>shared_bus</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::software_written} {
-        puts "                                                                <li>software_written</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::sticky} {
-        puts "                                                                <li>sticky</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::trigger} {
-        puts "                                                                <li>trigger</li>"
-    }
-    $item onAttributes {hardware.osys::rfg::wen} {
-        puts "                                                                <li>wen</li>"
+    $item onEachAttributes {
+        if {![string compare [$attrs name] "hardware"]} {
+            $attrs onEachAttribute {
+                set attr_name [string range $attr 11 end]
+                puts "                                                                <li>$attr_name</li>"
+            }
+        }
     }
 }
 
