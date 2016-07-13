@@ -72,9 +72,11 @@ namespace eval osys::rfg::generator::htmlbrowser {
             set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $registerFile]
             odfi::files::writeToFile [file join ${destinationPath} [$registerFile name].html] $html
             $registerFile walkDepthFirst {
-                ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html]"
-                set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $it]
-                odfi::files::writeToFile [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html] $html
+                if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+                    ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html]"
+                    set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $it]
+                    odfi::files::writeToFile [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html] $html
+                }
                 return true
             }
             ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} js] user_defined.js]"
