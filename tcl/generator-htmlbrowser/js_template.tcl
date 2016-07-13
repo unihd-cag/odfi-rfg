@@ -81,15 +81,6 @@ $(function() {
 });
 
 $(function() {
-        
-  $('.clickable-row').on('click', function() {
-    $('.glyphicon' ,this)
-      .toggleClass('glyphicon-chevron-right')
-      .toggleClass('glyphicon-chevron-down');
-  });
-});
-
-$(function() {
     $(".clickable-row").click(function() {
         window.document.location = $(this).data("href");
     });
