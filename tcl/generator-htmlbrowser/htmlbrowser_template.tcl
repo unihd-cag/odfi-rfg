@@ -354,32 +354,27 @@ proc generateNavigation {activeItem} {
     puts -nonewline "[indent 6]</div>"
 }
 
-proc generateSource {activeItem} {
-    set root [getRoot $activeItem]
-    puts "{ value: \"[getAbsoluteName $root /]\","
-    puts "                          url: \"[getFileName $root $activeItem]\""
-    puts "                        },"
-    $root walkDepthFirst {
-        puts "                        { value: \"[getAbsoluteName $it /]\","
-        puts "                          url: \"[getFileName $it $activeItem]\""
-        puts "                        },"
-        return true
+proc getJsFolder item {
+    if {[string compare [$item parent] ""]} {
+        return "../dependencies/js"
+    } else {
+        return "dependencies/js"
     }
 }
 
 proc getCssFolder item {
     if {[string compare [$item parent] ""]} {
-        return "../css"
+        return "../dependencies/css"
     } else {
-        return "css"
+        return "dependencies/css"
     }
 }
 
-proc getJsFolder item {
+proc getInputId item {
     if {[string compare [$item parent] ""]} {
-        return "../js"
+        return "autocomplete"
     } else {
-        return "js"
+        return "root-autocomplete"
     }
 }
 %>
@@ -390,8 +385,6 @@ proc getJsFolder item {
         <title><% puts -nonewline "[getAbsoluteName $caller]"%> Documentation</title>
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" type="text/css" <% puts -nonewline "href=\"[file join [getCssFolder $caller] bootstrap.min.css]\">"%>
-        <!-- Optional Bootstrap theme -->
-        <link rel="stylesheet" <% puts -nonewline "href=\"[file join [getCssFolder $caller] bootstrap-theme.min.css]\">"%>
         <!-- User defined css -->
         <link rel="stylesheet" type="text/css" <% puts -nonewline "href=\"[file join [getCssFolder $caller] user_defined.css]\">"%>
     </head>
@@ -409,7 +402,7 @@ proc getJsFolder item {
                 <div class="col-sm-4">
                     <div class="form-group ui-widget right-inner-addon margin-15px">
                         <i class="glyphicon glyphicon-search"></i>
-                        <input id="autocomplete" type="search" class="form-control" placeholder="Search" />
+                        <input <% puts -nonewline "id=\"[getInputId $caller]\""%> type="search" class="form-control" placeholder="Search" />
                     </div>
                     <div class="margin-15px">
                         <% generateNavigation $caller%>
@@ -432,17 +425,6 @@ proc getJsFolder item {
         <script <% puts -nonewline "src=\"[file join [getJsFolder $caller] bootstrap.min.js]\""%>></script>
         <!-- User defined javascript -->
         <script <% puts -nonewline "src=\"[file join [getJsFolder $caller] user_defined.js]\""%>></script>
-        <script>
-            $(document).ready(function() {
-                $("input#autocomplete").autocomplete({
-                    source: [
-                        <% generateSource $caller%>
-                    ],
-                    select: function( event, ui ) { 
-                    window.location = ui.item.url;
-                    }
-                });
-            });
-        </script>
+        <script ></script>
     </body>
 </html>
