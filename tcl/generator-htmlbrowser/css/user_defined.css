@@ -24,8 +24,44 @@
     padding-left: 30px;
 }
 
-.list-group.list-group-root > .list-group > .list-group > .list-group-item {
+.list-group.list-group-root > .list-group > * > .list-group-item {
     padding-left: 45px;
+}
+
+.list-group.list-group-root > .list-group > * > * > .list-group-item {
+    padding-left: 60px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > .list-group-item {
+    padding-left: 75px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > * > .list-group-item {
+    padding-left: 90px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > * > * > .list-group-item {
+    padding-left: 105px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > * > * > * > .list-group-item {
+    padding-left: 120px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > * > * > * > * > .list-group-item {
+    padding-left: 135px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > * > * > * > * > * > .list-group-item {
+    padding-left: 150px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > * > * > * > * > * > * > .list-group-item {
+    padding-left: 165px;
+}
+
+.list-group.list-group-root > .list-group > * > * > * > * > * > * > * > * > * > * > .list-group-item {
+    padding-left: 180px;
 }
 
 .list-group-item .glyphicon {
