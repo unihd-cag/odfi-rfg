@@ -42,7 +42,7 @@ proc getFileName {item caller} {
         if {[string compare [$item parent] ""]} {
             return "[getAbsoluteName $item _].html"
         } else {
-            return "../RF_TOP.html"
+            return "../[$item name].html"
         }
     } else {
         return "html/[getAbsoluteName $item _].html"
