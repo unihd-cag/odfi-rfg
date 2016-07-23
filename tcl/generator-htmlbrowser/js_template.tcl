@@ -39,11 +39,24 @@ proc getFileName item {
 proc generateSourceHtml {root} {
     puts "{ value: \"[getAbsoluteName $root /]\","
     puts "              url: \"[getFileName $root]\""
-    puts "            },"
+    puts "            } , "
     $root walkDepthFirst {
-        puts "            { value: \"[getAbsoluteName $it /]\","
-        puts "              url: \"[getFileName $it]\""
-        puts "            },"
+        if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+            puts "            { value: \"[getAbsoluteName $it /]\","
+            puts "              url: \"[getFileName $it]\""
+            puts "            } , "
+        }
+        if {[$it isa osys::rfg::Register]} {
+            $it onEachField {
+                if {[string compare [$it name] "Reserved"]} {
+::puts "field: [$it name]"
+::puts "field parent: [$it parent]"
+                    puts "            { value: \"[getAbsoluteName [$it parent] /]/[$it name]\","
+                    puts "              url: \"[getFileName [$it parent]]\""
+                    puts "            } , "
+                }
+            }
+        }
         return true
     }
 }
@@ -52,11 +65,22 @@ proc generateSourceHtml {root} {
 proc generateSourceRoot {root} {
     puts "{ value: \"[getAbsoluteName $root /]\","
     puts "              url: \"[getFileNameRoot $root]\""
-    puts "            },"
+    puts "            } , "
     $root walkDepthFirst {
-        puts "            { value: \"[getAbsoluteName $it /]\","
-        puts "              url: \"[getFileNameRoot $it]\""
-        puts "            },"
+        if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+            puts "            { value: \"[getAbsoluteName $it /]\","
+            puts "              url: \"[getFileNameRoot $it]\""
+            puts "            } , "
+        }
+        if {[$it isa osys::rfg::Register]} {
+            $it onEachField {
+                if {[string compare [$it name] "Reserved"]} {
+                    puts "            { value: \"[getAbsoluteName [$it parent] /]/[$it name]\","
+                    puts "              url: \"[getFileNameRoot [$it parent]]\""
+                    puts "            } , "
+                }
+            }
+       }
         return true
     }
 }
