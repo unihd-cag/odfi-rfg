@@ -49,8 +49,6 @@ proc generateSourceHtml {root} {
         if {[$it isa osys::rfg::Register]} {
             $it onEachField {
                 if {[string compare [$it name] "Reserved"]} {
-::puts "field: [$it name]"
-::puts "field parent: [$it parent]"
                     puts "            { value: \"[getAbsoluteName [$it parent] /]/[$it name]\","
                     puts "              url: \"[getFileName [$it parent]]\""
                     puts "            } , "
