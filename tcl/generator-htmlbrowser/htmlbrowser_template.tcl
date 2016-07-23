@@ -212,8 +212,8 @@ proc generateDescTable activeItem {
         puts "                                    <td>[getAbsoluteName $activeItem /]</td>"
         puts "                                </tr>"
     } elseif {[$activeItem isa osys::rfg::RamBlock]} {
-        puts "                                <tr>"
-        puts "                                    <td><span data-toggle=\"collapse\" data-target=\"#[getAbsoluteName $activeItem _]\" class=\"glyphicon glyphicon-chevron-right clickable\"></span> [$activeItem name]</td>"
+        puts "                                <tr class=\"collapse-row\" data-toggle=\"collapse\" data-target=\"#[getAbsoluteName $activeItem _]\">"
+        puts "                                    <td><span class=\"glyphicon glyphicon-chevron-right clickable\"></span> [$activeItem name]</td>"
         puts "                                    <td>[getType $activeItem]</td>"
         puts "                                    <td>[$activeItem width] bit</td>"
         puts "                                    <td>[$activeItem depth]</td>"
@@ -261,8 +261,8 @@ proc generateFieldTable item {
     puts "                            <tbody>"
     $item onEachField {
         if {[string compare [$it name] "Reserved"]} {
-            puts "                                <tr>"
-            puts "                                    <td><span class=\"glyphicon glyphicon-chevron-right clickable\" data-toggle=\"collapse\" data-target=\"#[getAbsoluteName $item _]_[$it name]\"></span> [$it name]</td>"
+            puts "                                <tr class=\"collapse-row\" data-toggle=\"collapse\" data-target=\"#[getAbsoluteName $item _]_[$it name]\">"
+            puts "                                    <td><span class=\"glyphicon glyphicon-chevron-right\" ></span> [$it name]</td>"
             puts "                                    <td>[$it width] bit</td>"
             puts "                                    <td>[$it reset]</td>"
             puts "                                    <td>[$it description]</td>"
