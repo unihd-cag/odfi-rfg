@@ -178,6 +178,14 @@ proc generateHwAttr item {
     }
 }
 
+proc getDescription item {
+    if {![string compare [$item description] ""]} {
+        return "-"
+    } else {
+        return [$item description]
+    }
+}
+
 proc generateDescTable activeItem {
     puts "<table class=\"table table-hover\">"
     puts "                            <thead>"
@@ -188,12 +196,12 @@ proc generateDescTable activeItem {
         puts "                                    <th class=\"col-md-1\">Width</th>"
         puts "                                    <th class=\"col-md-1\">Size</th>"
         puts "                                    <th class=\"col-md-1\">Address</th>"
-        puts "                                    <th class=\"col-md-4\">Path</th>"
+        puts "                                    <th class=\"col-md-4\">Description</th>"
     } elseif {[$activeItem isa osys::rfg::Group] || [$activeItem isa osys::rfg::Register]} {
         puts "                                    <th class=\"col-md-3\">Name</th>"
         puts "                                    <th class=\"col-md-2\">Type</th>"
         puts "                                    <th class=\"col-md-2\">Address</th>"
-        puts "                                    <th class=\"col-md-5\">Path</th>"
+        puts "                                    <th class=\"col-md-5\">Description</th>"
     }
     puts "                                </tr>"
     puts "                            </thead>"
@@ -205,7 +213,7 @@ proc generateDescTable activeItem {
                 puts "                                    <td>[$it name]</td>"
                 puts "                                    <td>[getType $it]</td>"
                 puts "                                    <td>0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
-                puts "                                    <td>[getAbsoluteName $it /]</td>"
+                puts "                                    <td>[getDescription $it] </td>"
                 puts "                                </tr>"
             }
         }
@@ -214,7 +222,7 @@ proc generateDescTable activeItem {
         puts "                                    <td>[$activeItem name]</td>"
         puts "                                    <td>[getType $activeItem]</td>"
         puts "                                    <td>0x[format %x [$activeItem getAttributeValue software.osys::rfg::absolute_address]]</td>"
-        puts "                                    <td>[getAbsoluteName $activeItem /]</td>"
+        puts "                                    <td>[getDescription $activeItem] </td>"
         puts "                                </tr>"
     } elseif {[$activeItem isa osys::rfg::RamBlock]} {
         puts "                                <tr class=\"collapse-row\" data-toggle=\"collapse\" data-target=\"#[getAbsoluteName $activeItem _]\">"
@@ -223,7 +231,7 @@ proc generateDescTable activeItem {
         puts "                                    <td>[$activeItem width] bit</td>"
         puts "                                    <td>[$activeItem depth]</td>"
         puts "                                    <td>0x[format %x [$activeItem getAttributeValue software.osys::rfg::absolute_address]]</td>"
-        puts "                                    <td>[getAbsoluteName $activeItem /]</td>"
+        puts "                                    <td>[getDescription $activeItem] </td>"
         puts "                                </tr>"
         puts "                                <tr>"
         puts "                                    <td class=\"hidden-row\" colspan=\"6\">"
@@ -270,7 +278,7 @@ proc generateFieldTable item {
             puts "                                    <td><span class=\"glyphicon glyphicon-chevron-right\" ></span> [$it name]</td>"
             puts "                                    <td>[$it width] bit</td>"
             puts "                                    <td>[$it reset]</td>"
-            puts "                                    <td>[$it description] </td>"
+            puts "                                    <td>[getDescription $it] </td>"
             puts "                                </tr>"
             puts "                                <tr>"
             puts "                                    <td class=\"hidden-row\" colspan=\"4\">"
@@ -373,7 +381,6 @@ proc getInputId item {
                 <div class="col-sm-8">
                     <div class="margin-15px">
                         <h3 class="vspace-30px"><% $caller name%></h3>
-                        <h4>Description: <% $caller description%> </h4>
                         <% generateDescTable $caller%>
                         <%  if {[$caller isa osys::rfg::Register]} {
                                 generateFieldTable $caller
