@@ -1,19 +1,26 @@
 registerFile RF_TOP {
-
+    description "this is the top rf"
     register REG_0 {
+        description "this is a csr"
         field field_0 {
+            description "this is a field"
             width        16
             reset        16'h0
             attributes software {
+                rw
             }    
             attributes hardware {
+                ro
             }
         }
         field field_1 {
             width        32
             attributes software {
+                rw
             }    
             attributes hardware {
+                rw
+                clear
             }
         }
         field field_2 {
@@ -25,7 +32,7 @@ registerFile RF_TOP {
         }
         reserved 8
     }
-
+    aligner 8
     register REG_1 {
         field field_0 {
             width        16
@@ -80,6 +87,4 @@ registerFile RF_TOP {
             }
         }
     }
-
-    external RF_GROUP.rf RF_GROUP
 }
