@@ -6,6 +6,13 @@ registerFile RF_TOP {
             description "this is a field"
             width        16
             reset        16'h0
+            software rw
+            hardware rw
+        }
+        field field_1 {
+            width        32
+            software rw
+            hardware rw
             attributes software {
                 rw
             }    
@@ -25,66 +32,53 @@ registerFile RF_TOP {
         }
         field field_2 {
             width        8
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
         reserved 8
     }
     aligner 8
     register REG_1 {
         field field_0 {
-            width        16
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            width        32
+            software rw
+            hardware rw
         }
-        reserved 16
         field field_1 {
             width        16
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
         reserved 16
     }
 
-    external RF_BOTTOM.rf RF_BOTTOM
+    internal RF_BOTTOM.rf RF_BOTTOM
 
     register REG_4 {
         field field_0 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
         field field_1 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
     }
 
     register REG_5 {
         field field_0 {
-            width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            width        16
+            software rw
+            hardware rw
         }
+        reserved 16
         field field_1 {
-            width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            width        16
+            software rw
+            hardware rw
         }
+        reserved 16
     }
 }
