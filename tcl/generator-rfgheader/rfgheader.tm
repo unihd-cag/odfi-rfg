@@ -86,11 +86,15 @@ namespace eval osys::rfg::generator::rfgheader {
             return [ld [getRFsize $registerfile]]
         }
 
-        public method produce {destinationPath {generator ""}} {
+        public method produce {destinationPath {generator}} {
 
-            file mkdir $destinationPath 
-            puts "Rfgheader processing $registerFile > ${destinationPath}[$registerFile name].h"
-            
+            file mkdir $destinationPath
+            set options $generator
+            $options onAttributes {options.::filename} {
+                puts "Rfgheader processing $registerFile > ${destinationPath}[$options getAttributeValue options.::filename]"
+            } otherwise {
+                puts "Rfgheader processing $registerFile > ${destinationPath}[$registerFile name].h"
+            }
             ## Create Special Stream 
             set out [odfi::common::newStringChannel]
             
@@ -111,27 +115,32 @@ namespace eval osys::rfg::generator::rfgheader {
                 odfi::common::println "`define RFS_[string toupper [$registerFile name]]_TWIDTH [llength [$registerFile getAttributeValue hardware.osys::rfg::trigger]]" $out
             }
             
+            set rf_list {}
             $registerFile walkDepthFirst {
-
+            
                 if {[$it isa osys::rfg::RegisterFile]} {
-                    if {[expr [getAddrBits $it]-3] == 0} {
-                        odfi::common::println "`define RFS_[string toupper [$it name]]_AWIDTH 1" $out
-                    } else {
-                        odfi::common::println "`define RFS_[string toupper [$it name]]_AWIDTH [expr [getAddrBits $it]-3]" $out
-                    }
-                    odfi::common::println "`define RFS_[string toupper [$it name]]_RWIDTH [getRFmaxWidth $it]" $out
-                    odfi::common::println "`define RFS_[string toupper [$it name]]_WWIDTH [getRFmaxWidth $it]" $out
+                    set name [lindex [split [file tail [$it getAttributeValue rfg.osys::rfg::file]] "."] 0]
+                    if {[lsearch $rf_list [$it getAttributeValue rfg.osys::rfg::file]] == -1} {
+                        
+                        lappend rf_list [$it getAttributeValue rfg.osys::rfg::file]
+                        
+                        if {[expr [getAddrBits $it]-3] == 0} {
+                            odfi::common::println "`define RFS_[string toupper $name]_AWIDTH 1" $out
+                        } else {
+                            odfi::common::println "`define RFS_[string toupper $name]_AWIDTH [expr [getAddrBits $it]-3]" $out
+                        }
+
+                        odfi::common::println "`define RFS_[string toupper $name]_RWIDTH [getRFmaxWidth $it]" $out
+                        odfi::common::println "`define RFS_[string toupper $name]_WWIDTH [getRFmaxWidth $it]" $out
 
 
-                    if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
-                        odfi::common::println "`define RFS_[string toupper [$it name]]_TWIDTH [llength [$it getAttributeValue hardware.osys::rfg::trigger]]" $out
-                    }
-
-
-                } elseif {[$it isa osys::rfg::Register]} {
-                    odfi::common::println "`define RFS_[string toupper [$it name]]_ADDR [$it getAttributeValue software.osys::rfg::absolute_address]" $out
+                        if {[llength [$it getAttributeValue hardware.osys::rfg::trigger]] != 0} {
+                            odfi::common::println "`define RFS_[string toupper $name]_TWIDTH [llength [$it getAttributeValue hardware.osys::rfg::trigger]]" $out
+                        }
+                    } 
 
                 }
+
                 return true
             }
             
@@ -140,7 +149,12 @@ namespace eval osys::rfg::generator::rfgheader {
             flush $out
             set res [read $out]
             close $out
-            odfi::files::writeToFile ${destinationPath}[$registerFile name].h $res
+
+            $options onAttributes {options.::filename} {
+                odfi::files::writeToFile ${destinationPath}[$options getAttributeValue options.::filename] $res
+            } otherwise {
+                odfi::files::writeToFile ${destinationPath}[$registerFile name].h $res
+            }
         }
     }
 }

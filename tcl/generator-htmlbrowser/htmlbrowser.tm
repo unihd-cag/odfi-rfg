@@ -39,24 +39,50 @@ namespace eval osys::rfg::generator::htmlbrowser {
             set registerFile $cRegisterFile
         }
 
+        ## returns a string composed of the name of the item and the names of its parents up to the top register file seperated by "seperator"
+        public method getAbsoluteName_m {item {seperator " "}} {
+            set result {}
+            if {[string compare [$item parent] ""]} {
+                set current [$item parent]
+                set parents {}
+                while {[string compare $current ""]} {
+                    lappend parents $current
+                    set current [$current parent]
+                }
+                foreach p $parents {
+                    set result "[$p name]$seperator$result"
+                }
+            }
+            return "$result[$item name]"
+        }
+
         public method copyDependenciesTo destination {
 
-            odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/bs/ *.css
-            odfi::common::copy $osys::rfg::generator::htmlbrowser::location $destination/bs/ *.js
+            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/css $destination/css *.css
+            odfi::common::copy $osys::rfg::generator::htmlbrowser::location/js $destination/js *.js
             odfi::common::copy $osys::rfg::generator::htmlbrowser::location/fonts $destination/fonts *
 
         }
 
         public method produce {destinationPath {generator ""}} {
-            
             file mkdir $destinationPath
-            ::puts "Htmlbrowser processing $registerFile > ${destinationPath}[$registerFile name].html"
-            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.html.tcl]
-            odfi::files::writeToFile ${destinationPath}[$registerFile name].html $html
+            file mkdir [file join $destinationPath html]
+            file mkdir [file join $destinationPath js]
+            ::puts "Htmlbrowser processing $registerFile > [file join ${destinationPath} [$registerFile name].html]"
+            set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $registerFile]
+            odfi::files::writeToFile [file join ${destinationPath} [$registerFile name].html] $html
+            $registerFile walkDepthFirst {
+                if {[$it isa osys::rfg::Group] || [$it isa osys::rfg::Register] || [$it isa osys::rfg::RamBlock]} {
+                    ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html]"
+                    set html [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/htmlbrowser_template.tcl $it]
+                    odfi::files::writeToFile [file join [file join ${destinationPath} html] [getAbsoluteName_m $it _].html] $html
+                }
+                return true
+            }
+            ::puts "Htmlbrowser processing $registerFile > [file join [file join ${destinationPath} js] user_defined.js]"
+            set js [odfi::closures::embeddedTclFromFileToString $osys::rfg::generator::htmlbrowser::location/js_template.tcl $registerFile]
+            odfi::files::writeToFile [file join [file join ${destinationPath} js] user_defined.js] $js
             copyDependenciesTo $destinationPath
-
         }
-    
     }
-
 }

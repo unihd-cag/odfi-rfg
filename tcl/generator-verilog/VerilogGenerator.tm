@@ -41,20 +41,25 @@ namespace eval osys::rfg::generator::verilog {
             file mkdir $destinationPath
             set ::options $generator
             set registerfiles $registerFile
+            set file_list [$registerFile getAttributeValue rfg.osys::rfg::file]
            	## Read and parse Verilog Template
 
             $registerFile walkDepthFirst {
                 if {[$it isa osys::rfg::RegisterFile]} {
-                    lappend registerfiles $it
+                    if {[lsearch $file_list [$it getAttributeValue rfg.osys::rfg::file]] == -1} {
+                        lappend file_list [$it getAttributeValue rfg.osys::rfg::file]
+                        lappend registerfiles $it
+                    }
                 }
                 return true
             }
             
             foreach ::rf $registerfiles {
-                ::puts "VerilogGenerator processing: $::rf > ${destinationPath}[$::rf name].v"
+                ::puts "VerilogGenerator processing: $::rf > ${destinationPath}[lindex [split [file tail [$::rf getAttributeValue rfg.osys::rfg::file]] "."] 0].v"
                 namespace eval :: {
                     catch {source ${::osys::rfg::generator::verilog::location}/registerfile_template.tcl} result
-                    $result generate ${dP}[$rf name].v
+                    set name [lindex [split [file tail [$rf getAttributeValue rfg.osys::rfg::file]] "."] 0]
+                    $result generate ${dP}${name}.v
                 }
             }
 

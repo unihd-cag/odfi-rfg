@@ -1,5 +1,5 @@
 registerFile RF_BOTTOM {
-
+    description "this is another rf"
     register REG_2 {
         field field_0 {
             width        16
@@ -26,6 +26,7 @@ registerFile RF_BOTTOM {
         }
     }
     ramBlock RAM_0 {
+        description "this is a ram block"
         width 64
         depth 2
         software rw
