@@ -68,19 +68,15 @@ namespace eval osys::rfg::generator::egenerator {
             if {[$item isa osys::rfg::RegisterFile]} {
                 ## was the register file read previously?
                 if {[lsearch [$item getAttributeValue rfg.osys::rfg::file] $regFileTypes] == -1} {
-                    puts "unknown rf"
                     return false
                 } else {
-                    puts "known rf"
                     return true
                 }
             } else {
                 ## was the entire  enclosing register file read previously
                 if {[llength [lsearch -all $regFileTypes [[getEnclosingRF $item] getAttributeValue rfg.osys::rfg::file]]] > 1} {
-                    puts "known item"
                     return true
                 } else {
-                    puts "unknown item"
                     return false
                 }
             }
@@ -121,7 +117,6 @@ namespace eval osys::rfg::generator::egenerator {
                         odfi::common::println "" $out
                     } elseif {[$it isa osys::rfg::Group]} {
                         if {[$it isa osys::rfg::RegisterFile]} {
-puts [$it getAttributeValue rfg.osys::rfg::file]
                             odfi::common::println "reg_file_type [string toupper [getRegFileType $it]];" $out
                             odfi::common::println "" $out
                         } else {
