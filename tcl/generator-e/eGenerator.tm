@@ -73,7 +73,7 @@ namespace eval osys::rfg::generator::egenerator {
                     return false
                 }
             } else {
-                ## was the entire  enclosing register file read previously
+                ## was the entire enclosing register file read previously?
                 if {[llength [lsearch -all $regFileTypes [[getEnclosingRF $item] getAttributeValue rfg.osys::rfg::file]]] > 1} {
                     return true
                 } else {
@@ -126,10 +126,13 @@ namespace eval osys::rfg::generator::egenerator {
                     }
                 }
                 if {[$it isa osys::rfg::RegisterFile]} {
-
                     lappend regFileTypes [$it getAttributeValue rfg.osys::rfg::file]
-                    odfi::common::println "reg_file_inst [$it name] [string toupper [getRegFileType $it]] [string toupper [getRegFileType [getEnclosingRF $it]]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]];" $out
-                    odfi::common::println "" $out
+
+                    ## if the enclosing register file was not entirely read previously
+                    if {[llength [lsearch -all $regFileTypes [[getEnclosingRF $it] getAttributeValue rfg.osys::rfg::file]]] <= 1} {
+                        odfi::common::println "reg_file_inst [$it name] [string toupper [getRegFileType $it]] [string toupper [getRegFileType [getEnclosingRF $it]]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]];" $out
+                        odfi::common::println "" $out
+                    }
                 }
                 return true
             }
