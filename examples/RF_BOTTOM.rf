@@ -1,39 +1,32 @@
 registerFile RF_BOTTOM {
-
+    description "this is another rf"
     register REG_2 {
         field field_0 {
             width        16
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
         field field_1 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
     }
 
     register REG_3 {
         field field_0 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
         field field_1 {
             width        32
-            attributes software {
-            }    
-            attributes hardware {
-            }
+            software rw
+            hardware rw
         }
     }
     ramBlock RAM_0 {
+        description "this is a ram block"
         width 64
         depth 2
         software rw

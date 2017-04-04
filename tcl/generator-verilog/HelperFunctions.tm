@@ -79,7 +79,7 @@ proc getRBAddrssDecode {object rf} {
     set dontCare_width [expr [ld [$object depth]] + [$object getAttributeValue software.osys::rfg::address_shift]]
     set care [expr ([$object getAttributeValue software.osys::rfg::relative_address]/([$object depth]*[$rf register_size]/8)) >> [$object getAttributeValue software.osys::rfg::address_shift]] 
     set care [format %x $care]
-    set care_width [expr [getAddrBits $rf] - [ld [$object depth]] - 3 - [$object getAttributeValue software.osys::rfg::address_shift]]
+    set care_width [expr [getAddrBits $rf] - [ld [$object depth]] - [getRFAddrOffset $rf] - [$object getAttributeValue software.osys::rfg::address_shift]]
     if {$care_width == 0} {
         return "$dontCare_width'b$dontCare"
     } else {
@@ -280,12 +280,16 @@ proc getName {object} {
 	
 	foreach element $list {
 		if {[$element isa osys::rfg::RegisterFile] && [$element hasAttribute hardware.osys::rfg::external]} {
-			set deleteIndex [expr $i+1]
+            set deleteIndex [expr $i+1]
 		}
 
 		incr i 1
 	}
 
+    if {[$object isa osys::rfg::RegisterFile] && [$object hasAttribute hardware.osys::rfg::external]} {
+        set deleteIndex [expr $deleteIndex-1]
+    }
+    
 	if {$deleteIndex == [llength $list]} {
 		foreach element $list {
 			lappend name [$element name]

@@ -48,3 +48,9 @@ generator egenerator {
     destinationPath "e/"
 
 }
+
+generator sv {
+
+    destinationPath "sv/"
+
+}
