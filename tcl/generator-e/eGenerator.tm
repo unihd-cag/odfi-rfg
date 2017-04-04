@@ -67,10 +67,10 @@ namespace eval osys::rfg::generator::egenerator {
         public method isKnownType {regFileTypes item} {
             if {[$item isa osys::rfg::RegisterFile]} {
                 ## was the register file read previously?
-                if {[lsearch [$item getAttributeValue rfg.osys::rfg::file] $regFileTypes] == -1} {
-                    return false
-                } else {
+                if {[lsearch $regFileTypes [$item getAttributeValue rfg.osys::rfg::file]] >= 0} {
                     return true
+                } else {
+                    return false
                 }
             } else {
                 ## was the entire  enclosing register file read previously
@@ -126,6 +126,7 @@ namespace eval osys::rfg::generator::egenerator {
                     }
                 }
                 if {[$it isa osys::rfg::RegisterFile]} {
+
                     lappend regFileTypes [$it getAttributeValue rfg.osys::rfg::file]
                     odfi::common::println "reg_file_inst [$it name] [string toupper [getRegFileType $it]] [string toupper [getRegFileType [getEnclosingRF $it]]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]];" $out
                     odfi::common::println "" $out
