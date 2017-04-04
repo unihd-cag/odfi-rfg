@@ -20,22 +20,6 @@ registerFile RF_TOP {
                 ro
             }
         }
-        field field_1 {
-            width        32
-            attributes software {
-                rw
-            }    
-            attributes hardware {
-                rw
-                clear
-            }
-        }
-        field field_2 {
-            width        8
-            software rw
-            hardware rw
-        }
-        reserved 8
     }
     aligner 8
     register REG_1 {
