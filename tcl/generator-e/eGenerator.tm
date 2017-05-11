@@ -63,6 +63,30 @@ namespace eval osys::rfg::generator::egenerator {
             }
         }
 
+        ## returns if a register file type was read previously
+        public method isKnownType {regFileTypes item} {
+            if {[$item isa osys::rfg::RegisterFile]} {
+                ## was the register file read previously?
+                if {[lsearch $regFileTypes [$item getAttributeValue rfg.osys::rfg::file]] >= 0} {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                ## was the entire enclosing register file read previously?
+                if {[llength [lsearch -all $regFileTypes [[getEnclosingRF $item] getAttributeValue rfg.osys::rfg::file]]] > 1} {
+                    return true
+                } else {
+                    return false
+                }
+            }
+        }
+
+        public method getRegFileType {regFile} {
+            ##returns file name without extension
+            return [lindex [split [file tail [$regFile getAttributeValue rfg.osys::rfg::file]] .] 0]
+        }
+
         public method produce {destinationPath {generator ""}} {
             file mkdir $destinationPath
             ::puts "eGenerator processing $registerFile > ${destinationPath}[$registerFile name].e"
@@ -72,29 +96,41 @@ namespace eval osys::rfg::generator::egenerator {
 
         public method produce_RegisterFile args {
             set out [odfi::common::newStringChannel]
+            set regFileTypes [list]
         
             odfi::common::println "<'" $out
-            odfi::common::println "reg_file_def [string toupper [$registerFile name]];" $out
+            odfi::common::println "reg_file_type [string toupper [getRegFileType $registerFile]];" $out
             odfi::common::println "" $out
 
             $registerFile walkDepthFirst {
-                if {[$it isa osys::rfg::RamBlock]} {
-	    			odfi::common::println "ram_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]] [$it width] [$it depth] {" $out
-                    odfi::common::println "};" $out
-                    odfi::common::println "" $out
-			    } elseif {[$it isa osys::rfg::Register]} {
-                    odfi::common::println "reg_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]] {" $out
-                    $it onEachField {
-                    odfi::common::println "    [$it name] : uint(bits:[$it width]) : [$it reset];" $out
+                if {![isKnownType $regFileTypes $it]} {
+                    if {[$it isa osys::rfg::RamBlock]} {
+	    			    odfi::common::println "ram_def [string toupper [$it name]] [string toupper [getRegFileType [getEnclosingRF $it]]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]] [$it width] [$it depth] {" $out
+                        odfi::common::println "};" $out
+                        odfi::common::println "" $out
+			        } elseif {[$it isa osys::rfg::Register]} {
+                        odfi::common::println "reg_def [string toupper [$it name]] [string toupper [getRegFileType [getEnclosingRF $it]]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]] {" $out
+                        $it onEachField {
+                        odfi::common::println "    [$it name] : uint(bits:[$it width]) : [$it reset];" $out
+                        }
+                        odfi::common::println "};" $out
+                        odfi::common::println "" $out
+                    } elseif {[$it isa osys::rfg::Group]} {
+                        if {[$it isa osys::rfg::RegisterFile]} {
+                            odfi::common::println "reg_file_type [string toupper [getRegFileType $it]];" $out
+                            odfi::common::println "" $out
+                        } else {
+                            odfi::common::println "group_def [string toupper [$it name]] [string toupper [getRegFileType [getEnclosingRF $it]]][getGroupsName $it];" $out
+                            odfi::common::println "" $out
+                        }
                     }
-                    odfi::common::println "};" $out
-                    odfi::common::println "" $out
-                } elseif {[$it isa osys::rfg::Group]} {
-                    if {[$it isa osys::rfg::RegisterFile]} {
-                        odfi::common::println "reg_file_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]];" $out
-                    odfi::common::println "" $out
-                    } else {
-                        odfi::common::println "group_def [string toupper [$it name]] [string toupper [[getEnclosingRF $it] name]][getGroupsName $it];" $out
+                }
+                if {[$it isa osys::rfg::RegisterFile]} {
+                    lappend regFileTypes [$it getAttributeValue rfg.osys::rfg::file]
+
+                    ## if the enclosing register file was not entirely read previously
+                    if {[llength [lsearch -all $regFileTypes [[getEnclosingRF $it] getAttributeValue rfg.osys::rfg::file]]] <= 1} {
+                        odfi::common::println "reg_file_inst [$it name] [string toupper [getRegFileType $it]] [string toupper [getRegFileType [getEnclosingRF $it]]][getGroupsName $it] 0x[format %x [$it getAttributeValue software.osys::rfg::relative_address]];" $out
                         odfi::common::println "" $out
                     }
                 }
