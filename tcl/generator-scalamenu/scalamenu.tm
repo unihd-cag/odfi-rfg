@@ -42,7 +42,13 @@ namespace eval osys::rfg::generator::scalamenu {
         public method produce_RegisterFile args {
             set out [odfi::common::newStringChannel]
 
-            odfi::common::println "scalamenu generator skeleton" $out
+            #package declaration
+            odfi::common::println "package com.extoll.rfmenu\n" $out
+
+            #imports
+            odfi::common::println "import com.extoll.utils.HexConversions"         $out
+            odfi::common::println "import com.extoll.utils.menu.{Menu, MenuTrait}" $out
+            odfi::common::println "import uni.hd.cag.osys.rfg.rf.device.Device\n"  $out
 
             flush $out
             set res [read $out]
