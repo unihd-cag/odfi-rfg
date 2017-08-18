@@ -10,6 +10,7 @@ package ifneeded osys::rfg::address 1.0.0 [list source [file join $dir address a
 package ifneeded osys::rfg::trigger 1.0.0 [list source [file join $dir trigger trigger.tm]]
 package ifneeded osys::rfg::generator::egenerator 1.0.0 [list source [file join $dir generator-e eGenerator.tm]]
 package ifneeded osys::rfg::generator::sv 1.0.0 [list source [file join $dir generator-sv sv.tm]]
+package ifneeded osys::rfg::generator::scalamenu 1.0.0 [list source [file join $dir generator-scalamenu scalamenu.tm]]
 
 package ifneeded HelperFunctions 1.0.0 [list source [file join $dir generator-verilog HelperFunctions.tm]]
 package ifneeded osys::generator 1.0.0 [list source [file join $dir generator.tm]]
