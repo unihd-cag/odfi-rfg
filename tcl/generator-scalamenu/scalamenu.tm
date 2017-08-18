@@ -203,8 +203,43 @@ namespace eval osys::rfg::generator::scalamenu {
                     odfi::common::printlnOutdent
 
                     odfi::common::println "\}\n" $out
+                
+                ## RegisterFile/Group
+                ##TODO multi inst registerFile (see e-generator)
                 } elseif {[$it isa osys::rfg::Group]} {
+                    if {[needsHexConversions $it]} {
+                        odfi::common::println "class [getFullName $it]_menu extends MenuTrait with HexConversions \{\n" $out
+                    } else {
+                        odfi::common::println "class [getFullName $it]_menu extends MenuTrait \{\n" $out
+                    }
+                    odfi::common::printlnIndent
+                    odfi::common::println "registerMenuHeader(\"[$it name] Menu\")\n" $out
+                    
+                    ## instantiate components within top registerFile
+                    $it onEachComponent {
+                        if {[$it isa osys::rfg::Register]} {
+                            odfi::common::println "registerMenuItem(() => s\"Write [$it name] (current $\{Device.readRegister(0,[getHexAddress $it])\})\") \{" $out
 
+                            odfi::common::printlnIndent
+                            odfi::common::println "println(\"Enter new value:\")" $out
+                            odfi::common::println "val value = hexToLong(Menu.getUserInputString())" $out
+                            odfi::common::println "Device.writeRegister(0,[getHexAddress $it],value)" $out
+                            odfi::common::printlnOutdent
+
+                            odfi::common::println "\}\n" $out
+
+                        } elseif {[$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Group]} {
+                            odfi::common::println "registerMenuItem(\"[$it name]\") \{" $out
+
+                            odfi::common::printlnIndent
+                            odfi::common::println "(new [getFullName $it]_menu).runMenu()" $out
+                            odfi::common::printlnOutdent
+
+                            odfi::common::println "\}\n" $out
+                        }
+                    }
+                    odfi::common::printlnOutdent
+                    odfi::common::println "\}\n" $out
                 }
 
                 return true
