@@ -31,6 +31,49 @@ namespace eval osys::rfg::generator::scalamenu {
             set registerFile $cRegisterFile
         }
 
+        ###########################################
+        ## help functions
+        ###########################################     
+
+        ## does group/registerFile contain registers?
+        public method containsRegisters {instance} {
+            set result false
+            if {[$instance isa osys::rfg::Group]} {
+                $instance onEachComponent {
+                    if {[$it isa osys::rfg::Register]} {
+                        set result true
+                    }
+                }
+            } else {
+                ::puts "method containsRegisters should only be called for groups/registerFiles"
+            }
+            return $result
+        }
+
+        ## decide if HexConversions is needed within a class/object
+        public method needsHexConversions {instance} {
+            if {[$instance isa osys::rfg::RamBlock]} {
+                return true
+            } elseif {[$instance isa osys::rfg::Group]} {
+                if {[containsRegisters $instance]} {
+                    return true
+                } else {
+                    return false
+                }
+            } else {
+                return false
+            }
+        }
+
+        ## get the absolute address of the instance as hex
+        public method getHexAddress {instance} {
+            return "0x[format %x [$instance getAttributeValue software.osys::rfg::absolute_address]]"
+        }
+
+        ###########################################
+        ## produce
+        ###########################################        
+
         public method produce {destinationPath {generator ""}} {
             file mkdir $destinationPath
             ::puts "scalamenu Generator processing $registerFile > ${destinationPath}[$registerFile name].scala"
@@ -42,13 +85,41 @@ namespace eval osys::rfg::generator::scalamenu {
         public method produce_RegisterFile args {
             set out [odfi::common::newStringChannel]
 
-            #package declaration
+            ## package declaration
             odfi::common::println "package com.extoll.rfmenu\n" $out
 
-            #imports
+            ## imports
             odfi::common::println "import com.extoll.utils.HexConversions"         $out
             odfi::common::println "import com.extoll.utils.menu.{Menu, MenuTrait}" $out
             odfi::common::println "import uni.hd.cag.osys.rfg.rf.device.Device\n"  $out
+
+            ## print top registerFile object
+            if {[needsHexConversions $registerFile]} {
+                odfi::common::println "object RfMenu extends App with MenuTrait with HexConversions \{\n" $out
+            } else {
+                odfi::common::println "object RfMenu extends App with MenuTrait \{\n" $out
+            }
+
+            odfi::common::printlnIndent
+
+            ## instantiate components within registerFile
+            $registerFile onEachComponent {
+                if {[$it isa osys::rfg::Register]} {
+                    odfi::common::println "registerMenuItem(() => s\"Write [$it name] (current $\{Device.readRegister(0,[getHexAddress $it])\})\") \{" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "println(\"Enter new value:\")" $out
+                    odfi::common::println "val value = hexToLong(Menu.getUserInputString())" $out
+                    odfi::common::println "Device.writeRegister(0,[getHexAddress $it],value)" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "\}\n" $out
+                } elseif {[$it isa osys::rfg::RamBlock] || [$it isa osys::rfg::Group]} {
+                    odfi::common::println "[$it name]" $out
+                }
+            }
+
+            odfi::common::printlnOutdent
+
+            odfi::common::println "\}" $out
 
             flush $out
             set res [read $out]
