@@ -109,7 +109,9 @@ proc generateNavigationRec {current activeItem count} {
         } else {
             puts "[indent $count]<span class=\"glyphicon glyphicon-chevron-right clickable\" data-toggle=\"collapse\" href=\"#[getAbsoluteName $current _]\"></span>[$current name]"
         }
-        puts "[indent $count]<span class=\"badge\">0x[format %x [$current getAttributeValue software.osys::rfg::absolute_address]]</span>"
+        if {[$current isa osys::rfg::RegisterFile]} {
+            puts "[indent $count]<span class=\"badge\">0x[format %x [$current getAttributeValue software.osys::rfg::absolute_address]]</span>"
+        }
         set count [expr {$count - 1}]
         puts "[indent $count]</a>"
         if {[subCompIsActive $current $activeItem]} {
@@ -212,7 +214,11 @@ proc generateDescTable activeItem {
                 puts "                                <tr class=\"clickable-row\" data-href=\"[getFileName $it $activeItem]\">"
                 puts "                                    <td>[$it name]</td>"
                 puts "                                    <td>[getType $it]</td>"
-                puts "                                    <td>0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
+        if {[$it isa osys::rfg::Group] && ![$it isa osys::rfg::RegisterFile]} {
+            puts "                                    <td>-</td>"
+        } else {
+            puts "                                    <td>0x[format %x [$it getAttributeValue software.osys::rfg::absolute_address]]</td>"
+        }
                 puts "                                    <td>[getDescription $it] </td>"
                 puts "                                </tr>"
             }
