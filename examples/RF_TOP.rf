@@ -65,4 +65,6 @@ registerFile RF_TOP {
         }
         reserved 16
     }
+
+    internal RF_GROUP.rf RF_GROUP
 }
