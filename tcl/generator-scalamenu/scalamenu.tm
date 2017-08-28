@@ -184,13 +184,14 @@ namespace eval osys::rfg::generator::scalamenu {
                     odfi::common::printlnIndent
                     odfi::common::println "println(\"Select Entry:\")" $out
                     odfi::common::println "var entry = Menu.getUserInput()\n" $out
-                    ##TODO error checking
-                    odfi::common::println "while (entry >= [$it depth]) \{" $out
+                    ## error checking
+                    odfi::common::println "while (entry < 0 || entry >= [$it depth]) \{" $out
                     odfi::common::printlnIndent
-                    odfi::common::println "println(\"Specified entry exceeds RamBlock size ([$it depth]). Select Entry:\")" $out
+                    odfi::common::println "println(\"Specified entry does not exist for RamBlock [$it name] (size [$it depth]). Select Entry:\")" $out
                     odfi::common::println "entry = Menu.getUserInput()" $out
                     odfi::common::printlnOutdent
                     odfi::common::println "\}\n" $out
+
                     odfi::common::println "println(Device.readRegister(0,[getHexAddress $it]+(8*entry)).ToHexString)" $out
                     odfi::common::printlnOutdent
                     odfi::common::println "\}\n" $out
@@ -200,10 +201,10 @@ namespace eval osys::rfg::generator::scalamenu {
                     odfi::common::printlnIndent
                     odfi::common::println "println(\"Select Entry:\")" $out
                     odfi::common::println "var entry = Menu.getUserInput()\n" $out
-                    ##TODO error checking
-                    odfi::common::println "while (entry >= [$it depth]) \{" $out
+                    ## error checking
+                    odfi::common::println "while (entry < 0 || entry >= [$it depth]) \{" $out
                     odfi::common::printlnIndent
-                    odfi::common::println "println(\"Specified entry exceeds RamBlock size ([$it depth]). Select Entry:\")" $out
+                    odfi::common::println "println(\"Specified entry does not exist for RamBlock [$it name] (size [$it depth]). Select Entry:\")" $out
                     odfi::common::println "entry = Menu.getUserInput()" $out
                     odfi::common::printlnOutdent
                     odfi::common::println "\}\n" $out
@@ -217,7 +218,6 @@ namespace eval osys::rfg::generator::scalamenu {
                     odfi::common::println "\}\n" $out
                 
                 ## RegisterFile/Group
-                ##TODO multi inst registerFile (see e-generator)
                 } elseif {[$it isa osys::rfg::Group]} {
                     if {[needsHexConversions $it]} {
                         odfi::common::println "class [getFullName $it]_menu extends MenuTrait with HexConversions \{\n" $out
