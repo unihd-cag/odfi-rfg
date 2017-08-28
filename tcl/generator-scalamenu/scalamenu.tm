@@ -183,8 +183,14 @@ namespace eval osys::rfg::generator::scalamenu {
                     odfi::common::println "registerMenuItem(\"Read Entry\") \{" $out
                     odfi::common::printlnIndent
                     odfi::common::println "println(\"Select Entry:\")" $out
-                    odfi::common::println "val entry = Menu.getUserInput()" $out
+                    odfi::common::println "var entry = Menu.getUserInput()\n" $out
                     ##TODO error checking
+                    odfi::common::println "while (entry >= [$it depth]) \{" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "println(\"Specified entry exceeds RamBlock size ([$it depth]). Select Entry:\")" $out
+                    odfi::common::println "entry = Menu.getUserInput()" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "\}\n" $out
                     odfi::common::println "println(Device.readRegister(0,[getHexAddress $it]+(8*entry)).ToHexString)" $out
                     odfi::common::printlnOutdent
                     odfi::common::println "\}\n" $out
@@ -193,8 +199,14 @@ namespace eval osys::rfg::generator::scalamenu {
                     odfi::common::println "registerMenuItem(\"Write Entry\") \{" $out
                     odfi::common::printlnIndent
                     odfi::common::println "println(\"Select Entry:\")" $out
-                    odfi::common::println "val entry = Menu.getUserInput()" $out
+                    odfi::common::println "var entry = Menu.getUserInput()\n" $out
                     ##TODO error checking
+                    odfi::common::println "while (entry >= [$it depth]) \{" $out
+                    odfi::common::printlnIndent
+                    odfi::common::println "println(\"Specified entry exceeds RamBlock size ([$it depth]). Select Entry:\")" $out
+                    odfi::common::println "entry = Menu.getUserInput()" $out
+                    odfi::common::printlnOutdent
+                    odfi::common::println "\}\n" $out
                     odfi::common::println "println(\"Set value:\")" $out
                     odfi::common::println "val value = hexToLong(Menu.getUserInputString())" $out
                     odfi::common::println "Device.writeRegister(0,[getHexAddress $it]+(8*entry),value)" $out
