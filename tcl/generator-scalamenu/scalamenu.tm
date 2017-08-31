@@ -70,39 +70,32 @@ namespace eval osys::rfg::generator::scalamenu {
             return "0x[format %x [$instance getAttributeValue software.osys::rfg::absolute_address]]"
         }
 
-        ## get the name of the registerFile enclosing instance
-        public method getEnclosingRF {instance} {
-            if {[[$instance parent] isa osys::rfg::RegisterFile]} {
-                return [$instance parent]
+        public method getFullNameRec instance {
+            if {[string compare $instance ""]==0} {
+                return ""
             } else {
-                return [getEnclosingRF [$instance parent]]
+                return "[getFullNameRec [$instance parent]][$instance name]_"
             }
         }
 
-        ## get the concat names of the groups containing instance
-        public method getGroupsName {instance} {
-            if {[[$instance parent] isa osys::rfg::Group]} {
-                if {[[$instance parent] isa osys::rfg::RegisterFile]} {
-                    return ""
-                } else {
-                    return "[getGroupsName [$instance parent]][[$instance parent] name]_"
-                }
-            } else {
-                return [getGroupsName [$instance parent]]
-            }
-        }
-
-        ## get the enclosing registerFile and groups extended name of instance
         public method getFullName instance {
             if {[$instance isa osys::rfg::RamBlock]} {
-                return "ram_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]"
+
+                return "ram_[getFullNameRec [$instance parent]][$instance name]"
+
             } elseif {[$instance isa osys::rfg::Register]} {
-                return "reg_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]"
+
+                return "reg_[getFullNameRec [$instance parent]][$instance name]"
+
             } elseif {[$instance isa osys::rfg::Group]} {
+
                 if {[$instance isa osys::rfg::RegisterFile]} {
-                    return "rf_[$instance name]"
+
+                    return "rf_[getFullNameRec [$instance parent]][$instance name]"
+
                 } else {
-                    return "grp_[[getEnclosingRF $instance] name]_[getGroupsName $instance][$instance name]"
+
+                    return "grp_[getFullNameRec [$instance parent]][$instance name]"
                 }
             }
         }
